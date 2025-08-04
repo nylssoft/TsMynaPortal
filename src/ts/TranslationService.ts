@@ -1,35 +1,38 @@
-/**
- * Provides functionality to load and manage locale data for translations.
- */
-export class Locale {
+export class TranslationService {
 
     private translationMap: Map<string, string> = new Map<string, string>();
 
+    private language: string = window.localStorage.getItem("locale") || window.navigator.language;
+
     /**
-     * Loads the locale data from the server.
-     * 
-     * @param languageCode language code, e.g. "de" for German and "en" for English
+     * Initializes the translation service by loading the locale data from the server.
      */
-    public async load(languageCode: string): Promise<void> {
-        if (languageCode != "en" && languageCode != "de") {
-            languageCode = "en";
-        }
-        const resp1: Response = await fetch(`/api/pwdman/locale/url/${languageCode}`);
+    public async initAsync(): Promise<void> {
+        const resp1: Response = await fetch(`/api/pwdman/locale/url/${this.getLanguage()}`);
         const url = await resp1.json();
         const resp2: Response = await fetch(url);
         const json = await resp2.json();
         this.translationMap.clear();
-        Object.entries(json).forEach(([key, value]) => this.addTranslation(key, value as string));
+        Object.entries(json).forEach(([key, value]) => this.translationMap.set(key, value as string));
     }
 
     /**
-     * Adds a translation to the translation map.
+     * Returns the currently set language code.
      * 
-     * @param key the key to add to the translation map
-     * @param value the translation value for the key
+     * @returns the language code, e.g. "de" for German and "en" for English
      */
-    public addTranslation(key: string, value: string): void {
-        this.translationMap.set(key, value);    
+    public getLanguage(): string {
+        return this.language;
+    }
+
+    /**
+     * Sets the language code for translations.
+     * 
+     * @param language the language code to set, e.g. "de" for German and "en" for English
+     */
+    public setLanguage(language: string): void {
+        this.language = language;
+        window.localStorage.setItem("locale", language);
     }
 
     /**
@@ -47,7 +50,7 @@ export class Locale {
     public translate(key: string): string {
         const arr = key.split(":");
         if (arr.length > 1) {
-            const params: (string|undefined)[] = arr.slice(1).map(p => {
+            const params: (string | undefined)[] = arr.slice(1).map(p => {
                 if (p.includes("\\")) {
                     return p.replaceAll("\\\\", "\\").replaceAll("\\;", ":");
                 }
@@ -74,13 +77,32 @@ export class Locale {
         return this.format(this.translate(key), restArgs);
     }
 
-    private format(s: string, arr: (string|undefined)[]): string {
+    /**
+     * Translates an error message or an error object.
+     * 
+     * If the error is an instance of Error, its message is translated.
+     * If the error is a string, it is translated directly.
+     * If the error is neither, a generic error message is returned.
+     * 
+     * @param error the error to translate
+     * @returns the translated error message
+     */
+    public translateError(error: Error | unknown): string {
+        if (error instanceof Error) {
+            return this.translate(error.message);
+        }
+        if (typeof error === "string") {
+            return this.translate(error);
+        }   
+        return this.translate("An unknown error occurred");
+    }
+
+    private format(s: string, arr: (string | undefined)[]): string {
         for (let i: number = 0; i < arr.length; i++) {
             if (arr[i] === undefined) continue;
             const reg = new RegExp("\\{" + i + "\\}", "gm");
             s = s.replace(reg, arr[i]!);
         }
         return s;
-    };
-
+    }
 }
