@@ -1,13 +1,13 @@
 
-import { TranslationService } from "./TranslationService";
-import { AuthenticationService } from "./AuthenticationService";
+import { Locale } from "./Locale";
+import { AuthenticationClient } from "./AuthenticationClient";
 
 export class App {
     private static instance: App;
 
-    private translationService: TranslationService = new TranslationService();
+    private locale: Locale = new Locale();
 
-    private authenticationService: AuthenticationService = new AuthenticationService();
+    private authenticationClient: AuthenticationClient = new AuthenticationClient();
 
     private constructor() {
     }
@@ -20,12 +20,12 @@ export class App {
     }
 
     public async runAsync(): Promise<void> {
-        this.authenticationService.init();
-        await this.translationService.initAsync();
-        if (!this.authenticationService.isLoggedIn()) {
-            if (this.authenticationService.getRequiresPass2()) {
+        await this.locale.setLanguageAsync();
+        await this.authenticationClient.loginWithLongLivedTokenAsync();
+        if (!this.authenticationClient.isLoggedIn()) {
+            if (this.authenticationClient.isRequiresPass2()) {
                 this.renderLoginWithPass2();
-            } else if (this.authenticationService.getRequiresPin()) {
+            } else if (this.authenticationClient.isRequiresPin()) {
                 this.renderLoginWithPin();
             } else {
                 this.renderLoginWithUsernameAndPassword();
@@ -39,31 +39,29 @@ export class App {
         const parent: HTMLElement = document.body;
         App.removeAllChildren(parent);
         const loginDiv: HTMLDivElement = App.createDiv(parent, "container py-4 px-3 mx-auto");
-        App.createHeading(loginDiv, 1, "text-center mb-4", this.translationService.translate("HEADER_LOGIN"));
+        App.createHeading(loginDiv, 1, "text-center mb-4", this.locale.translate("HEADER_LOGIN"));
         const formElement: HTMLFormElement = App.createForm(loginDiv);
         const alertDiv: HTMLDivElement = App.createDiv(formElement);
         const divUsername: HTMLDivElement = App.createDiv(formElement, "mb-3");
-        App.createLabel(divUsername, "username-id", "form-label", this.translationService.translate("LABEL_NAME"));
+        App.createLabel(divUsername, "username-id", "form-label", this.locale.translate("LABEL_NAME"));
         const inputUsername: HTMLInputElement = App.createInput(divUsername, "text", "username-id", "form-control");
         const divPassword: HTMLDivElement = App.createDiv(formElement, "mb-3");
-        App.createLabel(divPassword, "password-id", "form-label", this.translationService.translate("LABEL_PWD"));
+        App.createLabel(divPassword, "password-id", "form-label", this.locale.translate("LABEL_PWD"));
         const inputPassword: HTMLInputElement = App.createInput(divPassword, "password", "password-id", "form-control");
-        const buttonLogin: HTMLButtonElement = App.createButton(formElement, "submit", "login-button-id", this.translationService.translate("BUTTON_LOGIN"), "btn btn-primary");
+        const buttonLogin: HTMLButtonElement = App.createButton(formElement, "submit", "login-button-id", this.locale.translate("BUTTON_LOGIN"), "btn btn-primary");
 
         const buttonDiv: HTMLDivElement = App.createDiv(loginDiv, "fixed-bottom footer-buttons d-flex justify-content-center gap-2 p-3");
         const germanButton: HTMLButtonElement = App.createButton(buttonDiv, "button", "german-button-id", "", "btn btn-primary");
         germanButton.addEventListener("click", async (e: MouseEvent) => {
             e.preventDefault();
-            this.translationService.setLanguage("de");
-            await this.translationService.initAsync();
+            await this.locale.setLanguageAsync("de");
             this.renderLoginWithUsernameAndPassword();
         });
         App.createSpan(germanButton, "fi fi-de");
         const englishButton: HTMLButtonElement = App.createButton(buttonDiv, "button", "english-button-id", "", "btn btn-primary");
         englishButton.addEventListener("click", async (e: MouseEvent) => {
             e.preventDefault();
-            this.translationService.setLanguage("en");
-            await this.translationService.initAsync();
+            await this.locale.setLanguageAsync("en");
             this.renderLoginWithUsernameAndPassword();
         });
         App.createSpan(englishButton, "fi fi-gb");
@@ -71,10 +69,10 @@ export class App {
         buttonLogin.addEventListener("click", async (e: MouseEvent) => {
             e.preventDefault();
             try {
-                await this.authenticationService.loginAsync(inputUsername.value, inputPassword.value, this.translationService.getLanguage());
+                await this.authenticationClient.loginAsync(inputUsername.value, inputPassword.value, this.locale.getLanguage());
             }
             catch (error: Error | unknown) {
-                App.createAlert(alertDiv, this.translationService.translateError(error));
+                App.createAlert(alertDiv, this.locale.translateError(error));
             }
         });
     }

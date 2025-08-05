@@ -1,20 +1,11 @@
-export class TranslationService {
+/**
+ * Provides methods for managing locale and translations.
+ */
+export class Locale {
 
     private translationMap: Map<string, string> = new Map<string, string>();
 
     private language: string = window.localStorage.getItem("locale") || window.navigator.language;
-
-    /**
-     * Initializes the translation service by loading the locale data from the server.
-     */
-    public async initAsync(): Promise<void> {
-        const resp1: Response = await fetch(`/api/pwdman/locale/url/${this.getLanguage()}`);
-        const url = await resp1.json();
-        const resp2: Response = await fetch(url);
-        const json = await resp2.json();
-        this.translationMap.clear();
-        Object.entries(json).forEach(([key, value]) => this.translationMap.set(key, value as string));
-    }
 
     /**
      * Returns the currently set language code.
@@ -26,13 +17,21 @@ export class TranslationService {
     }
 
     /**
-     * Sets the language code for translations.
+     * Sets the language code for translations and loads the corresponding locale data.
      * 
-     * @param language the language code to set, e.g. "de" for German and "en" for English
+     * @param language the language code to set, e.g. "de" for German and "en" for English or undefined to use the current language
      */
-    public setLanguage(language: string): void {
-        this.language = language;
-        window.localStorage.setItem("locale", language);
+    public async setLanguageAsync(language?: string): Promise<void> {
+        if (language) {
+            this.language = language;
+            window.localStorage.setItem("locale", language);
+        }
+        const resp1: Response = await fetch(`/api/pwdman/locale/url/${this.getLanguage()}`);
+        const url = await resp1.json();
+        const resp2: Response = await fetch(url);
+        const json = await resp2.json();
+        this.translationMap.clear();
+        Object.entries(json).forEach(([key, value]) => this.translationMap.set(key, value as string));
     }
 
     /**

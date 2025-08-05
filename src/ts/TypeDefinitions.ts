@@ -1,9 +1,3 @@
-export type LoginState = {
-  token: string;
-  userName: string;
-  requiresPass2: boolean;
-}
-
 export type ClientInfo = {
   uuid: string;
   name: string;
@@ -11,15 +5,15 @@ export type ClientInfo = {
 
 export type AuthResult = {
   requiresPin: boolean;
-  token: string;
-  username: string;
+  token: string | null;
+  username: string | null;
   requiresPass2: boolean;
-  longLivedToken: string;
+  longLivedToken: string | null;
 }
 
 export type ErrorResult = {
-  type: string,
-  title: string,
+  type: string | null,
+  title: string | null,
   status: number,
-  traceId: string
+  traceId: string | null
 }
