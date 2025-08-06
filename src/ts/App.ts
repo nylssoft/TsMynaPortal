@@ -1,7 +1,11 @@
 
 import { Locale } from "./Locale";
 import { AuthenticationClient } from "./AuthenticationClient";
+import { Controls } from "./Controls";
 
+/**
+ * Main application class that initializes the application, handles authentication, and renders the UI.
+ */
 export class App {
     private static instance: App;
 
@@ -12,6 +16,11 @@ export class App {
     private constructor() {
     }
 
+    /**
+     * Retrieves the singleton instance of the App class.
+     * 
+     * @returns the singleton instance of the App class
+     */
     public static getInstance(): App {
         if (!App.instance) {
             App.instance = new App();
@@ -19,149 +28,133 @@ export class App {
         return App.instance;
     }
 
+    /**
+     * Runs the application asynchronously, setting the language and logging in if necessary.
+     */
     public async runAsync(): Promise<void> {
         await this.locale.setLanguageAsync();
         await this.authenticationClient.loginWithLongLivedTokenAsync();
-        if (!this.authenticationClient.isLoggedIn()) {
-            if (this.authenticationClient.isRequiresPass2()) {
-                this.renderLoginWithPass2();
-            } else if (this.authenticationClient.isRequiresPin()) {
-                this.renderLoginWithPin();
-            } else {
-                this.renderLoginWithUsernameAndPassword();
-            }
-        } else {
-            console.log("User is already logged in.");
-        }
+        this.renderPage();
     }
 
-    private renderLoginWithUsernameAndPassword(): void {
-        const parent: HTMLElement = document.body;
-        App.removeAllChildren(parent);
-        const loginDiv: HTMLDivElement = App.createDiv(parent, "container py-4 px-3 mx-auto");
-        App.createHeading(loginDiv, 1, "text-center mb-4", this.locale.translate("HEADER_LOGIN"));
-        const formElement: HTMLFormElement = App.createForm(loginDiv);
-        const alertDiv: HTMLDivElement = App.createDiv(formElement);
-        const divUsername: HTMLDivElement = App.createDiv(formElement, "mb-3");
-        App.createLabel(divUsername, "username-id", "form-label", this.locale.translate("LABEL_NAME"));
-        const inputUsername: HTMLInputElement = App.createInput(divUsername, "text", "username-id", "form-control");
-        const divPassword: HTMLDivElement = App.createDiv(formElement, "mb-3");
-        App.createLabel(divPassword, "password-id", "form-label", this.locale.translate("LABEL_PWD"));
-        const inputPassword: HTMLInputElement = App.createInput(divPassword, "password", "password-id", "form-control");
-        const buttonLogin: HTMLButtonElement = App.createButton(formElement, "submit", "login-button-id", this.locale.translate("BUTTON_LOGIN"), "btn btn-primary");
+    private renderPage(): void {
+        Controls.removeAllChildren(document.body);
+        const parent: HTMLDivElement = Controls.createDiv(document.body, "container py-4 px-3 mx-auto");
+        if (!this.authenticationClient.isLoggedIn()) {
+            if (this.authenticationClient.isRequiresPass2()) {
+                this.renderLoginWithPass2(parent);
+            } else if (this.authenticationClient.isRequiresPin()) {
+                this.renderLoginWithPin(parent);
+            } else {
+                this.renderLoginWithUsernameAndPassword(parent);
+            }
+        } else {
+            this.renderMain(parent)
+        }
+        this.renderLanguageButtons(parent);
+    }
 
-        const buttonDiv: HTMLDivElement = App.createDiv(loginDiv, "fixed-bottom footer-buttons d-flex justify-content-center gap-2 p-3");
-        const germanButton: HTMLButtonElement = App.createButton(buttonDiv, "button", "german-button-id", "", "btn btn-primary");
-        germanButton.addEventListener("click", async (e: MouseEvent) => {
-            e.preventDefault();
-            await this.locale.setLanguageAsync("de");
-            this.renderLoginWithUsernameAndPassword();
-        });
-        App.createSpan(germanButton, "fi fi-de");
-        const englishButton: HTMLButtonElement = App.createButton(buttonDiv, "button", "english-button-id", "", "btn btn-primary");
-        englishButton.addEventListener("click", async (e: MouseEvent) => {
-            e.preventDefault();
-            await this.locale.setLanguageAsync("en");
-            this.renderLoginWithUsernameAndPassword();
-        });
-        App.createSpan(englishButton, "fi fi-gb");
-
+    private renderLoginWithUsernameAndPassword(parent: HTMLElement): void {
+        parent = Controls.createDiv(parent, "card p-4 shadow-sm");
+        parent.style.maxWidth = "400px";
+        const alertDiv: HTMLDivElement = Controls.createDiv(parent);
+        Controls.createHeading(parent, 1, "text-center mb-4", this.locale.translate("APP_NAME"));
+        const formElement: HTMLFormElement = Controls.createForm(parent);
+        const divUsername: HTMLDivElement = Controls.createDiv(formElement, "mb-3");
+        Controls.createLabel(divUsername, "username-id", "form-label", this.locale.translate("LABEL_NAME"));
+        const inputUsername: HTMLInputElement = Controls.createInput(divUsername, "text", "username-id", "form-control");
+        const divPassword: HTMLDivElement = Controls.createDiv(formElement, "mb-3");
+        Controls.createLabel(divPassword, "password-id", "form-label", this.locale.translate("LABEL_PWD"));
+        const inputPassword: HTMLInputElement = Controls.createInput(divPassword, "password", "password-id", "form-control");
+        const buttonLogin: HTMLButtonElement = Controls.createButton(formElement, "submit", "login-button-id", this.locale.translate("BUTTON_LOGIN"), "btn btn-primary");
         buttonLogin.addEventListener("click", async (e: MouseEvent) => {
             e.preventDefault();
             try {
                 await this.authenticationClient.loginAsync(inputUsername.value, inputPassword.value, this.locale.getLanguage());
+                this.renderPage();
             }
             catch (error: Error | unknown) {
-                App.createAlert(alertDiv, this.locale.translateError(error));
+                Controls.createAlert(alertDiv, this.locale.translateError(error));
             }
         });
     }
 
-    renderLoginWithPass2(): void {
-        console.log("Rendering login with pass2.");
+    private renderLoginWithPass2(parent: HTMLElement): void {
+        parent = Controls.createDiv(parent, "card p-4 shadow-sm");
+        parent.style.maxWidth = "400px";
+        const alertDiv: HTMLDivElement = Controls.createDiv(parent);
+        Controls.createHeading(parent, 1, "text-center mb-4", this.locale.translate("HEADER_LOGIN"));
+        const formElement: HTMLFormElement = Controls.createForm(parent);
+        const divPass2: HTMLDivElement = Controls.createDiv(formElement, "mb-3");
+        Controls.createLabel(divPass2, "pass2-id", "form-label", this.locale.translate("LABEL_SEC_KEY"));
+        const inputPass2: HTMLInputElement = Controls.createInput(divPass2, "text", "pass2-id", "form-control");
+        const buttonLogin: HTMLButtonElement = Controls.createButton(formElement, "submit", "login-button-id", this.locale.translate("BUTTON_LOGIN"), "btn btn-primary");
+        buttonLogin.addEventListener("click", async (e: MouseEvent) => {
+            e.preventDefault();
+            try {
+                await this.authenticationClient.loginWithPass2Async(inputPass2.value);
+                this.renderPage();
+            }
+            catch (error: Error | unknown) {
+                Controls.createAlert(alertDiv, this.locale.translateError(error));
+            }
+        });
     }
 
-    renderLoginWithPin(): void {
-        console.log("Rendering login with PIN.");
+    private renderLoginWithPin(parent: HTMLElement): void {
+        parent = Controls.createDiv(parent, "card p-4 shadow-sm");
+        parent.style.maxWidth = "400px";
+        Controls.createHeading(parent, 1, "text-center mb-4", this.locale.translate("HEADER_LOGIN"));
+        const alertDiv: HTMLDivElement = Controls.createDiv(parent);
+        const formElement: HTMLFormElement = Controls.createForm(parent);
+        const divPin: HTMLDivElement = Controls.createDiv(formElement, "mb-3");
+        Controls.createLabel(divPin, "pin-id", "form-label", this.locale.translate("LABEL_PIN"));
+        const inputPin: HTMLInputElement = Controls.createInput(divPin, "password", "pin-id", "form-control");
+        const buttonLogin: HTMLButtonElement = Controls.createButton(formElement, "submit", "login-button-id", this.locale.translate("BUTTON_LOGIN"), "btn btn-primary");
+        buttonLogin.addEventListener("click", async (e: MouseEvent) => {
+            e.preventDefault();
+            try {
+                await this.authenticationClient.loginWithPinAsync(inputPin.value);
+                this.renderPage();
+            }
+            catch (error: Error | unknown) {
+                Controls.createAlert(alertDiv, this.locale.translateError(error));
+            }
+        });
     }
 
-    static createElement(parent: HTMLElement, name: string, classid?: string, txt?: string): HTMLElement {
-        const e: HTMLElement = document.createElement(name);
-        if (classid) {
-            e.setAttribute("class", classid);
-        }
-        parent.appendChild(e);
-        if (txt) {
-            e.textContent = txt;
-        }
-        return e;
+    private renderMain(parent: HTMLElement): void {
+        const alertDiv: HTMLDivElement = Controls.createDiv(parent);
+        Controls.createHeading(parent, 1, "text-center mb-4", this.locale.translate("HEADER_MAIN"));
+        const welcomeMessage: HTMLDivElement = Controls.createDiv(parent, "alert alert-success");
+        welcomeMessage.textContent = this.locale.translate("MESSAGE_WELCOME");
+        const buttonLogout: HTMLButtonElement = Controls.createButton(parent, "button", "logout-button-id", this.locale.translate("BUTTON_LOGOUT"), "btn btn-primary");
+        buttonLogout.addEventListener("click", async (e: MouseEvent) => {
+            e.preventDefault();
+            try {
+                await this.authenticationClient.logoutAsync();
+                this.renderPage();
+            }
+            catch (error: Error | unknown) {
+                Controls.createAlert(alertDiv, this.locale.translateError(error));
+            }
+        });
     }
 
-    static createDiv(parent: HTMLElement, classname?: string, txt?: string): HTMLDivElement {
-        return App.createElement(parent, "div", classname, txt) as HTMLDivElement;
+    private renderLanguageButtons(parent: HTMLElement): void {
+        const buttonDiv: HTMLDivElement = Controls.createDiv(parent, "fixed-bottom footer-buttons d-flex justify-content-center gap-2 p-3");
+        const germanButton: HTMLButtonElement = Controls.createButton(buttonDiv, "button", "german-button-id", "", "btn btn-primary");
+        germanButton.addEventListener("click", async (e: MouseEvent) => this.onLanguageChangeAsync(e, "de"));
+        Controls.createSpan(germanButton, "fi fi-de");
+        const englishButton: HTMLButtonElement = Controls.createButton(buttonDiv, "button", "english-button-id", "", "btn btn-primary");
+        englishButton.addEventListener("click", async (e: MouseEvent) => this.onLanguageChangeAsync(e, "en"));
+        Controls.createSpan(englishButton, "fi fi-gb");
     }
 
-    static createForm(parent: HTMLElement, classname?: string): HTMLFormElement {
-        return App.createElement(parent, "form", classname) as HTMLFormElement;
-    }
-
-    static createLabel(parent: HTMLElement, forid: string, classname?: string, txt?: string): HTMLLabelElement {
-        const label: HTMLLabelElement = App.createElement(parent, "label", classname) as HTMLLabelElement;
-        label.setAttribute("for", forid);
-        if (txt) {
-            label.textContent = txt;
-        }
-        return label;
-    }
-
-    static createInput(parent: HTMLElement, type: string, id: string, classname?: string, value?: string): HTMLInputElement {
-        const input: HTMLInputElement = App.createElement(parent, "input", classname) as HTMLInputElement;
-        input.type = type;
-        input.id = id;
-        if (value) {
-            input.value = value;
-        }
-        return input;
-    }
-
-    static createHeading(parent: HTMLElement, level: number, classname?: string, txt?: string): HTMLHeadingElement {
-        const h: HTMLHeadingElement = App.createElement(parent, `h${level}`, classname) as HTMLHeadingElement;
-        if (txt) {
-            h.textContent = txt;
-        }
-        return h;
-    }
-
-    static createButton(parent: HTMLElement, type: string, id: string, txt: string, classname?: string): HTMLButtonElement {
-        const b: HTMLButtonElement = App.createElement(parent, "button", classname) as HTMLButtonElement;
-        b.setAttribute("type", type);
-        b.id = id;
-        b.title = txt;
-        b.textContent = txt;
-        return b;
-    }
-
-    static createSpan(parent: HTMLElement, classname?: string, txt?: string): HTMLSpanElement {
-        const span: HTMLSpanElement = App.createElement(parent, "span", classname, txt) as HTMLSpanElement;
-        return span;
-    }
-
-    static createAlert(parent: HTMLElement, msg: string): HTMLDivElement {
-        App.removeAllChildren(parent);
-        const alertDiv: HTMLDivElement = App.createDiv(parent, "alert alert-danger alert-dismissible");
-        alertDiv.setAttribute("role", "alert");
-        const alertMessage: HTMLDivElement = App.createDiv(alertDiv, "", msg);
-        const alertButton: HTMLButtonElement = App.createButton(alertDiv, "button", "close-alert-id", "", "btn-close");
-        alertButton.setAttribute("data-bs-dismiss", "alert");
-        alertButton.setAttribute("aria-label", "Close");
-        return alertDiv;
-    }
-
-    static removeAllChildren(parent: HTMLElement): void {
-        const node: HTMLElement = parent;
-        while (node.lastChild) {
-            node.removeChild(node.lastChild);
-        }
+    private async onLanguageChangeAsync(e: MouseEvent, languageCode: string): Promise<void> {
+        e.preventDefault();
+        await this.locale.setLanguageAsync(languageCode);
+        this.renderPage();
     }
 
 }

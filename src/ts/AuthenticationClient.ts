@@ -57,7 +57,7 @@ export class AuthenticationClient {
      * @returns true if the user requires a second password, false otherwise
      */
     public isRequiresPass2(): boolean {
-        return this.authResult ? this.authResult.requiresPass2 : false;
+        return this.getToken() != null && this.authResult != null ? this.authResult.requiresPass2 : false;
     }
 
     /**
@@ -66,7 +66,7 @@ export class AuthenticationClient {
      * @returns true if the user requires a PIN, false otherwise
      */
     public isRequiresPin(): boolean {
-        return this.authResult ? this.authResult.requiresPin : false;
+        return this.getToken() == null && this.authResult != null && this.lltoken != null ? this.authResult.requiresPin : false;
     }
 
     /**
@@ -84,9 +84,7 @@ export class AuthenticationClient {
      * @returns the client information including UUID and name
      */
     public getClientInfo(): ClientInfo {
-        if (this.clientInfo == null) {
-            throw new Error("Client info not initialized.");
-        }
+        if (this.clientInfo == null) throw new Error("Client info not initialized.");
         return this.clientInfo;
     }
 
@@ -94,11 +92,14 @@ export class AuthenticationClient {
      * Logs out the user by clearing the auth result and long-lived token.
      */
     public async logoutAsync(): Promise<void> {
+        const token: string | null = this.getToken();
         this.authResult = null;
         this.lltoken = null;
         window.sessionStorage.removeItem("authresult");
         window.localStorage.removeItem("pwdman-lltoken");
-        await window.fetch("/api/pwdman/logout", { headers: { "token": this.getToken()! } });
+        if (token != null) {
+            await window.fetch("/api/pwdman/logout", { headers: { "token": token } });
+        }
     }
 
     /**
@@ -109,7 +110,7 @@ export class AuthenticationClient {
      * @param language language code for the request
      */
     public async loginAsync(username: string, password: string, language: string): Promise<void> {
-        if (this.authResult != null) throw new Error("Not logged out.");
+        if (this.getToken() != null) throw new Error("Already logged in.");
         const clientInfo: ClientInfo = this.getClientInfo();
         const requestInit: RequestInit = {
             method: "POST",
@@ -141,13 +142,14 @@ export class AuthenticationClient {
      * @param pass2 the second password to authenticate with
      */
     public async loginWithPass2Async(pass2: string): Promise<void> {
-        if (this.authResult == null || !this.authResult.requiresPass2) throw new Error("Not logged in or does not require pass2.");
+        const token: string | null = this.getToken();
+        if (token == null) throw new Error("Missing authentication token.");
         const requestInit: RequestInit = {
             method: "POST",
             headers: {
                 "Accept": "application/json",
                 "Content-Type": "application/json",
-                "token": this.authResult.token!
+                "token": token
             },
             body: JSON.stringify(pass2)
         };
@@ -174,7 +176,7 @@ export class AuthenticationClient {
      * @param pin the PIN to authenticate with
      */
     public async loginWithPinAsync(pin: string): Promise<void> {
-        if (!this.authResult || !this.authResult.requiresPin || !this.lltoken) throw new Error("Not logged in or does not require PIN or no long lived token.");
+        if (this.authResult == null || !this.authResult.requiresPin || this.lltoken == null) throw new Error("Not logged in or does not require PIN or no long lived token.");
         const requestInit: RequestInit = {
             method: "POST",
             headers: {
@@ -205,8 +207,8 @@ export class AuthenticationClient {
      * Logs in the user with a long-lived token if available.
      */
     public async loginWithLongLivedTokenAsync(): Promise<void> {
-        const lltoken: string | null = this.getLongLivedToken();
-        if (this.authResult == null && lltoken) {
+        const lltoken : string | null = this.getLongLivedToken();
+        if (this.getToken() == null && lltoken != null) {
             const requestInit: RequestInit = { headers: { "token": lltoken, "uuid": this.getClientInfo().uuid } };
             const resp: Response = await window.fetch("/api/pwdman/auth/lltoken", requestInit);
             if (!resp.ok) {
@@ -214,8 +216,8 @@ export class AuthenticationClient {
                 return;
             }
             this.authResult = await resp.json() as AuthResult;
-            this.lltoken = this.authResult.longLivedToken;
-            if (this.lltoken != null) {
+            if (this.authResult.longLivedToken != null) {
+                this.lltoken = this.authResult.longLivedToken;
                 window.localStorage.setItem("pwdman-lltoken", this.lltoken);
             }
             window.sessionStorage.setItem("authresult", JSON.stringify(this.authResult));
