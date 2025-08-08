@@ -17,3 +17,28 @@ export type ErrorResult = {
   status: number,
   traceId: string | null
 }
+
+export type UserInfoResult = {
+  id: number,
+  name: string,
+  email: string,
+  requires2FA: boolean,
+  useLongLivedToken: boolean,
+  usePin: boolean,
+  allowResetPassword: boolean,
+  lastLoginUtc: string | null,
+  registeredUtc: string,
+  roles: string[],
+  passwordManagerSalt: string,
+  accountLocked: boolean,
+  photo: string | null,
+  storageQuota: number,
+  usedStorage: number,
+  loginEnabled: boolean,
+  hasContacts: boolean,
+  hasDiary: boolean,
+  hasDocuments: boolean,
+  hasNotes: boolean,
+  hasPasswordManagerFile: boolean,
+  secKey: string | null
+}

@@ -32,13 +32,9 @@ export class Locale {
         const json = await resp2.json();
         this.translationMap.clear();
         Object.entries(json).forEach(([key, value]) => this.translationMap.set(key, value as string));
-        if (this.language === "de") {
-            document.documentElement.lang = "de";
-            this.translationMap.set("APP_NAME", "Myna Portal");
-        } else {
-            document.documentElement.lang = "en";
-            this.translationMap.set("APP_NAME", "Myna Portal");
-        }
+        this.translationMap.set("APP_NAME", "Myna Portal");
+        this.translationMap.set("MESSAGE_WELCOME_1", "Hello {0}, welcome to the Myna Portal!");
+        document.documentElement.lang = this.language;
     }
 
     /**

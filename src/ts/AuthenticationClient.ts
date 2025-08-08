@@ -1,4 +1,4 @@
-import { AuthResult, ErrorResult, ClientInfo } from "./TypeDefinitions";
+import { AuthResult, ErrorResult, ClientInfo, UserInfoResult } from "./TypeDefinitions";
 
 /**
  * Provides methods for managing authentication of the current user.
@@ -10,6 +10,8 @@ export class AuthenticationClient {
     private lltoken: string | null = null;
 
     private clientInfo: ClientInfo | null = null;
+
+    private userInfo: UserInfoResult | null = null;
 
     /**
      * Initializes the authentication client by loading the auth result and long-lived token from storage.
@@ -95,10 +97,15 @@ export class AuthenticationClient {
         const token: string | null = this.getToken();
         this.authResult = null;
         this.lltoken = null;
+        this.userInfo = null;
         window.sessionStorage.removeItem("authresult");
         window.localStorage.removeItem("pwdman-lltoken");
         if (token != null) {
-            await window.fetch("/api/pwdman/logout", { headers: { "token": token } });
+            try {
+                await this.fetchAsync("/api/pwdman/logout", { headers: { "token": token } });
+            } catch (error: Error | unknown) {
+                console.error("Logout failed:", error);
+            }
         }
     }
 
@@ -108,6 +115,7 @@ export class AuthenticationClient {
      * @param username username
      * @param password password
      * @param language language code for the request
+     * @throws an error if the login fails or if the user is already logged in
      */
     public async loginAsync(username: string, password: string, language: string): Promise<void> {
         if (this.getToken() != null) throw new Error("Already logged in.");
@@ -117,15 +125,7 @@ export class AuthenticationClient {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ "Username": username, "Password": password, "ClientUUID": clientInfo.uuid, "ClientName": clientInfo.name })
         };
-        const resp: Response = await window.fetch(`/api/pwdman/auth?locale=${language}`, requestInit);
-        if (!resp.ok) {
-            const errorResult: ErrorResult | null = await resp.json() as ErrorResult;
-            let errorMessage = "An unknown error occurred";
-            if (errorResult) {
-                errorMessage = errorResult.title || errorMessage;
-            }
-            throw new Error(errorMessage);
-        }
+        const resp: Response = await this.fetchAsync(`/api/pwdman/auth?locale=${language}`, requestInit);
         this.authResult = await resp.json() as AuthResult;
         this.lltoken = this.authResult.longLivedToken;
         window.sessionStorage.setItem("authresult", JSON.stringify(this.authResult));
@@ -140,6 +140,7 @@ export class AuthenticationClient {
      * Logs in the user with the second password.
      * 
      * @param pass2 the second password to authenticate with
+     * @throws an error if the user is not logged in or does not require a second password
      */
     public async loginWithPass2Async(pass2: string): Promise<void> {
         const token: string | null = this.getToken();
@@ -153,15 +154,7 @@ export class AuthenticationClient {
             },
             body: JSON.stringify(pass2)
         };
-        const resp: Response = await window.fetch("/api/pwdman/auth2", requestInit);
-        if (!resp.ok) {
-            const errorResult: ErrorResult | null = await resp.json() as ErrorResult;
-            let errorMessage = "An unknown error occurred";
-            if (errorResult) {
-                errorMessage = errorResult.title || errorMessage;
-            }
-            throw new Error(errorMessage);
-        }
+        const resp: Response = await this.fetchAsync("/api/pwdman/auth2", requestInit);
         this.authResult = await resp.json() as AuthResult;
         this.lltoken = this.authResult.longLivedToken;
         window.sessionStorage.setItem("authresult", JSON.stringify(this.authResult));
@@ -174,6 +167,7 @@ export class AuthenticationClient {
      * Logs in the user with a PIN.
      * 
      * @param pin the PIN to authenticate with
+     * @throws an error if the user is not logged in or does not require a PIN, or if the long-lived token is not available
      */
     public async loginWithPinAsync(pin: string): Promise<void> {
         if (this.authResult == null || !this.authResult.requiresPin || this.lltoken == null) throw new Error("Not logged in or does not require PIN or no long lived token.");
@@ -186,15 +180,7 @@ export class AuthenticationClient {
             },
             body: JSON.stringify(pin)
         };
-        const resp: Response = await window.fetch("/api/pwdman/auth/pin", requestInit);
-        if (!resp.ok) {
-            const errorResult: ErrorResult | null = await resp.json() as ErrorResult;
-            let errorMessage = "An unknown error occurred";
-            if (errorResult) {
-                errorMessage = errorResult.title || errorMessage;
-            }
-            throw new Error(errorMessage);
-        }
+        const resp: Response = await this.fetchAsync("/api/pwdman/auth/pin", requestInit);
         this.authResult = await resp.json() as AuthResult;
         this.lltoken = this.authResult.longLivedToken;
         if (this.lltoken != null) {
@@ -207,20 +193,46 @@ export class AuthenticationClient {
      * Logs in the user with a long-lived token if available.
      */
     public async loginWithLongLivedTokenAsync(): Promise<void> {
-        const lltoken : string | null = this.getLongLivedToken();
+        const lltoken: string | null = this.getLongLivedToken();
         if (this.getToken() == null && lltoken != null) {
-            const requestInit: RequestInit = { headers: { "token": lltoken, "uuid": this.getClientInfo().uuid } };
-            const resp: Response = await window.fetch("/api/pwdman/auth/lltoken", requestInit);
-            if (!resp.ok) {
+            try {
+                const requestInit: RequestInit = { headers: { "token": lltoken, "uuid": this.getClientInfo().uuid } };
+                const resp: Response = await this.fetchAsync("/api/pwdman/auth/lltoken", requestInit);
+                this.authResult = await resp.json() as AuthResult;
+                if (this.authResult.longLivedToken != null) {
+                    this.lltoken = this.authResult.longLivedToken;
+                    window.localStorage.setItem("pwdman-lltoken", this.lltoken);
+                }
+                window.sessionStorage.setItem("authresult", JSON.stringify(this.authResult));
+            }
+            catch (error: Error | unknown) {
+                console.error("Login with long-lived token failed:", error);
                 window.localStorage.removeItem("pwdman-lltoken");
-                return;
             }
-            this.authResult = await resp.json() as AuthResult;
-            if (this.authResult.longLivedToken != null) {
-                this.lltoken = this.authResult.longLivedToken;
-                window.localStorage.setItem("pwdman-lltoken", this.lltoken);
-            }
-            window.sessionStorage.setItem("authresult", JSON.stringify(this.authResult));
         }
+    }
+
+    /**
+     * Retrieves user information asynchronously.
+     * 
+     * @returns a promise that resolves to the user information
+     * @throws an error if the user information cannot be retrieved or if the user is not logged in
+     */
+    public async getUserInfoAsync(): Promise<UserInfoResult> {
+        if (this.userInfo != null) return this.userInfo;
+        const token: string | null = this.getToken();
+        if (token == null) throw new Error("Missing authentication token.");
+        const resp = await this.fetchAsync('/api/pwdman/user', { headers: { 'token': token } });
+        return resp.json() as Promise<UserInfoResult>;
+    }
+
+    private async fetchAsync(url: string, options?: RequestInit): Promise<Response> {
+        const resp = await window.fetch(url, options);
+        if (!resp.ok) {
+            const errorResult: ErrorResult | null = await resp.json() as ErrorResult;
+            const errorMessage = errorResult ? errorResult.title : undefined;
+            throw new Error(errorMessage || "An unknown error occurred.");
+        }
+        return resp;
     }
 }

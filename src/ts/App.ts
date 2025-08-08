@@ -2,6 +2,7 @@
 import { Locale } from "./Locale";
 import { AuthenticationClient } from "./AuthenticationClient";
 import { Controls } from "./Controls";
+import { UserInfoResult } from "./TypeDefinitions";
 
 /**
  * Main application class that initializes the application, handles authentication, and renders the UI.
@@ -34,27 +35,27 @@ export class App {
     public async runAsync(): Promise<void> {
         await this.locale.setLanguageAsync();
         await this.authenticationClient.loginWithLongLivedTokenAsync();
-        this.renderPage();
+        await this.renderPageAsync();
     }
 
-    private renderPage(): void {
+    private async renderPageAsync(): Promise<void> {
         Controls.removeAllChildren(document.body);
         const parent: HTMLDivElement = Controls.createDiv(document.body, "container py-4 px-3 mx-auto");
         if (!this.authenticationClient.isLoggedIn()) {
             if (this.authenticationClient.isRequiresPass2()) {
-                this.renderLoginWithPass2(parent);
+                await this.renderLoginWithPass2Async(parent);
             } else if (this.authenticationClient.isRequiresPin()) {
-                this.renderLoginWithPin(parent);
+                await this.renderLoginWithPinAsync(parent);
             } else {
-                this.renderLoginWithUsernameAndPassword(parent);
+                await this.renderLoginWithUsernameAndPasswordAsync(parent);
             }
         } else {
-            this.renderMain(parent)
+            await this.renderMainAsync(parent);
         }
         this.renderLanguageButtons(parent);
     }
 
-    private renderLoginWithUsernameAndPassword(parent: HTMLElement): void {
+    private async renderLoginWithUsernameAndPasswordAsync(parent: HTMLElement): Promise<void> {
         parent = Controls.createDiv(parent, "card p-4 shadow-sm");
         parent.style.maxWidth = "400px";
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
@@ -71,7 +72,7 @@ export class App {
             e.preventDefault();
             try {
                 await this.authenticationClient.loginAsync(inputUsername.value, inputPassword.value, this.locale.getLanguage());
-                this.renderPage();
+                await this.renderPageAsync();
             }
             catch (error: Error | unknown) {
                 Controls.createAlert(alertDiv, this.locale.translateError(error));
@@ -79,11 +80,11 @@ export class App {
         });
     }
 
-    private renderLoginWithPass2(parent: HTMLElement): void {
+    private async renderLoginWithPass2Async(parent: HTMLElement): Promise<void> {
         parent = Controls.createDiv(parent, "card p-4 shadow-sm");
         parent.style.maxWidth = "400px";
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
-        Controls.createHeading(parent, 1, "text-center mb-4", this.locale.translate("HEADER_LOGIN"));
+        Controls.createHeading(parent, 1, "text-center mb-4", this.locale.translate("APP_NAME"));
         const formElement: HTMLFormElement = Controls.createForm(parent);
         const divPass2: HTMLDivElement = Controls.createDiv(formElement, "mb-3");
         Controls.createLabel(divPass2, "pass2-id", "form-label", this.locale.translate("LABEL_SEC_KEY"));
@@ -93,7 +94,7 @@ export class App {
             e.preventDefault();
             try {
                 await this.authenticationClient.loginWithPass2Async(inputPass2.value);
-                this.renderPage();
+                await this.renderPageAsync();
             }
             catch (error: Error | unknown) {
                 Controls.createAlert(alertDiv, this.locale.translateError(error));
@@ -101,10 +102,10 @@ export class App {
         });
     }
 
-    private renderLoginWithPin(parent: HTMLElement): void {
+    private async renderLoginWithPinAsync(parent: HTMLElement): Promise<void> {
         parent = Controls.createDiv(parent, "card p-4 shadow-sm");
         parent.style.maxWidth = "400px";
-        Controls.createHeading(parent, 1, "text-center mb-4", this.locale.translate("HEADER_LOGIN"));
+        Controls.createHeading(parent, 1, "text-center mb-4", this.locale.translate("APP_NAME"));
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
         const formElement: HTMLFormElement = Controls.createForm(parent);
         const divPin: HTMLDivElement = Controls.createDiv(formElement, "mb-3");
@@ -115,7 +116,7 @@ export class App {
             e.preventDefault();
             try {
                 await this.authenticationClient.loginWithPinAsync(inputPin.value);
-                this.renderPage();
+                await this.renderPageAsync();
             }
             catch (error: Error | unknown) {
                 Controls.createAlert(alertDiv, this.locale.translateError(error));
@@ -123,17 +124,18 @@ export class App {
         });
     }
 
-    private renderMain(parent: HTMLElement): void {
+    private async renderMainAsync(parent: HTMLElement): Promise<void> {
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
-        Controls.createHeading(parent, 1, "text-center mb-4", this.locale.translate("HEADER_MAIN"));
+        Controls.createHeading(parent, 1, "text-center mb-4", this.locale.translate("APP_NAME"));
         const welcomeMessage: HTMLDivElement = Controls.createDiv(parent, "alert alert-success");
-        welcomeMessage.textContent = this.locale.translate("MESSAGE_WELCOME");
+        const userInfo: UserInfoResult = await this.authenticationClient.getUserInfoAsync();
+        welcomeMessage.textContent = this.locale.translateWithArgs("MESSAGE_WELCOME_1", [userInfo.name]);
         const buttonLogout: HTMLButtonElement = Controls.createButton(parent, "button", "logout-button-id", this.locale.translate("BUTTON_LOGOUT"), "btn btn-primary");
         buttonLogout.addEventListener("click", async (e: MouseEvent) => {
             e.preventDefault();
             try {
                 await this.authenticationClient.logoutAsync();
-                this.renderPage();
+                await this.renderPageAsync();
             }
             catch (error: Error | unknown) {
                 Controls.createAlert(alertDiv, this.locale.translateError(error));
@@ -154,7 +156,7 @@ export class App {
     private async onLanguageChangeAsync(e: MouseEvent, languageCode: string): Promise<void> {
         e.preventDefault();
         await this.locale.setLanguageAsync(languageCode);
-        this.renderPage();
+        await this.renderPageAsync();
     }
 
 }
