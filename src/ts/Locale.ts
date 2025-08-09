@@ -7,6 +7,26 @@ export class Locale {
 
     private language: string = window.localStorage.getItem("locale") || window.navigator.language;
 
+    private german = {
+        "APP_NAME": "Myna Portal",
+        "MESSAGE_WELCOME_1": "Hallo {0}, willkommen im Myna Portal!",
+        "LANGUAGE": "Sprache",
+        "ABOUT": "Über",
+        "INFO_ENTER_USERNAME": "Gib deinen Benutzernamen ein.",
+        "INFO_ENTER_PASSWORD": "Gib dein Kennwort ein.",
+        "INBOX": "Posteingang",
+    }
+
+    private englisch = {
+        "APP_NAME": "Myna Portal",
+        "MESSAGE_WELCOME_1": "Hello {0}, welcome to the Myna Portal!",
+        "LANGUAGE": "Language",
+        "ABOUT": "About",
+        "INFO_ENTER_USERNAME": "Enter your username.",
+        "INFO_ENTER_PASSWORD": "Enter your password.",
+        "INBOX": "Inbox",
+    }
+
     /**
      * Returns the currently set language code.
      * 
@@ -32,9 +52,8 @@ export class Locale {
         const json = await resp2.json();
         this.translationMap.clear();
         Object.entries(json).forEach(([key, value]) => this.translationMap.set(key, value as string));
-        this.translationMap.set("APP_NAME", "Myna Portal");
-        this.translationMap.set("MESSAGE_WELCOME_1", "Hello {0}, welcome to the Myna Portal!");
-        document.documentElement.lang = this.language;
+        const texts = this.language === "de" ? this.german : this.englisch;
+        Object.entries(texts).forEach(([key, value]) => this.translationMap.set(key, value as string));
     }
 
     /**
