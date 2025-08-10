@@ -180,13 +180,21 @@ export class AuthenticationClient {
             },
             body: JSON.stringify(pin)
         };
-        const resp: Response = await this.fetchAsync("/api/pwdman/auth/pin", requestInit);
-        this.authResult = await resp.json() as AuthResult;
-        this.lltoken = this.authResult.longLivedToken;
-        if (this.lltoken != null) {
-            window.localStorage.setItem("pwdman-lltoken", this.lltoken);
+        try {
+            const resp: Response = await this.fetchAsync("/api/pwdman/auth/pin", requestInit);
+            this.authResult = await resp.json() as AuthResult;
+            this.lltoken = this.authResult.longLivedToken;
+            if (this.lltoken != null) {
+                window.localStorage.setItem("pwdman-lltoken", this.lltoken);
+            }
+            window.sessionStorage.setItem("authresult", JSON.stringify(this.authResult));
         }
-        window.sessionStorage.setItem("authresult", JSON.stringify(this.authResult));
+        catch (err: Error | unknown) {
+            if (err instanceof Error && err.message == "ERROR_INVALID_TOKEN") {
+                await this.logoutAsync();
+            }
+            throw err;
+        }
     }
 
     /**
