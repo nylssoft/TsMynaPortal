@@ -1,5 +1,5 @@
-import { PageContext } from "./PageContext";
-import { Controls } from "./Controls";
+import { PageContext } from "../PageContext";
+import { Controls } from "../Controls";
 
 export class About {
     

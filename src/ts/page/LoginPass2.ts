@@ -1,5 +1,7 @@
-import { PageContext } from "./PageContext";
-import { Controls } from "./Controls";
+import { PageContext } from "../PageContext";
+import { Controls } from "../Controls";
+import { UserInfoResult } from "../TypeDefinitions";
+import { Security } from "../Security";
 
 export class LoginPass2 {
     
@@ -17,7 +19,7 @@ export class LoginPass2 {
         const pass2HelpDiv: HTMLDivElement = Controls.createDiv(divPass2, "form-text", pageContext.getLocale().translate("INFO_ENTER_SEC_KEY"));
         pass2HelpDiv.id = "pass2help-id";
 
-        const buttonLogin: HTMLButtonElement = Controls.createButton(formElement, "submit", "login-button-id", pageContext.getLocale().translate("BUTTON_LOGIN"), "btn btn-primary");
+        const buttonLogin: HTMLButtonElement = Controls.createButton(formElement, "submit", "login-button-id", pageContext.getLocale().translate("BUTTON_CONTINUE"), "btn btn-primary");
         buttonLogin.addEventListener("click", async (e: MouseEvent) =>  this.onClickLoginWithPass2Async(e, pageContext, inputPass2, alertDiv));
     }
 
@@ -25,6 +27,11 @@ export class LoginPass2 {
         e.preventDefault();
         try {
             await pageContext.getAuthenticationClient().loginWithPass2Async(inputPass2.value);
+            const user: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
+            const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
+            if (encryptionKey == null) {
+                await Security.setEncryptionKeyAsync(user, Security.generateEncryptionKey(32));
+            }
             pageContext.setPageType("INBOX");
             await pageContext.renderAsync();
         }

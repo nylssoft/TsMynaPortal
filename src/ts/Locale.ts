@@ -14,7 +14,10 @@ export class Locale {
         "ABOUT": "Über",
         "INFO_ENTER_USERNAME": "Gib deinen Benutzernamen ein.",
         "INFO_ENTER_PASSWORD": "Gib dein Kennwort ein.",
+        "INFO_ENTER_KEY": "Gib deinen Schlüssel zum Ver- und Entschlüsseln deiner Daten ein.",
         "INBOX": "Posteingang",
+        "ENCRYPTION_KEY": "Datenschutz",
+        "BUTTON_GENERATE": "Generieren",
     }
 
     private englisch = {
@@ -24,7 +27,10 @@ export class Locale {
         "ABOUT": "About",
         "INFO_ENTER_USERNAME": "Enter your username.",
         "INFO_ENTER_PASSWORD": "Enter your password.",
+        "INFO_ENTER_KEY": "Enter your key to encrypt and decrypt your data.",
         "INBOX": "Inbox",
+        "ENCRYPTION_KEY": "Data Protection",
+        "BUTTON_GENERATE": "Generate",
     }
 
     /**

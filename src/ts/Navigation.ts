@@ -27,6 +27,12 @@ export class Navigation {
             inboxA.href = "#";
             inboxA.addEventListener("click", async (e: MouseEvent) => this.onClickInboxAsync(e, pageContext));
 
+            const encryptionKeyLi: HTMLLIElement = Controls.createElement(ul, "li", "nav-item") as HTMLLIElement;
+            const encrpytionKeyA: HTMLAnchorElement = Controls.createElement(encryptionKeyLi, "a", "nav-link", pageContext.getLocale().translate("ENCRYPTION_KEY")) as HTMLAnchorElement;
+            encrpytionKeyA.id = "encryptionkeyaction-id";
+            encrpytionKeyA.href = "#";
+            encrpytionKeyA.addEventListener("click", async (e: MouseEvent) => this.onClickEncryptionKeyAsync(e, pageContext));
+
             const logoutLi: HTMLLIElement = Controls.createElement(ul, "li", "nav-item") as HTMLLIElement;
             const logoutA: HTMLAnchorElement = Controls.createElement(logoutLi, "a", "nav-link", pageContext.getLocale().translate("BUTTON_LOGOUT")) as HTMLAnchorElement;
             logoutA.id = "logoutaction-id";
@@ -64,6 +70,9 @@ export class Navigation {
             case "INBOX":
                 actionId = "inboxaction-id";
                 break;
+            case "ENCRYPTION_KEY":
+                actionId = "encryptionkeyaction-id";
+                break;
             default:
                 actionId = "loginaction-id";
                 break;
@@ -84,6 +93,12 @@ export class Navigation {
     private static async onClickAboutAsync(e: MouseEvent, pageContext: PageContext) {
         e.preventDefault();
         pageContext.setPageType("ABOUT");
+        await pageContext.renderAsync();
+    }
+
+    private static async onClickEncryptionKeyAsync(e: MouseEvent, pageContext: PageContext) {
+        e.preventDefault();
+        pageContext.setPageType("ENCRYPTION_KEY");
         await pageContext.renderAsync();
     }
 

@@ -1,3 +1,4 @@
+import { Security } from "./Security";
 import { AuthResult, ErrorResult, ClientInfo, UserInfoResult } from "./TypeDefinitions";
 
 /**
@@ -95,18 +96,23 @@ export class AuthenticationClient {
      */
     public async logoutAsync(): Promise<void> {
         const token: string | null = this.getToken();
+        if (token != null) {
+            try {
+                const user: UserInfoResult | null = await this.getUserInfoAsync();
+                if (user != null) {
+                    window.sessionStorage.removeItem(Security.getSessionStorageKey(user));
+                }
+                await this.fetchAsync("/api/pwdman/logout", { headers: { "token": token } });
+            } catch (error: Error | unknown) {
+                console.error("Logout failed:", error);
+                window.sessionStorage.clear();
+            }
+        }
         this.authResult = null;
         this.lltoken = null;
         this.userInfo = null;
         window.sessionStorage.removeItem("authresult");
         window.localStorage.removeItem("pwdman-lltoken");
-        if (token != null) {
-            try {
-                await this.fetchAsync("/api/pwdman/logout", { headers: { "token": token } });
-            } catch (error: Error | unknown) {
-                console.error("Logout failed:", error);
-            }
-        }
     }
 
     /**
@@ -227,11 +233,13 @@ export class AuthenticationClient {
      * @throws an error if the user information cannot be retrieved or if the user is not logged in
      */
     public async getUserInfoAsync(): Promise<UserInfoResult> {
-        if (this.userInfo != null) return this.userInfo;
-        const token: string | null = this.getToken();
-        if (token == null) throw new Error("Missing authentication token.");
-        const resp = await this.fetchAsync('/api/pwdman/user', { headers: { 'token': token } });
-        return resp.json() as Promise<UserInfoResult>;
+        if (this.userInfo == null) {
+            const token: string | null = this.getToken();
+            if (token == null) throw new Error("Missing authentication token.");
+            const resp = await this.fetchAsync('/api/pwdman/user', { headers: { 'token': token } });
+            this.userInfo = await resp.json() as UserInfoResult;
+        }
+        return this.userInfo;
     }
 
     private async fetchAsync(url: string, options?: RequestInit): Promise<Response> {

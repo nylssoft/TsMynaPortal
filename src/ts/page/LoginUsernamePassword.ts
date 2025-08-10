@@ -1,5 +1,7 @@
-import { PageContext } from "./PageContext";
-import { Controls } from "./Controls";
+import { PageContext } from "../PageContext";
+import { Controls } from "../Controls";
+import { Security } from "../Security";
+import { UserInfoResult } from "../TypeDefinitions";
 
 export class LoginUsernamePassword {
     
@@ -32,11 +34,14 @@ export class LoginUsernamePassword {
         e.preventDefault();
         try {
             await pageContext.getAuthenticationClient().loginAsync(inputUsername.value, inputPassword.value, pageContext.getLocale().getLanguage());
-            if (pageContext.getAuthenticationClient().isRequiresPin()) {
-                pageContext.setPageType("LOGIN_PIN");
-            } else if (pageContext.getAuthenticationClient().isRequiresPass2()) {
+            if (pageContext.getAuthenticationClient().isRequiresPass2()) {
                 pageContext.setPageType("LOGIN_PASS2");
             } else {
+                const user: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
+                const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
+                if (encryptionKey == null) {
+                    await Security.setEncryptionKeyAsync(user, Security.generateEncryptionKey(32));
+                }
                 pageContext.setPageType("INBOX");
             }
             await pageContext.renderAsync();

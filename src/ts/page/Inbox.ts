@@ -1,6 +1,6 @@
-import { PageContext } from "./PageContext";
-import { Controls } from "./Controls";
-import { UserInfoResult } from "./TypeDefinitions";
+import { PageContext } from "../PageContext";
+import { Controls } from "../Controls";
+import { UserInfoResult } from "../TypeDefinitions";
 
 export class Inbox {
     

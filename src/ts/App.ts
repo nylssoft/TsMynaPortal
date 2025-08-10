@@ -1,11 +1,12 @@
 import { Controls } from "./Controls";
 import { PageContext } from "./PageContext";
 import { Navigation } from "./Navigation";
-import { About } from "./About";
-import { Inbox } from "./Inbox";
-import { LoginUsernamePassword } from "./LoginUsernamePassword";
-import { LoginPin } from "./LoginPin";
-import { LoginPass2 } from "./LoginPass2";
+import { About } from "./page/About";
+import { Inbox } from "./page/Inbox";
+import { LoginUsernamePassword } from "./page/LoginUsernamePassword";
+import { LoginPin } from "./page/LoginPin";
+import { LoginPass2 } from "./page/LoginPass2";
+import { EncryptionKey } from "./page/EncryptionKey";
 
 /**
  * Main application class that initializes the application, handles authentication, and renders the UI.
@@ -68,6 +69,8 @@ export class App {
             case "LOGIN_PIN":
                 await LoginPin.renderAsync(parent, pageContext);
                 break;
+            case "ENCRYPTION_KEY":
+                await EncryptionKey.renderAsync(parent, pageContext);
         }
     }
 }

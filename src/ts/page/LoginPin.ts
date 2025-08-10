@@ -1,5 +1,7 @@
-import { PageContext } from "./PageContext";
-import { Controls } from "./Controls";
+import { PageContext } from "../PageContext";
+import { Controls } from "../Controls";
+import { UserInfoResult } from "../TypeDefinitions";
+import { Security } from "../Security";
 
 export class LoginPin {
     
@@ -28,6 +30,11 @@ export class LoginPin {
                 pageContext.setPageType("LOGIN_USERNAME_PASSWORD");            
             } else {
                 await pageContext.getAuthenticationClient().loginWithPinAsync(inputPin.value);
+                const user: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
+                const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
+                if (encryptionKey == null) {
+                    await Security.setEncryptionKeyAsync(user, Security.generateEncryptionKey(32));
+                }
                 pageContext.setPageType("INBOX");
             }
             await pageContext.renderAsync();
