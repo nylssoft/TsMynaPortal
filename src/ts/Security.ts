@@ -62,9 +62,9 @@ export class Security {
         return `encryptkey-${user.id}`;
     }
 
-    public static generateEncryptionKey(len: number): string {
+    public static generateEncryptionKey(): string {
         const chars: string = "!@$()=+-,:.ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        const arr: Uint32Array<ArrayBuffer> = new Uint32Array(len);
+        const arr: Uint32Array<ArrayBuffer> = new Uint32Array(24);
         window.crypto.getRandomValues(arr);
         let encryptKey: string = "";
         for (let i: number = 0; i < arr.length; i++) {

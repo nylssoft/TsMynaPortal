@@ -8,6 +8,6 @@ export class About {
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
         Controls.createHeading(parent, 1, "text-center mb-4", pageContext.getLocale().translate("ABOUT"));
         const aboutMessage: HTMLDivElement = Controls.createDiv(parent, "alert alert-success");
-        aboutMessage.textContent = pageContext.getLocale().translate("TEXT_COPYRIGHT_YEAR");
+        aboutMessage.textContent = `Version 0.0.1 ${pageContext.getLocale().translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.getLocale().translate("COPYRIGHT")}`;
     }
 }

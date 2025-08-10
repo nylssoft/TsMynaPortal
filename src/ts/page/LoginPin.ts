@@ -33,7 +33,7 @@ export class LoginPin {
                 const user: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
                 const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
                 if (encryptionKey == null) {
-                    await Security.setEncryptionKeyAsync(user, Security.generateEncryptionKey(32));
+                    await Security.setEncryptionKeyAsync(user, Security.generateEncryptionKey());
                 }
                 pageContext.setPageType("INBOX");
             }

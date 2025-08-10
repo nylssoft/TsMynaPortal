@@ -12,12 +12,13 @@ export class Locale {
         "MESSAGE_WELCOME_1": "Hallo {0}, willkommen im Myna Portal!",
         "LANGUAGE": "Sprache",
         "ABOUT": "Über",
-        "INFO_ENTER_USERNAME": "Gib deinen Benutzernamen ein.",
+        "INFO_ENTER_USERNAME": "Gib deinen Benutzernamen oder E-Mail-Adresse ein.",
         "INFO_ENTER_PASSWORD": "Gib dein Kennwort ein.",
         "INFO_ENTER_KEY": "Gib deinen Schlüssel zum Ver- und Entschlüsseln deiner Daten ein.",
         "INBOX": "Posteingang",
         "ENCRYPTION_KEY": "Datenschutz",
         "BUTTON_GENERATE": "Generieren",
+        "KEY_INFO": "Speichere deinen Schlüssel an einem sicheren Ort. Bei Verlust können die Daten nicht wiederhergestellt werden.",
     }
 
     private englisch = {
@@ -25,12 +26,13 @@ export class Locale {
         "MESSAGE_WELCOME_1": "Hello {0}, welcome to the Myna Portal!",
         "LANGUAGE": "Language",
         "ABOUT": "About",
-        "INFO_ENTER_USERNAME": "Enter your username.",
+        "INFO_ENTER_USERNAME": "Enter your username or email address.",
         "INFO_ENTER_PASSWORD": "Enter your password.",
         "INFO_ENTER_KEY": "Enter your key to encrypt and decrypt your data.",
         "INBOX": "Inbox",
         "ENCRYPTION_KEY": "Data Protection",
         "BUTTON_GENERATE": "Generate",
+        "KEY_INFO": "Store your key in a safe place. If lost, the data cannot be recovered.",
     }
 
     /**

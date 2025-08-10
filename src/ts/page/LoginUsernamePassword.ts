@@ -10,23 +10,27 @@ export class LoginUsernamePassword {
         parent.style.maxWidth = "400px";
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
         Controls.createHeading(parent, 1, "text-center mb-4", pageContext.getLocale().translate("HEADER_LOGIN"));
-        const formElement: HTMLFormElement = Controls.createForm(parent);
-
-        const divUsername: HTMLDivElement = Controls.createDiv(formElement, "mb-3");
+        const formElement: HTMLFormElement = Controls.createForm(parent, "align-items-center");
+        const divRows: HTMLDivElement = Controls.createDiv(formElement, "row g-3 align-items-center");
+        const divUsername: HTMLDivElement = Controls.createDiv(divRows, "mb-3");
         Controls.createLabel(divUsername, "username-id", "form-label", pageContext.getLocale().translate("LABEL_NAME"));
         const inputUsername: HTMLInputElement = Controls.createInput(divUsername, "text", "username-id", "form-control");
         inputUsername.setAttribute("aria-describedby", "usernamehelp-id");
         const usernameHelpDiv: HTMLDivElement = Controls.createDiv(divUsername, "form-text", pageContext.getLocale().translate("INFO_ENTER_USERNAME"));
         usernameHelpDiv.id = "usernamehelp-id";
 
-        const divPassword: HTMLDivElement = Controls.createDiv(formElement, "mb-3");
+        const divPassword: HTMLDivElement = Controls.createDiv(divRows, "mb-3");
         Controls.createLabel(divPassword, "password-id", "form-label", pageContext.getLocale().translate("LABEL_PWD"));
         const inputPassword: HTMLInputElement = Controls.createInput(divPassword, "password", "password-id", "form-control");
         inputPassword.setAttribute("aria-describedby", "passwordhelp-id");
         const passwordHelpDiv: HTMLDivElement = Controls.createDiv(divPassword, "form-text", pageContext.getLocale().translate("INFO_ENTER_PASSWORD"));
         passwordHelpDiv.id = "passwordhelp-id";
 
-        const buttonLogin: HTMLButtonElement = Controls.createButton(formElement, "submit", "login-button-id", pageContext.getLocale().translate("BUTTON_CONTINUE"), "btn btn-primary");
+        const divKeepLogin: HTMLDivElement = Controls.createDiv(divRows, "mb-3 form-check");
+        const inputKeepLogin: HTMLInputElement = Controls.createInput(divKeepLogin, "checkbox", "keeplogin-id", "form-check-input");
+        const labelKeepLogin: HTMLLabelElement = Controls.createLabel(divKeepLogin, "keeplogin-id", "form-check-label", pageContext.getLocale().translate("OPTION_KEEP_LOGIN"));
+
+        const buttonLogin: HTMLButtonElement = Controls.createButton(divRows, "submit", "login-button-id", pageContext.getLocale().translate("BUTTON_LOGIN"), "btn btn-primary");
         buttonLogin.addEventListener("click", async (e: MouseEvent) => this.onClickLoginWithUsernameAndPasswordAsync(e, pageContext, inputUsername, inputPassword, alertDiv));
     }
 
@@ -40,7 +44,7 @@ export class LoginUsernamePassword {
                 const user: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
                 const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
                 if (encryptionKey == null) {
-                    await Security.setEncryptionKeyAsync(user, Security.generateEncryptionKey(32));
+                    await Security.setEncryptionKeyAsync(user, Security.generateEncryptionKey());
                 }
                 pageContext.setPageType("INBOX");
             }
