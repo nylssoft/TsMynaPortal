@@ -14,6 +14,8 @@ export class AuthenticationClient {
 
     private userInfo: UserInfoResult | null = null;
 
+    private useLongLivedToken: boolean = false;
+
     /**
      * Initializes the authentication client by loading the auth result and long-lived token from storage.
      */
@@ -92,6 +94,24 @@ export class AuthenticationClient {
     }
 
     /**
+     * Returns whether a long lived token will be used.
+     * 
+     * @returns true if a long lived token will be used, false otherwise
+     */
+    public IsUseLongLivedToken(): boolean {
+        return this.useLongLivedToken;
+    }
+
+    /**
+     * Sets whether a long lived token will be used.
+     * 
+     * @param useLongLivedToken flag whether a long lived token will be used
+     */
+    public setUseLongLivedToken(useLongLivedToken: boolean) {
+        this.useLongLivedToken = useLongLivedToken;
+    }
+
+    /**
      * Logs out the user by clearing the auth result and long-lived token.
      */
     public async logoutAsync(): Promise<void> {
@@ -133,12 +153,12 @@ export class AuthenticationClient {
         };
         const resp: Response = await this.fetchAsync(`/api/pwdman/auth?locale=${language}`, requestInit);
         this.authResult = await resp.json() as AuthResult;
-        this.lltoken = this.authResult.longLivedToken;
+        this.lltoken = this.IsUseLongLivedToken() ? this.authResult.longLivedToken : null;
         window.sessionStorage.setItem("authresult", JSON.stringify(this.authResult));
-        if (this.authResult.longLivedToken == null) {
+        if (this.lltoken == null) {
             window.localStorage.removeItem("pwdman-lltoken");
         } else {
-            window.localStorage.setItem("pwdman-lltoken", this.authResult.longLivedToken);
+            window.localStorage.setItem("pwdman-lltoken", this.lltoken);
         }
     }
 
@@ -160,12 +180,20 @@ export class AuthenticationClient {
             },
             body: JSON.stringify(pass2)
         };
-        const resp: Response = await this.fetchAsync("/api/pwdman/auth2", requestInit);
-        this.authResult = await resp.json() as AuthResult;
-        this.lltoken = this.authResult.longLivedToken;
-        window.sessionStorage.setItem("authresult", JSON.stringify(this.authResult));
-        if (this.authResult.longLivedToken != null) {
-            window.localStorage.setItem("pwdman-lltoken", this.authResult.longLivedToken);
+        try {
+            const resp: Response = await this.fetchAsync("/api/pwdman/auth2", requestInit);
+            this.authResult = await resp.json() as AuthResult;
+            this.lltoken = this.IsUseLongLivedToken() ? this.authResult.longLivedToken : null;
+            window.sessionStorage.setItem("authresult", JSON.stringify(this.authResult));
+            if (this.lltoken != null) {
+                window.localStorage.setItem("pwdman-lltoken", this.lltoken);
+            }
+        }
+        catch (err: Error | unknown) {
+            if (err instanceof Error && err.message == "ERROR_INVALID_TOKEN") {
+                await this.logoutAsync();
+            }
+            throw err;
         }
     }
 

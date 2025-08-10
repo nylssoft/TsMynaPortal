@@ -10,16 +10,17 @@ export class LoginPin {
         parent.style.maxWidth = "400px";
         Controls.createHeading(parent, 1, "text-center mb-4", pageContext.getLocale().translate("HEADER_LOGIN"));
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
-        const formElement: HTMLFormElement = Controls.createForm(parent);
+        const formElement: HTMLFormElement = Controls.createForm(parent, "align-items-center");
+        const divRows: HTMLDivElement = Controls.createDiv(formElement, "row g-3 align-items-center");
 
-        const divPin: HTMLDivElement = Controls.createDiv(formElement, "mb-3");
+        const divPin: HTMLDivElement = Controls.createDiv(divRows, "mb-3");
         Controls.createLabel(divPin, "pin-id", "form-label", pageContext.getLocale().translate("LABEL_PIN"));
         const inputPin: HTMLInputElement = Controls.createInput(divPin, "password", "pin-id", "form-control");
         inputPin.setAttribute("aria-describedby", "pinhelp-id");
         const pinHelpDiv: HTMLDivElement = Controls.createDiv(divPin, "form-text", pageContext.getLocale().translate("INFO_ENTER_PIN"));
         pinHelpDiv.id = "pinhelp-id";
 
-        const buttonLogin: HTMLButtonElement = Controls.createButton(formElement, "submit", "login-button-id", pageContext.getLocale().translate("BUTTON_CONTINUE"), "btn btn-primary");
+        const buttonLogin: HTMLButtonElement = Controls.createButton(divRows, "submit", "login-button-id", pageContext.getLocale().translate("BUTTON_LOGIN"), "btn btn-primary");
         buttonLogin.addEventListener("click", async (e: MouseEvent) => this.onClickLoginWithPinAsync(e, pageContext, inputPin, alertDiv));
     }
 

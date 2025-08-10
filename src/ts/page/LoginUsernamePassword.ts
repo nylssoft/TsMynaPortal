@@ -26,17 +26,18 @@ export class LoginUsernamePassword {
         const passwordHelpDiv: HTMLDivElement = Controls.createDiv(divPassword, "form-text", pageContext.getLocale().translate("INFO_ENTER_PASSWORD"));
         passwordHelpDiv.id = "passwordhelp-id";
 
-        const divKeepLogin: HTMLDivElement = Controls.createDiv(divRows, "mb-3 form-check");
-        const inputKeepLogin: HTMLInputElement = Controls.createInput(divKeepLogin, "checkbox", "keeplogin-id", "form-check-input");
-        const labelKeepLogin: HTMLLabelElement = Controls.createLabel(divKeepLogin, "keeplogin-id", "form-check-label", pageContext.getLocale().translate("OPTION_KEEP_LOGIN"));
+        const divSaySignedIn: HTMLDivElement = Controls.createDiv(divRows, "mb-3 form-check");
+        const inputStaySignedIn: HTMLInputElement = Controls.createInput(divSaySignedIn, "checkbox", "staysignedin-id", "form-check-input");
+        Controls.createLabel(divSaySignedIn, "staysignedin-id", "form-check-label", pageContext.getLocale().translate("STAY_SIGNED_IN"));
 
         const buttonLogin: HTMLButtonElement = Controls.createButton(divRows, "submit", "login-button-id", pageContext.getLocale().translate("BUTTON_LOGIN"), "btn btn-primary");
-        buttonLogin.addEventListener("click", async (e: MouseEvent) => this.onClickLoginWithUsernameAndPasswordAsync(e, pageContext, inputUsername, inputPassword, alertDiv));
+        buttonLogin.addEventListener("click", async (e: MouseEvent) => this.onClickLoginWithUsernameAndPasswordAsync(e, pageContext, inputUsername, inputPassword, inputStaySignedIn, alertDiv));
     }
 
-    private static async onClickLoginWithUsernameAndPasswordAsync(e: MouseEvent, pageContext: PageContext, inputUsername: HTMLInputElement, inputPassword: HTMLInputElement, alertDiv: HTMLDivElement) {
+    private static async onClickLoginWithUsernameAndPasswordAsync(e: MouseEvent, pageContext: PageContext, inputUsername: HTMLInputElement, inputPassword: HTMLInputElement, staySignedIn: HTMLInputElement, alertDiv: HTMLDivElement) {
         e.preventDefault();
         try {
+            pageContext.getAuthenticationClient().setUseLongLivedToken(staySignedIn.checked);            
             await pageContext.getAuthenticationClient().loginAsync(inputUsername.value, inputPassword.value, pageContext.getLocale().getLanguage());
             if (pageContext.getAuthenticationClient().isRequiresPass2()) {
                 pageContext.setPageType("LOGIN_PASS2");

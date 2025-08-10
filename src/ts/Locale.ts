@@ -19,6 +19,7 @@ export class Locale {
         "ENCRYPTION_KEY": "Datenschutz",
         "BUTTON_GENERATE": "Generieren",
         "KEY_INFO": "Speichere deinen Schlüssel an einem sicheren Ort. Bei Verlust können die Daten nicht wiederhergestellt werden.",
+        "STAY_SIGNED_IN": "Angemeldet bleiben",
     }
 
     private englisch = {
@@ -33,6 +34,7 @@ export class Locale {
         "ENCRYPTION_KEY": "Data Protection",
         "BUTTON_GENERATE": "Generate",
         "KEY_INFO": "Store your key in a safe place. If lost, the data cannot be recovered.",
+        "STAY_SIGNED_IN": "Stay signed in",
     }
 
     /**
