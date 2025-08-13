@@ -16,6 +16,7 @@ export class LoginUsernamePassword {
         Controls.createLabel(divUsername, "username-id", "form-label", pageContext.getLocale().translate("LABEL_NAME"));
         const inputUsername: HTMLInputElement = Controls.createInput(divUsername, "text", "username-id", "form-control");
         inputUsername.setAttribute("aria-describedby", "usernamehelp-id");
+        inputUsername.focus();
         const usernameHelpDiv: HTMLDivElement = Controls.createDiv(divUsername, "form-text", pageContext.getLocale().translate("INFO_ENTER_USERNAME"));
         usernameHelpDiv.id = "usernamehelp-id";
 

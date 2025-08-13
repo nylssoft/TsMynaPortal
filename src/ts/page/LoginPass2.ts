@@ -17,6 +17,7 @@ export class LoginPass2 {
         Controls.createLabel(divPass2, "pass2-id", "form-label", pageContext.getLocale().translate("LABEL_SEC_KEY"));
         const inputPass2: HTMLInputElement = Controls.createInput(divPass2, "text", "pass2-id", "form-control");
         inputPass2.setAttribute("aria-describedby", "pass2help-id");
+        inputPass2.focus();
         const pass2HelpDiv: HTMLDivElement = Controls.createDiv(divPass2, "form-text", pageContext.getLocale().translate("INFO_ENTER_SEC_KEY"));
         pass2HelpDiv.id = "pass2help-id";
 

@@ -17,6 +17,7 @@ export class LoginPin {
         Controls.createLabel(divPin, "pin-id", "form-label", pageContext.getLocale().translate("LABEL_PIN"));
         const inputPin: HTMLInputElement = Controls.createInput(divPin, "password", "pin-id", "form-control");
         inputPin.setAttribute("aria-describedby", "pinhelp-id");
+        inputPin.focus();
         const pinHelpDiv: HTMLDivElement = Controls.createDiv(divPin, "form-text", pageContext.getLocale().translate("INFO_ENTER_PIN"));
         pinHelpDiv.id = "pinhelp-id";
 
