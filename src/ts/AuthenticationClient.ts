@@ -182,6 +182,7 @@ export class AuthenticationClient {
         try {
             const resp: Response = await this.fetchAsync("/api/pwdman/auth2", requestInit);
             this.authResult = await resp.json() as AuthResult;
+            this.authResult.requiresPass2 = false; // Reset pass2 requirement after successful login
             this.lltoken = this.IsUseLongLivedToken() ? this.authResult.longLivedToken : null;
             window.sessionStorage.setItem("authresult", JSON.stringify(this.authResult));
             if (this.lltoken != null) {
@@ -216,6 +217,7 @@ export class AuthenticationClient {
         try {
             const resp: Response = await this.fetchAsync("/api/pwdman/auth/pin", requestInit);
             this.authResult = await resp.json() as AuthResult;
+            this.authResult.requiresPin = false; // Reset PIN requirement after successful login
             this.lltoken = this.authResult.longLivedToken;
             if (this.lltoken != null) {
                 window.localStorage.setItem("pwdman-lltoken", this.lltoken);
