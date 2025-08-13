@@ -71,6 +71,9 @@ export class App {
                 break;
             case "ENCRYPTION_KEY":
                 await EncryptionKey.renderAsync(parent, pageContext);
+                break;
+            default:
+                break;
         }
     }
 }
