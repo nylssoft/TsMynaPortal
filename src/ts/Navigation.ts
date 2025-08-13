@@ -1,12 +1,38 @@
-import { PageContext } from "./PageContext";
+import { PageContext, PageType } from "./PageContext";
 import { Controls } from "./Controls";
+import { ClickAction, LogoutAction, ShowAboutPageAction, ShowDataProtectionPageAction, ShowInboxPageAction, ShowLoginPageAction, ToggleLanguageAction } from "./Actions";
 
+/**
+ * Renders the navigation bar with links to different pages.
+ */
 export class Navigation {
-    
+ 
+    /**
+     * Renders the navigation bar.
+     * 
+     * @param parent HTMLElement to which the navigation bar will be appended
+     * @param pageContext page context containing information about the current page and user authentication
+     */
     public static async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
+        const ul: HTMLUListElement = this.createNavBar(parent, pageContext, "APP_NAME");
+        if (pageContext.getAuthenticationClient().isLoggedIn()) {
+            this.createNavItem(ul, pageContext, "INBOX",  new ShowInboxPageAction());
+            this.createNavItem(ul, pageContext, "ENCRYPTION_KEY", new ShowDataProtectionPageAction());
+        } else {
+            this.createNavItem(ul, pageContext, "BUTTON_LOGIN", new ShowLoginPageAction());
+        }
+        this.createNavItem(ul, pageContext, "ABOUT", new ShowAboutPageAction());
+        const aToogleLanguage: HTMLAnchorElement = this.createNavItem(ul, pageContext, "LANGUAGE", new ToggleLanguageAction());
+        Controls.createSpan(aToogleLanguage, `mx-2 fi ${pageContext.getLocale().getLanguage() == "de" ? "fi-gb" : "fi-de"}`);
+        if (pageContext.getAuthenticationClient().isLoggedIn()) {
+            this.createNavItem(ul, pageContext, "BUTTON_LOGOUT", new LogoutAction());
+        }        
+    }
+
+    private static createNavBar(parent: HTMLElement, pageContext: PageContext, label: string): HTMLUListElement {
         const nav: HTMLElement = Controls.createElement(parent, "nav", "navbar navbar-expand-lg navbar-dark bg-dark");
         const container: HTMLDivElement = Controls.createDiv(nav, "container");
-        Controls.createElement(container, "a", "navbar-brand", pageContext.getLocale().translate("APP_NAME"));
+        Controls.createElement(container, "a", "navbar-brand", pageContext.getLocale().translate(label));
         const button: HTMLButtonElement = Controls.createElement(container, "button", "navbar-toggler") as HTMLButtonElement;
         button.setAttribute("type", "button");
         button.setAttribute("data-bs-toggle", "collapse");
@@ -17,113 +43,18 @@ export class Navigation {
         Controls.createSpan(button, "navbar-toggler-icon");        
         const navCollapse: HTMLDivElement = Controls.createDiv(container, "navbar-collapse collapse");
         navCollapse.id = "navbarSupportedContent";
-        const ul: HTMLUListElement = Controls.createElement(navCollapse, "ul", "navbar-nav me-auto mb-2 mb-lg-0") as HTMLUListElement;
+        return Controls.createElement(navCollapse, "ul", "navbar-nav me-auto mb-2 mb-lg-0") as HTMLUListElement;
+    }
 
-        if (pageContext.getAuthenticationClient().isLoggedIn()) {
-
-            const inboxLi : HTMLLIElement = Controls.createElement(ul, "li", "nav-item") as HTMLLIElement; 
-            const inboxA: HTMLAnchorElement = Controls.createElement(inboxLi, "a", "nav-link", pageContext.getLocale().translate("INBOX")) as HTMLAnchorElement;
-            inboxA.id = "inboxaction-id";
-            inboxA.href = "#";
-            inboxA.addEventListener("click", async (e: MouseEvent) => this.onClickInboxAsync(e, pageContext));
-
-            const encryptionKeyLi: HTMLLIElement = Controls.createElement(ul, "li", "nav-item") as HTMLLIElement;
-            const encrpytionKeyA: HTMLAnchorElement = Controls.createElement(encryptionKeyLi, "a", "nav-link", pageContext.getLocale().translate("ENCRYPTION_KEY")) as HTMLAnchorElement;
-            encrpytionKeyA.id = "encryptionkeyaction-id";
-            encrpytionKeyA.href = "#";
-            encrpytionKeyA.addEventListener("click", async (e: MouseEvent) => this.onClickEncryptionKeyAsync(e, pageContext));
-
-            const logoutLi: HTMLLIElement = Controls.createElement(ul, "li", "nav-item") as HTMLLIElement;
-            const logoutA: HTMLAnchorElement = Controls.createElement(logoutLi, "a", "nav-link", pageContext.getLocale().translate("BUTTON_LOGOUT")) as HTMLAnchorElement;
-            logoutA.id = "logoutaction-id";
-            logoutA.href = "#";
-            logoutA.addEventListener("click", async (e: MouseEvent) => this.onClickLogoutAsync(e, pageContext));
-        } else {
-            const lilogin: HTMLLIElement = Controls.createElement(ul, "li", "nav-item") as HTMLLIElement;
-            const loginA: HTMLAnchorElement = Controls.createElement(lilogin, "a", "nav-link", pageContext.getLocale().translate("BUTTON_LOGIN")) as HTMLAnchorElement;
-            loginA.id = "loginaction-id";
-            loginA.href = "#";
-            loginA.addEventListener("click", async (e: MouseEvent) => this.onClickLoginAsync(e, pageContext));
+    private static createNavItem(parent: HTMLElement, pageContext: PageContext, label: string, action: ClickAction): HTMLAnchorElement {
+        const li: HTMLLIElement = Controls.createElement(parent, "li", "nav-item") as HTMLLIElement;
+        const a: HTMLAnchorElement = Controls.createElement(li, "a", "nav-link", pageContext.getLocale().translate(label)) as HTMLAnchorElement;
+        a.href = "#";
+        a.addEventListener("click", async (e: MouseEvent) => action.runAsync(e, pageContext));
+        if (action.isActive(pageContext)) {
+            a.classList.add("active");
+            a.setAttribute("aria-current", "page");
         }
-
-        const aboutLi: HTMLLIElement = Controls.createElement(ul, "li", "nav-item") as HTMLLIElement;
-        const aboutA: HTMLAnchorElement = Controls.createElement(aboutLi, "a", "nav-link", pageContext.getLocale().translate("ABOUT")) as HTMLAnchorElement;
-        aboutA.href = "#";
-        aboutA.id = "aboutaction-id";
-        aboutA.addEventListener("click", async (e: MouseEvent) => this.onClickAboutAsync(e, pageContext));
-
-        const language: string = pageContext.getLocale().getLanguage();
-        const classLanguage = language === "de" ? "fi-gb" : "fi-de";
-        const switchLanguage = language === "de" ? "en" : "de";
-        const languageLi: HTMLLIElement = Controls.createElement(ul, "li", "nav-item") as HTMLLIElement;
-        const languageA: HTMLAnchorElement = Controls.createElement(languageLi, "a", "nav-link", pageContext.getLocale().translate("LANGUAGE")) as HTMLAnchorElement;
-        languageA.href = "#";
-        languageA.id = "languageaction-id";
-        Controls.createSpan(languageA, `mx-2 fi ${classLanguage}`);
-        languageA.addEventListener("click", async (e: MouseEvent) => this.onClickLanguageAsync(e, pageContext, switchLanguage));
-
-        let actionId;
-        switch (pageContext.getPageType()) {
-            case "ABOUT":
-                actionId = "aboutaction-id";
-                break;
-            case "INBOX":
-                actionId = "inboxaction-id";
-                break;
-            case "ENCRYPTION_KEY":
-                actionId = "encryptionkeyaction-id";
-                break;
-            default:
-                actionId = "loginaction-id";
-                break;
-        }
-        const actionElem: HTMLElement | null =  document.getElementById(actionId);
-        if (actionElem) {
-            actionElem.classList.add("active");
-            actionElem.setAttribute("aria-current", "page");
-        }
-    }
-
-    private static async onClickLanguageAsync(e: MouseEvent, pageContext: PageContext, languageCode: string): Promise<void> {
-        e.preventDefault();
-        await pageContext.getLocale().setLanguageAsync(languageCode);
-        await pageContext.renderAsync();
-    }
-
-    private static async onClickAboutAsync(e: MouseEvent, pageContext: PageContext) {
-        e.preventDefault();
-        pageContext.setPageType("ABOUT");
-        await pageContext.renderAsync();
-    }
-
-    private static async onClickEncryptionKeyAsync(e: MouseEvent, pageContext: PageContext) {
-        e.preventDefault();
-        pageContext.setPageType("ENCRYPTION_KEY");
-        await pageContext.renderAsync();
-    }
-
-    private static async onClickLogoutAsync(e: MouseEvent, pageContext: PageContext) {
-        e.preventDefault();
-        await pageContext.getAuthenticationClient().logoutAsync();
-        pageContext.setPageType("LOGIN_USERNAME_PASSWORD");
-        await pageContext.renderAsync();
-    }
-
-    private static async onClickLoginAsync(e: MouseEvent, pageContext: PageContext) {
-        e.preventDefault();
-        if (pageContext.getAuthenticationClient().isRequiresPin()) {
-            pageContext.setPageType("LOGIN_PIN");
-        } else if (pageContext.getAuthenticationClient().isRequiresPass2()) {
-            pageContext.setPageType("LOGIN_PASS2");
-        } else {
-            pageContext.setPageType("LOGIN_USERNAME_PASSWORD");
-        }
-        await pageContext.renderAsync();
-    }
-
-    private static async onClickInboxAsync(e: MouseEvent, pageContext: PageContext) {
-        e.preventDefault();
-        pageContext.setPageType("INBOX");
-        await pageContext.renderAsync();
+        return a;
     }
 }
