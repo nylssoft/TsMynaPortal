@@ -5,7 +5,7 @@ export class Locale {
 
     private translationMap: Map<string, string> = new Map<string, string>();
 
-    private language: string = window.localStorage.getItem("locale") || window.navigator.language;
+    private language: string = window.localStorage.getItem("locale") || window.navigator.language.split("-")[0];
 
     private german = {
         "APP_NAME": "Myna Portal",
@@ -57,9 +57,9 @@ export class Locale {
             window.localStorage.setItem("locale", language);
         }
         const resp1: Response = await fetch(`/api/pwdman/locale/url/${this.getLanguage()}`);
-        const url = await resp1.json();
+        const url: any = await resp1.json();
         const resp2: Response = await fetch(url);
-        const json = await resp2.json();
+        const json: any = await resp2.json();
         this.translationMap.clear();
         Object.entries(json).forEach(([key, value]) => this.translationMap.set(key, value as string));
         const texts = this.language === "de" ? this.german : this.englisch;
@@ -79,7 +79,7 @@ export class Locale {
      * @returns the translated string or the key itself if no translation is found
      */
     public translate(key: string): string {
-        const arr = key.split(":");
+        const arr: string[] = key.split(":");
         if (arr.length > 1) {
             const params: (string | undefined)[] = arr.slice(1).map(p => {
                 if (p.includes("\\")) {
@@ -131,7 +131,7 @@ export class Locale {
     private format(s: string, arr: (string | undefined)[]): string {
         for (let i: number = 0; i < arr.length; i++) {
             if (arr[i] === undefined) continue;
-            const reg = new RegExp("\\{" + i + "\\}", "gm");
+            const reg: RegExp = new RegExp("\\{" + i + "\\}", "gm");
             s = s.replace(reg, arr[i]!);
         }
         return s;

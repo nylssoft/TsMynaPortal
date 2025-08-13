@@ -10,7 +10,7 @@ export class AuthenticationClient {
 
     private lltoken: string | null = null;
 
-    private clientInfo: ClientInfo | null = null;
+    private clientInfo: ClientInfo;
 
     private userInfo: UserInfoResult | null = null;
 
@@ -89,7 +89,6 @@ export class AuthenticationClient {
      * @returns the client information including UUID and name
      */
     public getClientInfo(): ClientInfo {
-        if (this.clientInfo == null) throw new Error("Client info not initialized.");
         return this.clientInfo;
     }
 
@@ -274,7 +273,7 @@ export class AuthenticationClient {
         const resp = await window.fetch(url, options);
         if (!resp.ok) {
             const errorResult: ErrorResult | null = await resp.json() as ErrorResult;
-            const errorMessage = errorResult ? errorResult.title : undefined;
+            const errorMessage: string | null = errorResult?.title;
             throw new Error(errorMessage || "An unknown error occurred.");
         }
         return resp;
