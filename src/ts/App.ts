@@ -1,12 +1,6 @@
-import { Controls } from "./Controls";
 import { PageContext } from "./PageContext";
 import { Navigation } from "./Navigation";
-import { About } from "./page/About";
-import { Inbox } from "./page/Inbox";
-import { LoginUsernamePassword } from "./page/LoginUsernamePassword";
-import { LoginPin } from "./page/LoginPin";
-import { LoginPass2 } from "./page/LoginPass2";
-import { EncryptionKey } from "./page/EncryptionKey";
+import { AboutPage, EncryptionKeyPage, InboxPage, LoginPass2Page, LoginPinPage, LoginUsernamePasswordPage } from "./Pages";
 
 /**
  * Main application class that initializes the application, handles authentication, and renders the UI.
@@ -30,10 +24,17 @@ export class App {
     }
 
     /**
-     * Runs the application asynchronously, setting the language and logging in if necessary.
+     * Runs the application asynchronously.
      */
     public async runAsync(): Promise<void> {
-        const pageContext: PageContext = new PageContext(this.renderAsync);
+        const pageContext: PageContext = new PageContext();
+        pageContext.registerPage("ABOUT", new AboutPage());
+        pageContext.registerPage("INBOX", new InboxPage());
+        pageContext.registerPage("LOGIN_USERNAME_PASSWORD", new LoginUsernamePasswordPage());
+        pageContext.registerPage("LOGIN_PIN", new LoginPinPage());
+        pageContext.registerPage("LOGIN_PASS2", new LoginPass2Page());
+        pageContext.registerPage("ENCRYPTION_KEY", new EncryptionKeyPage());
+        pageContext.setNavigationPage(new Navigation());
         await pageContext.getLocale().setLanguageAsync();
         await pageContext.getAuthenticationClient().loginWithLongLivedTokenAsync();
         if (pageContext.getAuthenticationClient().isLoggedIn()) {
@@ -46,34 +47,5 @@ export class App {
             pageContext.setPageType("LOGIN_USERNAME_PASSWORD");
         }
         await pageContext.renderAsync();
-    }
-
-    private async renderAsync(pageContext: PageContext): Promise<void> {
-        const main: HTMLElement = document.getElementById("main-id")!;
-        Controls.removeAllChildren(main);
-        await Navigation.renderAsync(main, pageContext);
-        const parent: HTMLDivElement = Controls.createDiv(main, "container py-4 px-3 mx-auto");
-        switch (pageContext.getPageType()) {
-            case "ABOUT":
-                await About.renderAsync(parent, pageContext);
-                break;
-            case "INBOX":
-                await Inbox.renderAsync(parent, pageContext);
-                break;
-            case "LOGIN_USERNAME_PASSWORD":
-                await LoginUsernamePassword.renderAsync(parent, pageContext);
-                break;
-            case "LOGIN_PASS2":
-                await LoginPass2.renderAsync(parent, pageContext);
-                break;
-            case "LOGIN_PIN":
-                await LoginPin.renderAsync(parent, pageContext);
-                break;
-            case "ENCRYPTION_KEY":
-                await EncryptionKey.renderAsync(parent, pageContext);
-                break;
-            default:
-                break;
-        }
     }
 }
