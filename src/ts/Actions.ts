@@ -11,7 +11,7 @@ export interface ClickAction {
      * @param e MouseEvent triggered by the click
      * @param pageContext PageContext containing information about the current page and user authentication
      */
-    runAsync(e:MouseEvent, pageContext: PageContext): Promise<void>;
+    runAsync(e: MouseEvent, pageContext: PageContext): Promise<void>;
 
     /**
      * Returns whether the action is active on the current page.
@@ -38,16 +38,18 @@ export abstract class SwitchPageClickAction implements ClickAction {
      * 
      * @param e MouseEvent triggered by the click
      * @param pageContext PageContext containing information about the current page and user authentication
+     * @returns Promise that resolves to the next page type to switch to
      */
-    protected async beforeRunAsync(e:MouseEvent, pageContext: PageContext): Promise<void> {
+    protected async beforeRunAsync(e: MouseEvent, pageContext: PageContext): Promise<PageType> {
+        return this.switchPage;
     }
 
-    public async runAsync(e:MouseEvent, pageContext: PageContext): Promise<void> {
-        this.beforeRunAsync(e, pageContext);
+    public async runAsync(e: MouseEvent, pageContext: PageContext): Promise<void> {
+        const nextPage: PageType = await this.beforeRunAsync(e, pageContext);
         e.preventDefault();
-        pageContext.setPageType(this.switchPage);
+        pageContext.setPageType(nextPage);
         await pageContext.renderAsync();
-    }    
+    }
 
     public isActive(pageContext: PageContext): boolean {
         return this.switchPage === pageContext.getPageType();
@@ -93,8 +95,9 @@ export class LogoutAction extends SwitchPageClickAction {
         super("LOGIN_USERNAME_PASSWORD");
     }
 
-    override async beforeRunAsync(e:MouseEvent, pageContext: PageContext): Promise<void> {
+    override async beforeRunAsync(e: MouseEvent, pageContext: PageContext): Promise<PageType> {
         await pageContext.getAuthenticationClient().logoutAsync();
+        return this.switchPage;
     }
 
     override isActive(pageContext: PageContext): boolean {
@@ -111,12 +114,14 @@ export class ShowLoginPageAction extends SwitchPageClickAction {
         super("LOGIN_USERNAME_PASSWORD");
     }
 
-    public async beforeRunAsync(e:MouseEvent, pageContext: PageContext): Promise<void> {
+    public async beforeRunAsync(e: MouseEvent, pageContext: PageContext): Promise<PageType> {
         if (pageContext.getAuthenticationClient().isRequiresPin()) {
-            this.switchPage = "LOGIN_PIN";
-        } else if (pageContext.getAuthenticationClient().isRequiresPass2()) {
-            this.switchPage = "LOGIN_PASS2";
+            return "LOGIN_PIN";
         }
+        if (pageContext.getAuthenticationClient().isRequiresPass2()) {
+            return "LOGIN_PASS2";
+        }
+        return this.switchPage;
     }
 
     public isActive(pageContext: PageContext): boolean {
@@ -129,7 +134,7 @@ export class ShowLoginPageAction extends SwitchPageClickAction {
  */
 export class ToggleLanguageAction implements ClickAction {
 
-    public async runAsync(e:MouseEvent, pageContext: PageContext): Promise<void> {
+    public async runAsync(e: MouseEvent, pageContext: PageContext): Promise<void> {
         e.preventDefault();
         const switchLanguage = pageContext.getLocale().getLanguage() === "de" ? "en" : "de";
         await pageContext.getLocale().setLanguageAsync(switchLanguage);
@@ -137,6 +142,6 @@ export class ToggleLanguageAction implements ClickAction {
     }
 
     public isActive(pageContext: PageContext): boolean {
-        return false;        
+        return false;
     }
 }
