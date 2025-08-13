@@ -1,6 +1,5 @@
 import { PageContext } from "./PageContext";
-import { Navigation } from "./Navigation";
-import { AboutPage, EncryptionKeyPage, InboxPage, LoginPass2Page, LoginPinPage, LoginUsernamePasswordPage } from "./Pages";
+import { NavigationBarPage, AboutPage, DataProtectionPage, InboxPage, LoginPass2Page, LoginPinPage, LoginUsernamePasswordPage } from "./Pages";
 
 /**
  * Main application class that initializes the application, handles authentication, and renders the UI.
@@ -28,13 +27,13 @@ export class App {
      */
     public async runAsync(): Promise<void> {
         const pageContext: PageContext = new PageContext();
-        pageContext.registerPage("ABOUT", new AboutPage());
-        pageContext.registerPage("INBOX", new InboxPage());
-        pageContext.registerPage("LOGIN_USERNAME_PASSWORD", new LoginUsernamePasswordPage());
-        pageContext.registerPage("LOGIN_PIN", new LoginPinPage());
-        pageContext.registerPage("LOGIN_PASS2", new LoginPass2Page());
-        pageContext.registerPage("ENCRYPTION_KEY", new EncryptionKeyPage());
-        pageContext.setNavigationPage(new Navigation());
+        pageContext.registerPage(new NavigationBarPage());
+        pageContext.registerPage(new AboutPage());
+        pageContext.registerPage(new InboxPage());
+        pageContext.registerPage(new LoginUsernamePasswordPage());
+        pageContext.registerPage(new LoginPinPage());
+        pageContext.registerPage(new LoginPass2Page());
+        pageContext.registerPage(new DataProtectionPage());
         await pageContext.getLocale().setLanguageAsync();
         await pageContext.getAuthenticationClient().loginWithLongLivedTokenAsync();
         if (pageContext.getAuthenticationClient().isLoggedIn()) {

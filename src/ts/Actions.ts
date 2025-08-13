@@ -60,7 +60,7 @@ export abstract class SwitchPageClickAction implements ClickAction {
 export class ShowDataProtectionPageAction extends SwitchPageClickAction {
 
     constructor() {
-        super("ENCRYPTION_KEY");
+        super("DATA_PROTECTION");
     }
 }
 

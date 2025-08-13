@@ -1,13 +1,76 @@
+import { ClickAction, LogoutAction, ShowAboutPageAction, ShowDataProtectionPageAction, ShowInboxPageAction, ShowLoginPageAction, ToggleLanguageAction } from "./Actions";
 import { Controls } from "./Controls";
-import { PageContext, Page } from "./PageContext";
+import { PageContext, Page, PageType } from "./PageContext";
 import { Security } from "./Security";
 import { UserInfoResult } from "./TypeDefinitions";
+
+/**
+ * Page implementation for the navigation bar.
+ * It renders links to different pages such as Inbox, Data Protection, About, and Login.
+ * It also includes a language toggle and a logout option if the user is logged in.
+ * The navigation bar is responsive and collapses on smaller screens.
+ */
+export class NavigationBarPage implements Page {
+
+    public getPageType(): PageType {
+        return "NAVIGATION_BAR";
+    }
+
+    public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
+        const ul: HTMLUListElement = this.createNavBar(parent, pageContext, "APP_NAME");
+        if (pageContext.getAuthenticationClient().isLoggedIn()) {
+            this.createNavItem(ul, pageContext, "INBOX", new ShowInboxPageAction());
+            this.createNavItem(ul, pageContext, "ENCRYPTION_KEY", new ShowDataProtectionPageAction());
+        } else {
+            this.createNavItem(ul, pageContext, "BUTTON_LOGIN", new ShowLoginPageAction());
+        }
+        this.createNavItem(ul, pageContext, "ABOUT", new ShowAboutPageAction());
+        const aToogleLanguage: HTMLAnchorElement = this.createNavItem(ul, pageContext, "LANGUAGE", new ToggleLanguageAction());
+        Controls.createSpan(aToogleLanguage, `mx-2 fi ${pageContext.getLocale().getLanguage() == "de" ? "fi-gb" : "fi-de"}`);
+        if (pageContext.getAuthenticationClient().isLoggedIn()) {
+            this.createNavItem(ul, pageContext, "BUTTON_LOGOUT", new LogoutAction());
+        }
+    }
+
+    private createNavBar(parent: HTMLElement, pageContext: PageContext, label: string): HTMLUListElement {
+        const nav: HTMLElement = Controls.createElement(parent, "nav", "navbar navbar-expand-lg navbar-dark bg-dark");
+        const container: HTMLDivElement = Controls.createDiv(nav, "container");
+        Controls.createElement(container, "a", "navbar-brand", pageContext.getLocale().translate(label));
+        const button: HTMLButtonElement = Controls.createElement(container, "button", "navbar-toggler") as HTMLButtonElement;
+        button.setAttribute("type", "button");
+        button.setAttribute("data-bs-toggle", "collapse");
+        button.setAttribute("data-bs-target", "#navbarSupportedContent");
+        button.setAttribute("aria-controls", "navbarSupportedContent");
+        button.setAttribute("aria-expanded", "false");
+        button.setAttribute("aria-label", "Toogle navigation");
+        Controls.createSpan(button, "navbar-toggler-icon");
+        const navCollapse: HTMLDivElement = Controls.createDiv(container, "navbar-collapse collapse");
+        navCollapse.id = "navbarSupportedContent";
+        return Controls.createElement(navCollapse, "ul", "navbar-nav me-auto mb-2 mb-lg-0") as HTMLUListElement;
+    }
+
+    private createNavItem(parent: HTMLElement, pageContext: PageContext, label: string, action: ClickAction): HTMLAnchorElement {
+        const li: HTMLLIElement = Controls.createElement(parent, "li", "nav-item") as HTMLLIElement;
+        const a: HTMLAnchorElement = Controls.createElement(li, "a", "nav-link", pageContext.getLocale().translate(label)) as HTMLAnchorElement;
+        a.href = "#";
+        a.addEventListener("click", async (e: MouseEvent) => action.runAsync(e, pageContext));
+        if (action.isActive(pageContext)) {
+            a.classList.add("active");
+            a.setAttribute("aria-current", "page");
+        }
+        return a;
+    }
+}
 
 /**
  * Page implementation for the About page.
  */
 export class AboutPage implements Page {
-    
+
+    public getPageType(): PageType {
+        return "ABOUT";
+    }
+
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         parent = Controls.createDiv(parent, "container py-4 px-3 mx-auto");
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
@@ -20,8 +83,12 @@ export class AboutPage implements Page {
 /**
  * Page implementation for the Encryption Key page.
  */
-export class EncryptionKeyPage implements Page {
-    
+export class DataProtectionPage implements Page {
+
+    public getPageType(): PageType {
+        return "DATA_PROTECTION";
+    }
+
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const user: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
         const encKey: string | null = await Security.getEncryptionKeyAsync(user);
@@ -82,7 +149,11 @@ export class EncryptionKeyPage implements Page {
  * Page implementation for the Inbox page.
  */
 export class InboxPage implements Page {
-    
+
+    public getPageType(): PageType {
+        return "INBOX";
+    }
+
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
         Controls.createHeading(parent, 1, "text-center mb-4", pageContext.getLocale().translate("INBOX"));
@@ -96,6 +167,10 @@ export class InboxPage implements Page {
  * Page implementation for the Login with Pass2 page.
  */
 export class LoginPass2Page implements Page {
+
+    public getPageType(): PageType {
+        return "LOGIN_PASS2";
+    }
 
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         parent = Controls.createDiv(parent, "card p-4 shadow-sm");
@@ -143,7 +218,11 @@ export class LoginPass2Page implements Page {
  * Page implementation for the Login with PIN page.
  */
 export class LoginPinPage implements Page {
-    
+
+    public getPageType(): PageType {
+        return "LOGIN_PIN";
+    }
+
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         parent = Controls.createDiv(parent, "card p-4 shadow-sm");
         parent.style.maxWidth = "400px";
@@ -168,7 +247,7 @@ export class LoginPinPage implements Page {
         e.preventDefault();
         try {
             if (pageContext.getAuthenticationClient().getLongLivedToken() == null) {
-                pageContext.setPageType("LOGIN_USERNAME_PASSWORD");            
+                pageContext.setPageType("LOGIN_USERNAME_PASSWORD");
             } else {
                 await pageContext.getAuthenticationClient().loginWithPinAsync(inputPin.value);
                 const user: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
@@ -190,7 +269,11 @@ export class LoginPinPage implements Page {
  * Page implementation for the Login with Username and Password page.
  */
 export class LoginUsernamePasswordPage implements Page {
-    
+
+    public getPageType(): PageType {
+        return "LOGIN_USERNAME_PASSWORD";
+    }
+
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         parent = Controls.createDiv(parent, "card p-4 shadow-sm");
         parent.style.maxWidth = "400px";
@@ -224,7 +307,7 @@ export class LoginUsernamePasswordPage implements Page {
     private async onClickLoginWithUsernameAndPasswordAsync(e: MouseEvent, pageContext: PageContext, inputUsername: HTMLInputElement, inputPassword: HTMLInputElement, staySignedIn: HTMLInputElement, alertDiv: HTMLDivElement) {
         e.preventDefault();
         try {
-            pageContext.getAuthenticationClient().setUseLongLivedToken(staySignedIn.checked);            
+            pageContext.getAuthenticationClient().setUseLongLivedToken(staySignedIn.checked);
             await pageContext.getAuthenticationClient().loginAsync(inputUsername.value, inputPassword.value, pageContext.getLocale().getLanguage());
             if (pageContext.getAuthenticationClient().isRequiresPass2()) {
                 pageContext.setPageType("LOGIN_PASS2");
