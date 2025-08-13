@@ -1,7 +1,20 @@
 import { UserInfoResult } from "./TypeDefinitions";
 
+/**
+ * Security class provides methods for creating cryptographic keys,
+ * encrypting and decrypting messages, and managing secure local storage.
+ * It uses the Web Crypto API to perform cryptographic operations
+ * such as PBKDF2 key derivation and AES-GCM encryption/decryption.
+ */
 export class Security {
 
+    /**
+     * Creates a CryptoKey using PBKDF2 with the provided key and salt
+     * 
+     * @param key key to use for encryption
+     * @param salt salt to use for key derivation
+     * @returns 
+     */
     public static async createCryptoKeyAsync(key: string, salt: string): Promise<CryptoKey> {
         const pwdCryptoKey: CryptoKey = await window.crypto.subtle.importKey("raw", new TextEncoder().encode(key), "PBKDF2", false, ["deriveKey"]);
         const algo: Pbkdf2Params = {
@@ -13,6 +26,15 @@ export class Security {
         return await window.crypto.subtle.deriveKey(algo, pwdCryptoKey, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
     }
 
+    /**
+     * Encrypts a message using AES-GCM with the provided CryptoKey.
+     * The message is encoded as a hex string, prefixed with the IV used for encryption.
+     * This allows the message to be decrypted later using the same key.
+     * 
+     * @param cryptoKey CryptoKey to use for encryption
+     * @param msg message to encrypt
+     * @returns encoded message as a hex string
+     */
     public static async encodeMessageAsync(cryptoKey: CryptoKey, msg: string): Promise<string> {
         const arr: Uint8Array<ArrayBuffer> = new TextEncoder().encode(msg);
         const iv: Uint8Array<ArrayBuffer> = window.crypto.getRandomValues(new Uint8Array(12));
@@ -21,6 +43,15 @@ export class Security {
         return this.buf2hex(iv.buffer) + this.buf2hex(cipherText);
     }
 
+    /**
+     * Decrypts a message using AES-GCM with the provided CryptoKey.
+     * The message should be a hex string prefixed with the IV used for encryption.
+     * This allows the message to be decrypted back to its original string format.
+     * 
+     * @param cryptoKey CryptoKey to use for decryption
+     * @param msg message to decrypt, which should be a hex string prefixed with the IV used for encryption
+     * @returns decoded message as a string
+     */
     public static async decodeMessageAsync(cryptoKey: CryptoKey, msg: string): Promise<string> {
         const iv: number[] = this.hex2arr(msg.substring(0, 12 * 2));
         const data: number[] = this.hex2arr(msg.substring(12 * 2));
@@ -32,6 +63,15 @@ export class Security {
         return new TextDecoder().decode(decrypted);
     }
 
+    /**
+     * Retrieves the encryption key for a user from session storage or secure local storage.
+     * If the key is not found in session storage, it attempts to retrieve it from secure local storage.
+     * If found, it caches the key in session storage for future use.
+     * If the key is not found in either storage, it returns null.
+     * 
+     * @param user UserInfoResult object containing user information
+     * @returns encryption key for the user, or null if not found
+     */
     public static async getEncryptionKeyAsync(user: UserInfoResult): Promise<string | null> {
         const storageKey: string = "encryptkey";
         const sessionKey: string = `${storageKey}-${user.id}`;
@@ -45,6 +85,14 @@ export class Security {
         return encryptKey != null && encryptKey.length > 0 ? encryptKey : null;
     }
 
+    /**
+     * Sets the encryption key for a user in both session storage and secure local storage.
+     * If the provided key is null or empty, it removes the key from both storages.
+     * This ensures that the user's encryption key is securely stored and can be retrieved later.
+     * 
+     * @param user UserInfoResult object containing user information
+     * @param encryptKey encryption key to set for the user
+     */
     public static async setEncryptionKeyAsync(user: UserInfoResult, encryptKey: string | null) {
         const storageKey: string = "encryptkey";
         const sessionKey: string = `${storageKey}-${user.id}`;
@@ -58,10 +106,26 @@ export class Security {
         }
     }
 
+    /**
+     * Retrieves the session storage key for a user's encryption key.
+     * This key is used to store the user's encryption key in session storage,
+     * allowing for quick access during the user's session.
+     * 
+     * @param user UserInfoResult object containing user information
+     * @returns session storage key for the user's encryption key
+     */
     public static getSessionStorageKey(user: UserInfoResult): string {
         return `encryptkey-${user.id}`;
     }
 
+    /**
+     * Generates a random encryption key consisting of 24 characters
+     * from a predefined set of characters. This key can be used for
+     * encryption purposes in the application.
+     * 
+     * @returns a randomly generated encryption key consisting of 24 characters
+     *          from a predefined set of characters.
+     */
     public static generateEncryptionKey(): string {
         const chars: string = "!@$()=+-,:.ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         const arr: Uint32Array<ArrayBuffer> = new Uint32Array(24);

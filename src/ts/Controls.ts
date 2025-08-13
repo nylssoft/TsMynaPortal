@@ -1,9 +1,26 @@
+
+/**
+ * Provides utility functions to create and manipulate HTML elements.
+ * This class includes methods for creating various HTML elements such as divs, forms, labels,
+ * inputs, headings, buttons, and spans. It also includes methods for creating alerts
+ * and removing all children from a parent element.
+ */
 export class Controls {
 
-    static createElement(parent: HTMLElement, name: string, classid?: string, txt?: string): HTMLElement {
+    /**
+     * Creates an HTML element with the specified name, class, and text content.
+     * The element is appended to the specified parent element.
+     * 
+     * @param parent parent element to append the new element to
+     * @param name name of the HTML element to create
+     * @param classname class name to assign to the element
+     * @param txt text content to set for the element
+     * @returns HTML element created with the specified name, class, and text content
+     */
+    public static createElement(parent: HTMLElement, name: string, classname?: string, txt?: string): HTMLElement {
         const e: HTMLElement = document.createElement(name);
-        if (classid) {
-            e.setAttribute("class", classid);
+        if (classname) {
+            e.setAttribute("class", classname);
         }
         parent.appendChild(e);
         if (txt) {
@@ -12,15 +29,42 @@ export class Controls {
         return e;
     }
 
-    static createDiv(parent: HTMLElement, classname?: string, txt?: string): HTMLDivElement {
+    /**
+     * Creates a div element with the specified class and text content.
+     * The div is appended to the specified parent element.
+     * 
+     * @param parent parent element to append the new div to
+     * @param classname class name to assign to the div
+     * @param txt text content to set for the div
+     * @returns HTMLDivElement created with the specified class and text content
+     */
+    public static createDiv(parent: HTMLElement, classname?: string, txt?: string): HTMLDivElement {
         return Controls.createElement(parent, "div", classname, txt) as HTMLDivElement;
     }
 
-    static createForm(parent: HTMLElement, classname?: string): HTMLFormElement {
+    /**
+     * Creates a form element with the specified class.
+     * The form is appended to the specified parent element.
+     * 
+     * @param parent parent element to append the new form to
+     * @param classname class name to assign to the form
+     * @returns HTMLFormElement created with the specified class
+     */
+    public static createForm(parent: HTMLElement, classname?: string): HTMLFormElement {
         return Controls.createElement(parent, "form", classname) as HTMLFormElement;
     }
 
-    static createLabel(parent: HTMLElement, forid: string, classname?: string, txt?: string): HTMLLabelElement {
+    /**
+     * Creates a label element with the specified for attribute, class, and text content.
+     * The label is appended to the specified parent element.
+     * 
+     * @param parent parent element to append the new label to
+     * @param forid element ID that the label is associated with
+     * @param classname class name to assign to the label
+     * @param txt text content to set for the label
+     * @returns HTMLLabelElement created with the specified for attribute, class, and text content
+     */
+    public static createLabel(parent: HTMLElement, forid: string, classname?: string, txt?: string): HTMLLabelElement {
         const label: HTMLLabelElement = Controls.createElement(parent, "label", classname) as HTMLLabelElement;
         label.setAttribute("for", forid);
         if (txt) {
@@ -29,7 +73,18 @@ export class Controls {
         return label;
     }
 
-    static createInput(parent: HTMLElement, type: string, id: string, classname?: string, value?: string): HTMLInputElement {
+    /**
+     * Creates an input element with the specified type, ID, class, and value.
+     * The input is appended to the specified parent element.
+     * 
+     * @param parent parent element to append the new input to
+     * @param type type of the input element (e.g., "text", "password", "email")
+     * @param id ID of the input element
+     * @param classname class name to assign to the input element
+     * @param value value to set for the input element
+     * @returns HTMLInputElement created with the specified type, ID, class, and value
+     */
+    public static createInput(parent: HTMLElement, type: string, id: string, classname?: string, value?: string): HTMLInputElement {
         const input: HTMLInputElement = Controls.createElement(parent, "input", classname) as HTMLInputElement;
         input.type = type;
         input.id = id;
@@ -39,7 +94,17 @@ export class Controls {
         return input;
     }
 
-    static createHeading(parent: HTMLElement, level: number, classname?: string, txt?: string): HTMLHeadingElement {
+    /**
+     * Creates a heading element (h1, h2, etc.) with the specified level, class, and text content.
+     * The heading is appended to the specified parent element.
+     * 
+     * @param parent parent element to append the new heading to
+     * @param level heading level (1-6)
+     * @param classname class name to assign to the heading
+     * @param txt text content to set for the heading
+     * @returns HTMLHeadingElement created with the specified level, class, and text content
+     */
+    public static createHeading(parent: HTMLElement, level: number, classname?: string, txt?: string): HTMLHeadingElement {
         const h: HTMLHeadingElement = Controls.createElement(parent, `h${level}`, classname) as HTMLHeadingElement;
         if (txt) {
             h.textContent = txt;
@@ -47,7 +112,18 @@ export class Controls {
         return h;
     }
 
-    static createButton(parent: HTMLElement, type: string, id: string, txt: string, classname?: string): HTMLButtonElement {
+    /**
+     * Creates a button element with the specified type, ID, text content, and optional class.
+     * The button is appended to the specified parent element.
+     * 
+     * @param parent parent element to append the new button to
+     * @param type type of the button (e.g., "button", "submit")
+     * @param id ID of the button element
+     * @param txt text content to set for the button
+     * @param classname optional class name to assign to the button
+     * @returns HTMLButtonElement created with the specified type, ID, text content, and class
+     */
+    public static createButton(parent: HTMLElement, type: string, id: string, txt: string, classname?: string): HTMLButtonElement {
         const b: HTMLButtonElement = Controls.createElement(parent, "button", classname) as HTMLButtonElement;
         b.setAttribute("type", type);
         b.id = id;
@@ -56,12 +132,29 @@ export class Controls {
         return b;
     }
 
-    static createSpan(parent: HTMLElement, classname?: string, txt?: string): HTMLSpanElement {
+    /**
+     * Creates a span element with the specified class and text content.
+     * The span is appended to the specified parent element.
+     * 
+     * @param parent parent element to append the new span to
+     * @param classname class name to assign to the span
+     * @param txt text content to set for the span
+     * @returns HTMLSpanElement created with the specified class and text content
+     */
+    public static createSpan(parent: HTMLElement, classname?: string, txt?: string): HTMLSpanElement {
         const span: HTMLSpanElement = Controls.createElement(parent, "span", classname, txt) as HTMLSpanElement;
         return span;
     }
 
-    static createAlert(parent: HTMLElement, msg: string): HTMLDivElement {
+    /**
+     * Creates an alert element with the specified message.
+     * The alert is appended to the specified parent element and includes a close button.
+     * 
+     * @param parent parent element to append the new alert to
+     * @param msg message to display in the alert
+     * @returns HTMLDivElement representing the alert
+     */
+    public static createAlert(parent: HTMLElement, msg: string): HTMLDivElement {
         Controls.removeAllChildren(parent);
         const alertDiv: HTMLDivElement = Controls.createDiv(parent, "alert alert-danger alert-dismissible");
         alertDiv.setAttribute("role", "alert");
@@ -72,7 +165,13 @@ export class Controls {
         return alertDiv;
     }
 
-    static removeAllChildren(parent: HTMLElement): void {
+    /**
+     * Removes all child elements from the specified parent element.
+     * This is useful for clearing the contents of an element before adding new content.
+     * 
+     * @param parent parent element whose children will be removed
+     */
+    public static removeAllChildren(parent: HTMLElement): void {
         const node: HTMLElement = parent;
         while (node.lastChild) {
             node.removeChild(node.lastChild);
