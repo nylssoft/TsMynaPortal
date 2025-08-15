@@ -142,7 +142,7 @@ export class Security {
         return `${key}-${user.id}-secure`;
     }
 
-    private static async getSecureLocalStorageAsync(user: UserInfoResult, key: string): Promise<string|null> {
+    private static async getSecureLocalStorageAsync(user: UserInfoResult, key: string): Promise<string | null> {
         const storageKey: string = this.getSecureLocalStorageKey(user, key);
         const secureValue: string | null = window.localStorage.getItem(storageKey);
         if (secureValue != null && user.secKey != null) {
@@ -156,7 +156,7 @@ export class Security {
         return null;
     }
 
-    private static async removeSecureLocalStorage(user: UserInfoResult, key: string) {        
+    private static async removeSecureLocalStorage(user: UserInfoResult, key: string) {
         const storageKey: string = this.getSecureLocalStorageKey(user, key);
         window.localStorage.removeItem(storageKey);
     }
@@ -198,7 +198,7 @@ export class Security {
         const ret: number[] = [];
         const l: number = str.length;
         for (let idx: number = 0; idx < l; idx += 2) {
-            const h: string = str.substring(idx, idx+2);
+            const h: string = str.substring(idx, idx + 2);
             ret.push(parseInt(h, 16));
         }
         return ret;

@@ -143,7 +143,7 @@ export class AuthenticationClient {
      * @throws an error if the login fails or if the user is already logged in
      */
     public async loginAsync(username: string, password: string, language: string): Promise<void> {
-        if (this.getToken() != null) throw new Error("Already logged in.");
+        if (this.getToken() != null) throw new Error("ERROR_INVALID_PARAMETERS");
         const clientInfo: ClientInfo = this.getClientInfo();
         const requestInit: RequestInit = {
             method: "POST",
@@ -169,7 +169,7 @@ export class AuthenticationClient {
      */
     public async loginWithPass2Async(pass2: string): Promise<void> {
         const token: string | null = this.getToken();
-        if (token == null) throw new Error("Missing authentication token.");
+        if (token == null) throw new Error("ERROR_INVALID_PARAMETERS");
         const requestInit: RequestInit = {
             method: "POST",
             headers: {
@@ -204,7 +204,7 @@ export class AuthenticationClient {
      * @throws an error if the user is not logged in or does not require a PIN, or if the long-lived token is not available
      */
     public async loginWithPinAsync(pin: string): Promise<void> {
-        if (this.authResult == null || !this.authResult.requiresPin || this.lltoken == null) throw new Error("Not logged in or does not require PIN or no long lived token.");
+        if (this.authResult == null || !this.authResult.requiresPin || this.lltoken == null) throw new Error("INVALID_PARAMETERS");
         const requestInit: RequestInit = {
             method: "POST",
             headers: {
@@ -264,7 +264,7 @@ export class AuthenticationClient {
     public async getUserInfoAsync(): Promise<UserInfoResult> {
         if (this.userInfo == null) {
             const token: string | null = this.getToken();
-            if (token == null) throw new Error("Missing authentication token.");
+            if (token == null) throw new Error("ERROR_INVALID_PARAMETERS");
             const resp = await this.fetchAsync('/api/pwdman/user', { headers: { 'token': token } });
             this.userInfo = await resp.json() as UserInfoResult;
         }
@@ -276,7 +276,7 @@ export class AuthenticationClient {
         if (!resp.ok) {
             const errorResult: ErrorResult | null = await resp.json() as ErrorResult;
             const errorMessage: string | null = errorResult?.title;
-            throw new Error(errorMessage || "An unknown error occurred.");
+            throw new Error(errorMessage || "ERROR_UNEXPECTED");
         }
         return resp;
     }
