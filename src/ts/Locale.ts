@@ -9,7 +9,7 @@ export class Locale {
 
     private german = {
         "APP_NAME": "Myna Portal",
-        "MESSAGE_WELCOME_1": "Hallo {0}, willkommen im Myna Portal!",
+        "MESSAGE_WELCOME_1_2_3": "Hallo {0}, willkommen im Myna Portal! Heute ist der {1}. Es ist {2}.",
         "LANGUAGE": "Sprache",
         "ABOUT": "Über",
         "INFO_ENTER_USERNAME": "Gib deinen Benutzernamen oder E-Mail-Adresse ein.",
@@ -20,11 +20,15 @@ export class Locale {
         "BUTTON_GENERATE": "Generieren",
         "KEY_INFO": "Speichere deinen Schlüssel an einem sicheren Ort. Bei Verlust können die Daten nicht wiederhergestellt werden.",
         "STAY_SIGNED_IN": "Angemeldet bleiben",
+        "BIRTHDAYS": "Geburtstage",
+        "DAYS": "Tage",
+
+        "ERROR_WRONG_DATA_PROTECTION_KEY": "Der Schlüssel zum Entschlüsseln der Daten ist ungültig oder fehlt. Bitte überprüfe deinen Schlüssel auf der Seite 'Datenschutz'.",
     }
 
     private englisch = {
         "APP_NAME": "Myna Portal",
-        "MESSAGE_WELCOME_1": "Hello {0}, welcome to the Myna Portal!",
+        "MESSAGE_WELCOME_1_2_3": "Hello {0}, welcome to the Myna Portal! Today is {1}. It is {2}.",
         "LANGUAGE": "Language",
         "ABOUT": "About",
         "INFO_ENTER_USERNAME": "Enter your username or email address.",
@@ -35,6 +39,10 @@ export class Locale {
         "BUTTON_GENERATE": "Generate",
         "KEY_INFO": "Store your key in a safe place. If lost, the data cannot be recovered.",
         "STAY_SIGNED_IN": "Stay signed in",
+        "BIRTHDAYS": "Birthdays",
+        "DAYS": "days",
+
+        "ERROR_WRONG_DATA_PROTECTION_KEY": "The key to decrypt the data is invalid or missing. Please check your key on the 'Data Protection' page.",
     }
 
     /**
@@ -124,7 +132,7 @@ export class Locale {
         }
         if (typeof error === "string") {
             return this.translate(error);
-        }   
+        }
         return this.translate("An unknown error occurred");
     }
 

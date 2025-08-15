@@ -63,3 +63,20 @@ export type UserInfoResult = {
   hasPasswordManagerFile: boolean,
   secKey: string | null
 }
+
+export type ContactsResult = {
+  nextId: number,
+  version: number,
+  items: ContactResult[]
+}
+
+export type ContactResult = {
+  id: number,
+  name: string,
+  address: string,
+  phone: string,
+  birthday: string,
+  email: string,
+  note: string,
+  daysUntilBirthday?: number | null
+}

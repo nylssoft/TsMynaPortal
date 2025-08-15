@@ -1,8 +1,9 @@
 import { ClickAction, LogoutAction, ShowAboutPageAction, ShowDataProtectionPageAction, ShowInboxPageAction, ShowLoginPageAction, ToggleLanguageAction } from "./Actions";
+import { ContactService } from "./ContactService";
 import { Controls } from "./Controls";
 import { PageContext, Page, PageType } from "./PageContext";
 import { Security } from "./Security";
-import { UserInfoResult } from "./TypeDefinitions";
+import { ContactResult, ContactsResult, ErrorResult, UserInfoResult } from "./TypeDefinitions";
 
 /**
  * Page implementation for the navigation bar.
@@ -159,7 +160,42 @@ export class InboxPage implements Page {
         Controls.createHeading(parent, 1, "text-center mb-4", pageContext.getLocale().translate("INBOX"));
         const welcomeMessage: HTMLDivElement = Controls.createDiv(parent, "alert alert-success");
         const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
-        welcomeMessage.textContent = pageContext.getLocale().translateWithArgs("MESSAGE_WELCOME_1", [userInfo.name]);
+        const now = new Date();
+        const longDate = now.toLocaleDateString(pageContext.getLocale().getLanguage(), { dateStyle: "long" });
+        const longTime = now.toLocaleTimeString(pageContext.getLocale().getLanguage(), { timeStyle: "long" });
+        welcomeMessage.textContent = pageContext.getLocale().translateWithArgs("MESSAGE_WELCOME_1_2_3", [userInfo.name, longDate, longTime]);
+        await this.renderBirthdaysAsync(pageContext, parent, alertDiv);
+    }
+
+    private async renderBirthdaysAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
+        try {
+            const token: string | null = pageContext.getAuthenticationClient().getToken();
+            if (token == null) throw new Error("ERROR_INVALID_TOKEN");
+            const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
+            const contacts: ContactsResult = await ContactService.getContactsAsync(token, userInfo);
+            const birthdays: ContactResult[] = [];
+            contacts.items.forEach((contact) => {
+                contact.daysUntilBirthday = ContactService.getDaysUntilBirthday(contact);
+                if (contact.daysUntilBirthday != null && contact.daysUntilBirthday <= 31) {
+                    birthdays.push(contact);
+                }
+            });
+            if (birthdays.length > 0) {
+                birthdays.sort((a, b) => a.daysUntilBirthday! - b.daysUntilBirthday!);
+                const contactsDiv: HTMLDivElement = Controls.createDiv(parent, "mt-4");
+                Controls.createHeading(contactsDiv, 2, "mb-3", pageContext.getLocale().translate("BIRTHDAYS"));
+                const ul: HTMLUListElement = Controls.createElement(contactsDiv, "ul", "list-group") as HTMLUListElement;
+                birthdays.forEach((contact) => {
+                    const li: HTMLLIElement = Controls.createElement(ul, "li", "list-group-item") as HTMLLIElement;
+                    li.textContent = `${contact.name}`;
+                    Controls.createSpan(li, "ms-2 bi bi-cake");
+                    Controls.createSpan(li, "ms-2", `${contact.daysUntilBirthday} ${pageContext.getLocale().translate("DAYS")}`);
+                });
+            }
+        }
+        catch (error: Error | unknown) {
+            Controls.createAlert(alertDiv, pageContext.getLocale().translateError(error));
+        }
     }
 }
 
