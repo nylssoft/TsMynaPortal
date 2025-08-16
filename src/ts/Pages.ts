@@ -1,9 +1,11 @@
+import { text } from "stream/consumers";
 import { ClickAction, LogoutAction, ShowAboutPageAction, ShowDataProtectionPageAction, ShowInboxPageAction, ShowLoginPageAction, ToggleLanguageAction } from "./Actions";
 import { ContactService } from "./ContactService";
 import { Controls } from "./Controls";
+import { NoteService } from "./NoteService";
 import { PageContext, Page, PageType } from "./PageContext";
 import { Security } from "./Security";
-import { ContactResult, ContactsResult, ErrorResult, UserInfoResult } from "./TypeDefinitions";
+import { ContactResult, ContactsResult, ErrorResult, NoteResult, UserInfoResult } from "./TypeDefinitions";
 
 /**
  * Page implementation for the navigation bar.
@@ -74,7 +76,7 @@ export class AboutPage implements Page {
 
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const aboutMessage: HTMLDivElement = Controls.createDiv(parent, "alert alert-success");
-        aboutMessage.textContent = `Version 0.0.1 ${pageContext.getLocale().translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.getLocale().translate("COPYRIGHT")}`;
+        aboutMessage.textContent = `Version 0.0.2 ${pageContext.getLocale().translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.getLocale().translate("COPYRIGHT")}`;
     }
 }
 
@@ -157,35 +159,41 @@ export class InboxPage implements Page {
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
         const welcomeMessage: HTMLDivElement = Controls.createDiv(parent, "alert alert-success");
         const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
-        const now = new Date();
-        const longDate = now.toLocaleDateString(pageContext.getLocale().getLanguage(), { dateStyle: "long" });
-        const longTime = now.toLocaleTimeString(pageContext.getLocale().getLanguage(), { timeStyle: "long" });
+        const now: Date = new Date();
+        const longDate: string = now.toLocaleDateString(pageContext.getLocale().getLanguage(), { dateStyle: "long" });
+        const longTime: string = now.toLocaleTimeString(pageContext.getLocale().getLanguage(), { timeStyle: "long" });
         welcomeMessage.textContent = pageContext.getLocale().translateWithArgs("MESSAGE_WELCOME_1_2_3", [userInfo.name, longDate, longTime]);
         const tabs: HTMLUListElement = Controls.createElement(parent, "ul", "nav nav-pills") as HTMLUListElement;
         const tabBirthdays: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
-        const aBirthdays: HTMLAnchorElement = Controls.createAnchor(tabBirthdays, "birthdays", pageContext.getLocale().translate("BIRTHDAYS"), "nav-link", this.currentTab === "BIRTHDAYS");
-        
-        aBirthdays.addEventListener("click", async (e: MouseEvent) => {
-            e.preventDefault();            
-            this.currentTab = "BIRTHDAYS";
-            await pageContext.renderAsync();
-        });
-        const tabContacts: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;        
-        const aContacts: HTMLAnchorElement = Controls.createAnchor(tabContacts, "contacts", pageContext.getLocale().translate("CONTACTS"), "nav-link", this.currentTab === "CONTACTS");
-        aContacts.addEventListener("click", async (e: MouseEvent) => {
-            e.preventDefault();
-            this.currentTab = "CONTACTS";
-            await pageContext.renderAsync();
-        });
+        const aBirthdays: HTMLAnchorElement = Controls.createAnchor(tabBirthdays, "birthdays", "", "nav-link", this.currentTab === "BIRTHDAYS");
+        Controls.createSpan(aBirthdays, "bi bi-cake");
+        aBirthdays.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, "BIRTHDAYS"));
+        const tabContacts: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
+        const aContacts: HTMLAnchorElement = Controls.createAnchor(tabContacts, "contacts", "", "nav-link", this.currentTab === "CONTACTS");
+        Controls.createSpan(aContacts, "bi bi-person");
+        aContacts.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, "CONTACTS"));
+        const tabNotes: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
+        const aNotes: HTMLAnchorElement = Controls.createAnchor(tabNotes, "notes", "", "nav-link", this.currentTab === "NOTES");
+        Controls.createSpan(aNotes, "bi bi-journal");
+        aNotes.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, "NOTES"));
         if (this.currentTab === "BIRTHDAYS") {
             await this.renderBirthdaysAsync(pageContext, parent, alertDiv);
         } else if (this.currentTab === "CONTACTS") {
             await this.renderContactsAsync(pageContext, parent, alertDiv);
+        } else if (this.currentTab === "NOTES") {
+            await this.renderNotesAsync(pageContext, parent, alertDiv);
         }
+    }
+
+    private async switchTabAsync(e: MouseEvent, pageContext: PageContext, tabName: string): Promise<void> {
+        e.preventDefault();
+        this.currentTab = tabName;
+        await pageContext.renderAsync();
     }
 
     private async renderBirthdaysAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
         try {
+            Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("BIRTHDAYS"));
             const token: string = pageContext.getAuthenticationClient().getToken()!;
             const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
             const contacts: ContactsResult = await ContactService.getContactsAsync(token, userInfo);
@@ -198,9 +206,7 @@ export class InboxPage implements Page {
             });
             if (birthdays.length > 0) {
                 birthdays.sort((a, b) => a.daysUntilBirthday! - b.daysUntilBirthday!);
-                const contactsDiv: HTMLDivElement = Controls.createDiv(parent, "");
-                // Controls.createHeading(contactsDiv, 5, "mb-3", pageContext.getLocale().translate("BIRTHDAYS"));
-                const listGroup: HTMLDivElement = Controls.createDiv(contactsDiv, "list-group");
+                const listGroup: HTMLDivElement = Controls.createDiv(parent, "list-group");
                 birthdays.forEach((contact) => {
                     const a: HTMLAnchorElement = Controls.createAnchor(listGroup, "contactdetails", "", "list-group-item");
                     Controls.createSpan(a, "bi bi-person");
@@ -229,13 +235,13 @@ export class InboxPage implements Page {
 
     private async renderContactsAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
         try {
+            Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("CONTACTS"));
             const token: string = pageContext.getAuthenticationClient().getToken()!;
             const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
             const contacts: ContactsResult = await ContactService.getContactsAsync(token, userInfo);
             if (contacts.items.length > 0) {
                 contacts.items.sort((a, b) => a.name.localeCompare(b.name));
-                const contactsDiv: HTMLDivElement = Controls.createDiv(parent, "");
-                const listGroup: HTMLDivElement = Controls.createDiv(contactsDiv, "list-group");
+                const listGroup: HTMLDivElement = Controls.createDiv(parent, "list-group");
                 contacts.items.forEach((contact) => {
                     const a: HTMLAnchorElement = Controls.createAnchor(listGroup, "contactdetails", "", "list-group-item");
                     Controls.createSpan(a, "bi bi-person");
@@ -244,6 +250,33 @@ export class InboxPage implements Page {
                         e.preventDefault();
                         pageContext.setPageType("CONTACT_DETAIL");
                         pageContext.setContact(contact);
+                        await pageContext.renderAsync();
+                    });
+                });
+            }
+        }
+        catch (error: Error | unknown) {
+            Controls.createAlert(alertDiv, pageContext.getLocale().translateError(error));
+        }
+    }
+
+    private async renderNotesAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
+        try {
+            Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("NOTES"));
+            const token: string = pageContext.getAuthenticationClient().getToken()!;
+            const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
+            const notes: NoteResult[] = await NoteService.getNotesAsync(token, userInfo);
+            if (notes.length > 0) {
+                notes.sort((a, b) => a.title.localeCompare(b.title));
+                const listGroup: HTMLDivElement = Controls.createDiv(parent, "list-group");
+                notes.forEach((note) => {
+                    const a: HTMLAnchorElement = Controls.createAnchor(listGroup, "notedetails", "", "list-group-item");
+                    Controls.createSpan(a, "bi bi-journal");
+                    Controls.createSpan(a, "ms-2", note.title);
+                    a.addEventListener("click", async (e: MouseEvent) => {
+                        e.preventDefault();
+                        pageContext.setPageType("NOTE_DETAIL");
+                        pageContext.setNote(note);
                         await pageContext.renderAsync();
                     });
                 });
@@ -308,6 +341,47 @@ export class ContactDetailPage implements Page {
 }
 
 /**
+ * Page implementation for the Note Detail page.
+ * It displays detailed information about a specific note, including title, content, and last modified date.
+ * It also provides a back button to return to the Inbox page.
+ */
+export class NoteDetailPage implements Page {
+
+    public getPageType(): PageType {
+        return "NOTE_DETAIL";
+    }
+
+    public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
+        const token: string = pageContext.getAuthenticationClient().getToken()!;
+        const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
+        parent = Controls.createDiv(parent, "card p-4 shadow-sm bg-light");
+        parent.style.maxWidth = "600px";
+        const note: NoteResult = await NoteService.getNoteAsync(token, userInfo, pageContext.getNote()!.id);
+        const date: Date = new Date(note.lastModifiedUtc);
+        const longDate: string = date.toLocaleDateString(pageContext.getLocale().getLanguage(), { dateStyle: "long" });
+        const longTime: string = date.toLocaleTimeString(pageContext.getLocale().getLanguage(), { timeStyle: "long" });
+        const cardBody: HTMLDivElement = Controls.createDiv(parent, "card-body text-dark");
+        Controls.createHeading(cardBody, 2, "card-title mb-3", note.title);
+        const cardTextDate: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
+        Controls.createSpan(cardTextDate, "bi bi-calendar");
+        Controls.createSpan(cardTextDate, "ms-2", `${longDate} ${longTime}`);
+        if (note.content!.length > 0) {
+            const divFormFloating: HTMLDivElement = Controls.createDiv(cardBody, "form-floating mb-4");
+            const textarea: HTMLTextAreaElement = Controls.createElement(divFormFloating, "textarea", "form-control text-dark bg-light", note.content!) as HTMLTextAreaElement;
+            textarea.style.height = "400px";
+            textarea.setAttribute("readonly", "true");
+        }
+        const backButton: HTMLButtonElement = Controls.createButton(cardBody, "button", "back-button-id", pageContext.getLocale().translate("BUTTON_BACK"), "btn btn-primary");
+        backButton.addEventListener("click", async (e: MouseEvent) => {
+            e.preventDefault();
+            pageContext.setPageType("INBOX");
+            pageContext.setNote(null);
+            await pageContext.renderAsync();
+        });
+    }
+}
+
+/**
  * Page implementation for the Login with Pass2 page.
  */
 export class LoginPass2Page implements Page {
@@ -322,7 +396,6 @@ export class LoginPass2Page implements Page {
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
         const formElement: HTMLFormElement = Controls.createForm(parent, "align-items-center");
         const divRows: HTMLDivElement = Controls.createDiv(formElement, "row g-3 align-items-center");
-
         const divPass2: HTMLDivElement = Controls.createDiv(divRows, "mb-3");
         Controls.createLabel(divPass2, "pass2-id", "form-label", pageContext.getLocale().translate("LABEL_SEC_KEY"));
         const inputPass2: HTMLInputElement = Controls.createInput(divPass2, "text", "pass2-id", "form-control");
@@ -330,7 +403,6 @@ export class LoginPass2Page implements Page {
         inputPass2.focus();
         const pass2HelpDiv: HTMLDivElement = Controls.createDiv(divPass2, "form-text", pageContext.getLocale().translate("INFO_ENTER_SEC_KEY"));
         pass2HelpDiv.id = "pass2help-id";
-
         const buttonLogin: HTMLButtonElement = Controls.createButton(divRows, "submit", "login-button-id", pageContext.getLocale().translate("BUTTON_LOGIN"), "btn btn-primary");
         buttonLogin.addEventListener("click", async (e: MouseEvent) => this.onClickLoginWithPass2Async(e, pageContext, inputPass2, alertDiv));
     }
@@ -372,7 +444,6 @@ export class LoginPinPage implements Page {
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
         const formElement: HTMLFormElement = Controls.createForm(parent, "align-items-center");
         const divRows: HTMLDivElement = Controls.createDiv(formElement, "row g-3 align-items-center");
-
         const divPin: HTMLDivElement = Controls.createDiv(divRows, "mb-3");
         Controls.createLabel(divPin, "pin-id", "form-label", pageContext.getLocale().translate("LABEL_PIN"));
         const inputPin: HTMLInputElement = Controls.createInput(divPin, "password", "pin-id", "form-control");
@@ -380,7 +451,6 @@ export class LoginPinPage implements Page {
         inputPin.focus();
         const pinHelpDiv: HTMLDivElement = Controls.createDiv(divPin, "form-text", pageContext.getLocale().translate("INFO_ENTER_PIN"));
         pinHelpDiv.id = "pinhelp-id";
-
         const buttonLogin: HTMLButtonElement = Controls.createButton(divRows, "submit", "login-button-id", pageContext.getLocale().translate("BUTTON_LOGIN"), "btn btn-primary");
         buttonLogin.addEventListener("click", async (e: MouseEvent) => this.onClickLoginWithPinAsync(e, pageContext, inputPin, alertDiv));
     }
@@ -429,18 +499,15 @@ export class LoginUsernamePasswordPage implements Page {
         inputUsername.focus();
         const usernameHelpDiv: HTMLDivElement = Controls.createDiv(divUsername, "form-text", pageContext.getLocale().translate("INFO_ENTER_USERNAME"));
         usernameHelpDiv.id = "usernamehelp-id";
-
         const divPassword: HTMLDivElement = Controls.createDiv(divRows, "mb-3");
         Controls.createLabel(divPassword, "password-id", "form-label", pageContext.getLocale().translate("LABEL_PWD"));
         const inputPassword: HTMLInputElement = Controls.createInput(divPassword, "password", "password-id", "form-control");
         inputPassword.setAttribute("aria-describedby", "passwordhelp-id");
         const passwordHelpDiv: HTMLDivElement = Controls.createDiv(divPassword, "form-text", pageContext.getLocale().translate("INFO_ENTER_PASSWORD"));
         passwordHelpDiv.id = "passwordhelp-id";
-
         const divSaySignedIn: HTMLDivElement = Controls.createDiv(divRows, "mb-3 form-check");
         const inputStaySignedIn: HTMLInputElement = Controls.createInput(divSaySignedIn, "checkbox", "staysignedin-id", "form-check-input");
         Controls.createLabel(divSaySignedIn, "staysignedin-id", "form-check-label", pageContext.getLocale().translate("STAY_SIGNED_IN"));
-
         const buttonLogin: HTMLButtonElement = Controls.createButton(divRows, "submit", "login-button-id", pageContext.getLocale().translate("BUTTON_LOGIN"), "btn btn-primary");
         buttonLogin.addEventListener("click", async (e: MouseEvent) => this.onClickLoginWithUsernameAndPasswordAsync(e, pageContext, inputUsername, inputPassword, inputStaySignedIn, alertDiv));
     }

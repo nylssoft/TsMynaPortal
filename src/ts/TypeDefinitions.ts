@@ -64,12 +64,22 @@ export type UserInfoResult = {
   secKey: string | null
 }
 
+/**
+ * ContactsResult represents the result of fetching contacts.
+ * It includes properties such as nextId, version, and items.
+ * This type is used to manage the contacts data in the application.
+ */
 export type ContactsResult = {
   nextId: number,
   version: number,
   items: ContactResult[]
 }
 
+/**
+ * ContactResult represents a single contact's information.
+ * It includes properties such as id, name, address, phone, birthday, email, note, and optionally daysUntilBirthday.
+ * This type is used to manage individual contact data in the application.
+ */
 export type ContactResult = {
   id: number,
   name: string,
@@ -78,5 +88,17 @@ export type ContactResult = {
   birthday: string,
   email: string,
   note: string,
-  daysUntilBirthday?: number | null
+  daysUntilBirthday: number | null
+}
+
+/**
+ * NoteResult represents a single note's information.
+ * It includes properties such as id, title, lastModifiedUtc, and content.
+ * This type is used to manage individual note data in the application.
+ */
+export type NoteResult = {
+  id: number,
+  title: string,
+  lastModifiedUtc: string,
+  content: string | null
 }

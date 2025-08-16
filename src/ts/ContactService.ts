@@ -1,3 +1,4 @@
+import { FetchHelper } from "./FetchHelper";
 import { Security } from "./Security";
 import { ContactResult, ContactsResult, ErrorResult, UserInfoResult } from "./TypeDefinitions";
 
@@ -29,7 +30,7 @@ export class ContactService {
         if (encryptionKey == null || encryptionKey.length === 0) {
             throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
         }
-        const resp: Response = await this.fetchAsync('/api/contacts', { headers: { 'token': token } });
+        const resp: Response = await FetchHelper.fetchAsync('/api/contacts', { headers: { 'token': token } });
         const json: string | null = await resp.json() as string | null;
         if (json == null) {
             return { nextId: 1, version: 1, items: [] };
@@ -67,16 +68,6 @@ export class ContactService {
         const msPerDay: number = 1000 * 60 * 60 * 24;
         const diffMs: number = Math.abs(birthday.getTime() - refDate.getTime());
         return Math.floor(diffMs / msPerDay);
-    }
-
-    private static async fetchAsync(url: string, options?: RequestInit): Promise<Response> {
-        const resp = await window.fetch(url, options);
-        if (!resp.ok) {
-            const errorResult: ErrorResult | null = await resp.json() as ErrorResult;
-            const errorMessage: string | null = errorResult?.title;
-            throw new Error(errorMessage || "ERROR_UNEXPECTED");
-        }
-        return resp;
     }
 
     private static parseDayMonth(dateStr: string): DayAndMonth | null {

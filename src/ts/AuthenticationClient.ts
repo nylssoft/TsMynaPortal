@@ -1,3 +1,4 @@
+import { FetchHelper } from "./FetchHelper";
 import { Security } from "./Security";
 import { AuthResult, ErrorResult, ClientInfo, UserInfoResult } from "./TypeDefinitions";
 
@@ -121,7 +122,7 @@ export class AuthenticationClient {
                 if (user != null) {
                     window.sessionStorage.removeItem(Security.getSessionStorageKey(user));
                 }
-                await this.fetchAsync("/api/pwdman/logout", { headers: { "token": token } });
+                await FetchHelper.fetchAsync("/api/pwdman/logout", { headers: { "token": token } });
             } catch (error: Error | unknown) {
                 console.error("Logout failed:", error);
                 window.sessionStorage.clear();
@@ -150,7 +151,7 @@ export class AuthenticationClient {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ "Username": username, "Password": password, "ClientUUID": clientInfo.uuid, "ClientName": clientInfo.name })
         };
-        const resp: Response = await this.fetchAsync(`/api/pwdman/auth?locale=${language}`, requestInit);
+        const resp: Response = await FetchHelper.fetchAsync(`/api/pwdman/auth?locale=${language}`, requestInit);
         this.authResult = await resp.json() as AuthResult;
         this.lltoken = this.IsUseLongLivedToken() ? this.authResult.longLivedToken : null;
         window.sessionStorage.setItem("authresult", JSON.stringify(this.authResult));
@@ -180,7 +181,7 @@ export class AuthenticationClient {
             body: JSON.stringify(pass2)
         };
         try {
-            const resp: Response = await this.fetchAsync("/api/pwdman/auth2", requestInit);
+            const resp: Response = await FetchHelper.fetchAsync("/api/pwdman/auth2", requestInit);
             this.authResult = await resp.json() as AuthResult;
             this.authResult.requiresPass2 = false; // Reset pass2 requirement after successful login
             this.lltoken = this.IsUseLongLivedToken() ? this.authResult.longLivedToken : null;
@@ -215,7 +216,7 @@ export class AuthenticationClient {
             body: JSON.stringify(pin)
         };
         try {
-            const resp: Response = await this.fetchAsync("/api/pwdman/auth/pin", requestInit);
+            const resp: Response = await FetchHelper.fetchAsync("/api/pwdman/auth/pin", requestInit);
             this.authResult = await resp.json() as AuthResult;
             this.authResult.requiresPin = false; // Reset PIN requirement after successful login
             this.lltoken = this.authResult.longLivedToken;
@@ -240,7 +241,7 @@ export class AuthenticationClient {
         if (this.getToken() == null && lltoken != null) {
             try {
                 const requestInit: RequestInit = { headers: { "token": lltoken, "uuid": this.getClientInfo().uuid } };
-                const resp: Response = await this.fetchAsync("/api/pwdman/auth/lltoken", requestInit);
+                const resp: Response = await FetchHelper.fetchAsync("/api/pwdman/auth/lltoken", requestInit);
                 this.authResult = await resp.json() as AuthResult;
                 if (this.authResult.longLivedToken != null) {
                     this.lltoken = this.authResult.longLivedToken;
@@ -265,19 +266,10 @@ export class AuthenticationClient {
         if (this.userInfo == null) {
             const token: string | null = this.getToken();
             if (token == null) throw new Error("ERROR_INVALID_PARAMETERS");
-            const resp = await this.fetchAsync('/api/pwdman/user', { headers: { 'token': token } });
+            const resp = await FetchHelper.fetchAsync('/api/pwdman/user', { headers: { 'token': token } });
             this.userInfo = await resp.json() as UserInfoResult;
         }
         return this.userInfo;
     }
-
-    private async fetchAsync(url: string, options?: RequestInit): Promise<Response> {
-        const resp = await window.fetch(url, options);
-        if (!resp.ok) {
-            const errorResult: ErrorResult | null = await resp.json() as ErrorResult;
-            const errorMessage: string | null = errorResult?.title;
-            throw new Error(errorMessage || "ERROR_UNEXPECTED");
-        }
-        return resp;
-    }
 }
+ 

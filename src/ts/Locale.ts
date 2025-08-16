@@ -25,6 +25,7 @@ export class Locale {
         "TODAY": "Heute",
         "TOMORROW": "Morgen",
         "CONTACTS": "Kontakte",
+        "NOTES": "Notizen",
 
         "ERROR_WRONG_DATA_PROTECTION_KEY": "Der Schlüssel zum Entschlüsseln der Daten ist ungültig oder fehlt. Bitte überprüfe deinen Schlüssel auf der Seite 'Datenschutz'.",
     }
@@ -47,6 +48,7 @@ export class Locale {
         "TODAY": "Today",
         "TOMORROW": "Tomorrow",
         "CONTACTS": "Contacts",
+        "NOTES": "Notes",
         
         "ERROR_WRONG_DATA_PROTECTION_KEY": "The key to decrypt the data is invalid or missing. Please check your key on the 'Data Protection' page.",
     }

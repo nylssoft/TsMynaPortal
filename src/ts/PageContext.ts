@@ -1,13 +1,13 @@
 import { Locale } from "./Locale";
 import { AuthenticationClient } from "./AuthenticationClient";
 import { Controls } from "./Controls";
-import { ContactResult } from "./TypeDefinitions";
+import { ContactResult, NoteResult } from "./TypeDefinitions";
 
 /**
  * Type representing the different pages in the application.
  */
 export type PageType = "LOGIN_USERNAME_PASSWORD" | "LOGIN_PIN" | "LOGIN_PASS2" | "ABOUT" | "INBOX"
-    | "DATA_PROTECTION" | "NAVIGATION_BAR" | "CONTACT_DETAIL";
+    | "DATA_PROTECTION" | "NAVIGATION_BAR" | "CONTACT_DETAIL" | "NOTE_DETAIL";
 
 
 /**
@@ -37,6 +37,7 @@ export class PageContext {
     private locale: Locale = new Locale();
     private authenticationClient: AuthenticationClient = new AuthenticationClient();
     private contact: ContactResult | null = null;
+    private note: NoteResult | null = null;
     private pageType: PageType = "LOGIN_USERNAME_PASSWORD";
     private pageRegistrations = new Map<PageType, Page>();
 
@@ -102,7 +103,6 @@ export class PageContext {
 
     /**
      * Retrieves the currently set contact.
-     * 
      * If no contact is set, it returns null.
      * 
      * @returns the currently set contact or null if no contact is set
@@ -113,10 +113,31 @@ export class PageContext {
 
     /**
      * Sets the contact to be used in the application.
+     * If the contact is null, it clears the current contact.
      * 
      * @param contact the contact to be set, or null to clear the current contact
      */
     public setContact(contact: ContactResult | null) {
         this.contact = contact;
+    }
+
+    /**
+     * Retrieves the currently set note.
+     * If no note is set, it returns null.
+     * 
+     * @returns the currently set note or null if no note is set
+     */
+    public getNote(): NoteResult | null {
+        return this.note;
+    }
+
+    /**
+     * Sets the note to be used in the application.
+     * If the note is null, it clears the current note.
+     * 
+     * @param note the note to be set, or null to clear the current note
+     */
+    public setNote(note: NoteResult | null) {
+        this.note = note;
     }
 }
