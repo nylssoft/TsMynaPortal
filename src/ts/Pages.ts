@@ -73,9 +73,8 @@ export class AboutPage implements Page {
     }
 
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
-        parent = Controls.createDiv(parent, "container py-4 px-3 mx-auto");
-        const alertDiv: HTMLDivElement = Controls.createDiv(parent);
-        Controls.createHeading(parent, 1, "text-center mb-4", pageContext.getLocale().translate("ABOUT"));
+        parent = Controls.createDiv(parent, "card p-4 shadow-sm");
+        parent.style.maxWidth = "600px";
         const aboutMessage: HTMLDivElement = Controls.createDiv(parent, "alert alert-success");
         aboutMessage.textContent = `Version 0.0.1 ${pageContext.getLocale().translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.getLocale().translate("COPYRIGHT")}`;
     }
@@ -95,7 +94,6 @@ export class DataProtectionPage implements Page {
         const encKey: string | null = await Security.getEncryptionKeyAsync(user);
         parent = Controls.createDiv(parent, "card p-4 shadow-sm");
         parent.style.maxWidth = "400px";
-        Controls.createHeading(parent, 1, "text-center mb-4", pageContext.getLocale().translate("ENCRYPTION_KEY"));
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
         const infoDiv: HTMLDivElement = Controls.createDiv(parent, "alert alert-warning", pageContext.getLocale().translate("KEY_INFO"));
         infoDiv.setAttribute("role", "alert");
@@ -151,26 +149,47 @@ export class DataProtectionPage implements Page {
  */
 export class InboxPage implements Page {
 
+    private currentTab: string = "BIRTHDAYS";
+
     public getPageType(): PageType {
         return "INBOX";
     }
 
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
+        parent = Controls.createDiv(parent, "card p-4 shadow-sm");
+        parent.style.maxWidth = "600px";
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
-        Controls.createHeading(parent, 1, "text-center mb-4", pageContext.getLocale().translate("INBOX"));
         const welcomeMessage: HTMLDivElement = Controls.createDiv(parent, "alert alert-success");
         const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
         const now = new Date();
         const longDate = now.toLocaleDateString(pageContext.getLocale().getLanguage(), { dateStyle: "long" });
         const longTime = now.toLocaleTimeString(pageContext.getLocale().getLanguage(), { timeStyle: "long" });
         welcomeMessage.textContent = pageContext.getLocale().translateWithArgs("MESSAGE_WELCOME_1_2_3", [userInfo.name, longDate, longTime]);
-        await this.renderBirthdaysAsync(pageContext, parent, alertDiv);
+        const tabs: HTMLUListElement = Controls.createElement(parent, "ul", "nav nav-pills") as HTMLUListElement;
+        const tabBirthdays: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
+        const aBirthdays: HTMLAnchorElement = Controls.createAnchor(tabBirthdays, "#", pageContext.getLocale().translate("BIRTHDAYS"), "nav-link", this.currentTab === "BIRTHDAYS");
+        aBirthdays.addEventListener("click", async (e: MouseEvent) => {
+            e.preventDefault();            
+            this.currentTab = "BIRTHDAYS";
+            await pageContext.renderAsync();
+        });
+        const tabContacts: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;        
+        const aContacts: HTMLAnchorElement = Controls.createAnchor(tabContacts, "#", pageContext.getLocale().translate("CONTACTS"), "nav-link", this.currentTab === "CONTACTS");
+        aContacts.addEventListener("click", async (e: MouseEvent) => {
+            e.preventDefault();
+            this.currentTab = "CONTACTS";
+            await pageContext.renderAsync();
+        });
+        if (this.currentTab === "BIRTHDAYS") {
+            await this.renderBirthdaysAsync(pageContext, parent, alertDiv);
+        } else if (this.currentTab === "CONTACTS") {
+            await this.renderContactsAsync(pageContext, parent, alertDiv);
+        }
     }
 
     private async renderBirthdaysAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
         try {
-            const token: string | null = pageContext.getAuthenticationClient().getToken();
-            if (token == null) throw new Error("ERROR_INVALID_TOKEN");
+            const token: string = pageContext.getAuthenticationClient().getToken()!;
             const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
             const contacts: ContactsResult = await ContactService.getContactsAsync(token, userInfo);
             const birthdays: ContactResult[] = [];
@@ -182,20 +201,112 @@ export class InboxPage implements Page {
             });
             if (birthdays.length > 0) {
                 birthdays.sort((a, b) => a.daysUntilBirthday! - b.daysUntilBirthday!);
-                const contactsDiv: HTMLDivElement = Controls.createDiv(parent, "mt-4");
-                Controls.createHeading(contactsDiv, 2, "mb-3", pageContext.getLocale().translate("BIRTHDAYS"));
-                const ul: HTMLUListElement = Controls.createElement(contactsDiv, "ul", "list-group") as HTMLUListElement;
+                const contactsDiv: HTMLDivElement = Controls.createDiv(parent, "");
+                // Controls.createHeading(contactsDiv, 5, "mb-3", pageContext.getLocale().translate("BIRTHDAYS"));
+                const listGroup: HTMLDivElement = Controls.createDiv(contactsDiv, "list-group");
                 birthdays.forEach((contact) => {
-                    const li: HTMLLIElement = Controls.createElement(ul, "li", "list-group-item") as HTMLLIElement;
-                    li.textContent = `${contact.name}`;
-                    Controls.createSpan(li, "ms-2 bi bi-cake");
-                    Controls.createSpan(li, "ms-2", `${contact.daysUntilBirthday} ${pageContext.getLocale().translate("DAYS")}`);
+                    const a: HTMLAnchorElement = Controls.createAnchor(listGroup, "#", "", "list-group-item");
+                    Controls.createSpan(a, "bi bi-person");
+                    Controls.createSpan(a, "ms-2", contact.name);
+                    Controls.createSpan(a, "ms-2 bi bi-cake");
+                    if (contact.daysUntilBirthday == 0) {
+                        Controls.createSpan(a, "ms-2", pageContext.getLocale().translate("TODAY"));
+                    } else if (contact.daysUntilBirthday == 1) {
+                        Controls.createSpan(a, "ms-2", pageContext.getLocale().translate("TOMORROW"));
+                    } else {
+                        Controls.createSpan(a, "ms-2", `${contact.daysUntilBirthday} ${pageContext.getLocale().translate("DAYS")}`);
+                    }
+                    a.addEventListener("click", async (e: MouseEvent) => {
+                        e.preventDefault();
+                        pageContext.setPageType("CONTACT_DETAIL");
+                        pageContext.setContact(contact);
+                        await pageContext.renderAsync();
+                    });
                 });
             }
         }
         catch (error: Error | unknown) {
             Controls.createAlert(alertDiv, pageContext.getLocale().translateError(error));
         }
+    }
+
+    private async renderContactsAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
+        try {
+            const token: string = pageContext.getAuthenticationClient().getToken()!;
+            const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
+            const contacts: ContactsResult = await ContactService.getContactsAsync(token, userInfo);
+            if (contacts.items.length > 0) {
+                contacts.items.sort((a, b) => a.name.localeCompare(b.name));
+                const contactsDiv: HTMLDivElement = Controls.createDiv(parent, "");
+                const listGroup: HTMLDivElement = Controls.createDiv(contactsDiv, "list-group");
+                contacts.items.forEach((contact) => {
+                    const a: HTMLAnchorElement = Controls.createAnchor(listGroup, "#", "", "list-group-item");
+                    Controls.createSpan(a, "bi bi-person");
+                    Controls.createSpan(a, "ms-2", contact.name);
+                    a.addEventListener("click", async (e: MouseEvent) => {
+                        e.preventDefault();
+                        pageContext.setPageType("CONTACT_DETAIL");
+                        pageContext.setContact(contact);
+                        await pageContext.renderAsync();
+                    });
+                });
+            }
+        }
+        catch (error: Error | unknown) {
+            Controls.createAlert(alertDiv, pageContext.getLocale().translateError(error));
+        }
+    }
+}
+
+/**
+ * Page implementation for the Contact Detail page.
+ * It displays detailed information about a specific contact, including name, phone, address, email, birthday, and notes.
+ * It also provides a back button to return to the Inbox page.
+ */
+export class ContactDetailPage implements Page {
+
+    public getPageType(): PageType {
+        return "CONTACT_DETAIL";
+    }
+
+    public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
+        parent = Controls.createDiv(parent, "card p-4 shadow-sm bg-light");
+        parent.style.maxWidth = "400px";
+        const contact: ContactResult = pageContext.getContact()!;
+        const cardBody: HTMLDivElement = Controls.createDiv(parent, "card-body text-dark");
+        Controls.createHeading(cardBody, 2, "card-title mb-3", contact.name);
+        if (contact.phone.length > 0) {
+            const cardTextPhone: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
+            Controls.createSpan(cardTextPhone, "bi bi-telephone");
+            Controls.createSpan(cardTextPhone, "ms-2", contact.phone);
+        }
+        if (contact.address.length > 0) {
+            const cardTextAddress: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
+            Controls.createSpan(cardTextAddress, "bi bi-geo-alt");
+            Controls.createSpan(cardTextAddress, "ms-2", contact.address);
+        }
+        if (contact.email.length > 0) {
+            const cardTextEmail: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
+            Controls.createSpan(cardTextEmail, "bi bi-envelope");
+            Controls.createSpan(cardTextEmail, "ms-2", contact.email);
+        }
+        if (contact.birthday.length > 0) {
+            const cardTextBirthday: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
+            Controls.createSpan(cardTextBirthday, "bi bi-cake");
+            Controls.createSpan(cardTextBirthday, "ms-2", contact.birthday);
+        }
+        if (contact.note.length > 0) {
+            const cardTextNotes: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
+            Controls.createSpan(cardTextNotes, "bi bi-journal");
+            Controls.createSpan(cardTextNotes, "ms-2", contact.note);
+        }
+        const backButton: HTMLButtonElement = Controls.createButton(cardBody, "button", "back-button-id", pageContext.getLocale().translate("BUTTON_BACK"), "btn btn-primary");
+        backButton.addEventListener("click", async (e: MouseEvent) => {
+            e.preventDefault();
+            pageContext.setPageType("INBOX");
+            pageContext.setContact(null);
+            await pageContext.renderAsync();
+        });
     }
 }
 
@@ -212,7 +323,6 @@ export class LoginPass2Page implements Page {
         parent = Controls.createDiv(parent, "card p-4 shadow-sm");
         parent.style.maxWidth = "400px";
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
-        Controls.createHeading(parent, 1, "text-center mb-4", pageContext.getLocale().translate("HEADER_LOGIN"));
         const formElement: HTMLFormElement = Controls.createForm(parent, "align-items-center");
         const divRows: HTMLDivElement = Controls.createDiv(formElement, "row g-3 align-items-center");
 
@@ -262,7 +372,6 @@ export class LoginPinPage implements Page {
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         parent = Controls.createDiv(parent, "card p-4 shadow-sm");
         parent.style.maxWidth = "400px";
-        Controls.createHeading(parent, 1, "text-center mb-4", pageContext.getLocale().translate("HEADER_LOGIN"));
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
         const formElement: HTMLFormElement = Controls.createForm(parent, "align-items-center");
         const divRows: HTMLDivElement = Controls.createDiv(formElement, "row g-3 align-items-center");
@@ -314,7 +423,6 @@ export class LoginUsernamePasswordPage implements Page {
         parent = Controls.createDiv(parent, "card p-4 shadow-sm");
         parent.style.maxWidth = "400px";
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
-        Controls.createHeading(parent, 1, "text-center mb-4", pageContext.getLocale().translate("HEADER_LOGIN"));
         const formElement: HTMLFormElement = Controls.createForm(parent, "align-items-center");
         const divRows: HTMLDivElement = Controls.createDiv(formElement, "row g-3 align-items-center");
         const divUsername: HTMLDivElement = Controls.createDiv(divRows, "mb-3");

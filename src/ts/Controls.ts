@@ -166,6 +166,41 @@ export class Controls {
     }
 
     /**
+     * Creates an anchor element with the specified hyperlink reference, text content, class, and active state.
+     * The anchor is appended to the specified parent element.
+     * 
+     * @param parent parent element to append the new anchor to
+     * @param href hyperlink reference for the anchor
+     * @param txt text content to set for the anchor
+     * @param classname class name to assign to the anchor
+     * @param active flag indicating if the anchor is active
+     * @returns HTMLAnchorElement created with the specified href, text content, class, and active state
+     */
+    public static createAnchor(parent: HTMLElement, href: string, txt: string, classname?: string, active?: boolean): HTMLAnchorElement {
+        const a: HTMLAnchorElement = Controls.createElement(parent, "a", classname) as HTMLAnchorElement;
+        a.href = href;
+        a.textContent = txt;
+        if (active) {
+            a.classList.add("active");
+            a.setAttribute("aria-current", "true");
+        }
+        return a;
+    }
+
+    /**
+     * Creates a paragraph element with the specified class and text content.
+     * The paragraph is appended to the specified parent element.
+     * 
+     * @param parent parent element to append the new paragraph to
+     * @param classname class name to assign to the paragraph
+     * @param txt text content to set for the paragraph
+     * @returns HTMLParagraphElement created with the specified class and text content
+     */
+    public static createParagraph(parent: HTMLElement, classname?: string, txt?: string): HTMLParagraphElement {
+        return Controls.createElement(parent, "p", classname, txt) as HTMLParagraphElement;
+    }
+
+    /**
      * Removes all child elements from the specified parent element.
      * This is useful for clearing the contents of an element before adding new content.
      * 

@@ -1,11 +1,13 @@
 import { Locale } from "./Locale";
 import { AuthenticationClient } from "./AuthenticationClient";
 import { Controls } from "./Controls";
+import { ContactResult } from "./TypeDefinitions";
 
 /**
  * Type representing the different pages in the application.
  */
-export type PageType = "LOGIN_USERNAME_PASSWORD" | "LOGIN_PIN" | "LOGIN_PASS2" | "ABOUT" | "INBOX" | "DATA_PROTECTION" | "NAVIGATION_BAR";
+export type PageType = "LOGIN_USERNAME_PASSWORD" | "LOGIN_PIN" | "LOGIN_PASS2" | "ABOUT" | "INBOX"
+    | "DATA_PROTECTION" | "NAVIGATION_BAR" | "CONTACT_DETAIL";
 
 
 /**
@@ -34,6 +36,7 @@ export interface Page {
 export class PageContext {
     private locale: Locale = new Locale();
     private authenticationClient: AuthenticationClient = new AuthenticationClient();
+    private contact: ContactResult | null = null;
     private pageType: PageType = "LOGIN_USERNAME_PASSWORD";
     private pageRegistrations = new Map<PageType, Page>();
 
@@ -56,9 +59,8 @@ export class PageContext {
         if (main != null) {
             Controls.removeAllChildren(main);
             this.pageRegistrations.get("NAVIGATION_BAR")?.renderAsync(main, this);
-            const parent: HTMLDivElement = Controls.createDiv(main, "container py-4 px-3 mx-auto");
-            const page: Page | undefined = this.pageRegistrations.get(this.pageType);
-            await page?.renderAsync(parent, this);
+            const content: HTMLDivElement = Controls.createDiv(main, "container py-4 px-3 mx-auto");
+            await this.pageRegistrations.get(this.pageType)?.renderAsync(content, this);
         }
     }
 
@@ -96,5 +98,25 @@ export class PageContext {
      */
     public setPageType(pageType: PageType) {
         this.pageType = pageType;
+    }
+
+    /**
+     * Retrieves the currently set contact.
+     * 
+     * If no contact is set, it returns null.
+     * 
+     * @returns the currently set contact or null if no contact is set
+     */
+    public getContact(): ContactResult | null {
+        return this.contact;
+    }
+
+    /**
+     * Sets the contact to be used in the application.
+     * 
+     * @param contact the contact to be set, or null to clear the current contact
+     */
+    public setContact(contact: ContactResult | null) {
+        this.contact = contact;
     }
 }

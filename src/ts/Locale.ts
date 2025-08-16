@@ -22,6 +22,9 @@ export class Locale {
         "STAY_SIGNED_IN": "Angemeldet bleiben",
         "BIRTHDAYS": "Geburtstage",
         "DAYS": "Tage",
+        "TODAY": "Heute",
+        "TOMORROW": "Morgen",
+        "CONTACTS": "Kontakte",
 
         "ERROR_WRONG_DATA_PROTECTION_KEY": "Der Schlüssel zum Entschlüsseln der Daten ist ungültig oder fehlt. Bitte überprüfe deinen Schlüssel auf der Seite 'Datenschutz'.",
     }
@@ -41,7 +44,10 @@ export class Locale {
         "STAY_SIGNED_IN": "Stay signed in",
         "BIRTHDAYS": "Birthdays",
         "DAYS": "days",
-
+        "TODAY": "Today",
+        "TOMORROW": "Tomorrow",
+        "CONTACTS": "Contacts",
+        
         "ERROR_WRONG_DATA_PROTECTION_KEY": "The key to decrypt the data is invalid or missing. Please check your key on the 'Data Protection' page.",
     }
 
