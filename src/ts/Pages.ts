@@ -73,8 +73,6 @@ export class AboutPage implements Page {
     }
 
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
-        parent = Controls.createDiv(parent, "card p-4 shadow-sm");
-        parent.style.maxWidth = "600px";
         const aboutMessage: HTMLDivElement = Controls.createDiv(parent, "alert alert-success");
         aboutMessage.textContent = `Version 0.0.1 ${pageContext.getLocale().translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.getLocale().translate("COPYRIGHT")}`;
     }
@@ -156,8 +154,6 @@ export class InboxPage implements Page {
     }
 
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
-        parent = Controls.createDiv(parent, "card p-4 shadow-sm");
-        parent.style.maxWidth = "600px";
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
         const welcomeMessage: HTMLDivElement = Controls.createDiv(parent, "alert alert-success");
         const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
@@ -167,14 +163,15 @@ export class InboxPage implements Page {
         welcomeMessage.textContent = pageContext.getLocale().translateWithArgs("MESSAGE_WELCOME_1_2_3", [userInfo.name, longDate, longTime]);
         const tabs: HTMLUListElement = Controls.createElement(parent, "ul", "nav nav-pills") as HTMLUListElement;
         const tabBirthdays: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
-        const aBirthdays: HTMLAnchorElement = Controls.createAnchor(tabBirthdays, "#", pageContext.getLocale().translate("BIRTHDAYS"), "nav-link", this.currentTab === "BIRTHDAYS");
+        const aBirthdays: HTMLAnchorElement = Controls.createAnchor(tabBirthdays, "birthdays", pageContext.getLocale().translate("BIRTHDAYS"), "nav-link", this.currentTab === "BIRTHDAYS");
+        
         aBirthdays.addEventListener("click", async (e: MouseEvent) => {
             e.preventDefault();            
             this.currentTab = "BIRTHDAYS";
             await pageContext.renderAsync();
         });
         const tabContacts: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;        
-        const aContacts: HTMLAnchorElement = Controls.createAnchor(tabContacts, "#", pageContext.getLocale().translate("CONTACTS"), "nav-link", this.currentTab === "CONTACTS");
+        const aContacts: HTMLAnchorElement = Controls.createAnchor(tabContacts, "contacts", pageContext.getLocale().translate("CONTACTS"), "nav-link", this.currentTab === "CONTACTS");
         aContacts.addEventListener("click", async (e: MouseEvent) => {
             e.preventDefault();
             this.currentTab = "CONTACTS";
@@ -205,7 +202,7 @@ export class InboxPage implements Page {
                 // Controls.createHeading(contactsDiv, 5, "mb-3", pageContext.getLocale().translate("BIRTHDAYS"));
                 const listGroup: HTMLDivElement = Controls.createDiv(contactsDiv, "list-group");
                 birthdays.forEach((contact) => {
-                    const a: HTMLAnchorElement = Controls.createAnchor(listGroup, "#", "", "list-group-item");
+                    const a: HTMLAnchorElement = Controls.createAnchor(listGroup, "contactdetails", "", "list-group-item");
                     Controls.createSpan(a, "bi bi-person");
                     Controls.createSpan(a, "ms-2", contact.name);
                     Controls.createSpan(a, "ms-2 bi bi-cake");
@@ -240,7 +237,7 @@ export class InboxPage implements Page {
                 const contactsDiv: HTMLDivElement = Controls.createDiv(parent, "");
                 const listGroup: HTMLDivElement = Controls.createDiv(contactsDiv, "list-group");
                 contacts.items.forEach((contact) => {
-                    const a: HTMLAnchorElement = Controls.createAnchor(listGroup, "#", "", "list-group-item");
+                    const a: HTMLAnchorElement = Controls.createAnchor(listGroup, "contactdetails", "", "list-group-item");
                     Controls.createSpan(a, "bi bi-person");
                     Controls.createSpan(a, "ms-2", contact.name);
                     a.addEventListener("click", async (e: MouseEvent) => {
