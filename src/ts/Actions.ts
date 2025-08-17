@@ -77,12 +77,12 @@ export class ShowAboutPageAction extends SwitchPageClickAction {
 }
 
 /**
- * Action to show the inbox page.
+ * Action to show the desktop page.
  */
-export class ShowInboxPageAction extends SwitchPageClickAction {
+export class ShowDesktopPageAction extends SwitchPageClickAction {
 
     constructor() {
-        super("INBOX");
+        super("DESKTOP");
     }
 }
 

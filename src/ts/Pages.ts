@@ -1,15 +1,14 @@
-import { text } from "stream/consumers";
-import { ClickAction, LogoutAction, ShowAboutPageAction, ShowDataProtectionPageAction, ShowInboxPageAction, ShowLoginPageAction, ToggleLanguageAction } from "./Actions";
+import { ClickAction, LogoutAction, ShowAboutPageAction, ShowDataProtectionPageAction, ShowDesktopPageAction, ShowLoginPageAction, ToggleLanguageAction } from "./Actions";
 import { ContactService } from "./ContactService";
 import { Controls } from "./Controls";
 import { NoteService } from "./NoteService";
 import { PageContext, Page, PageType } from "./PageContext";
 import { Security } from "./Security";
-import { AuditResult, ContactResult, ContactsResult, ErrorResult, NoteResult, UserInfoResult } from "./TypeDefinitions";
+import { ContactResult, ContactsResult, NoteResult, UserInfoResult } from "./TypeDefinitions";
 
 /**
  * Page implementation for the navigation bar.
- * It renders links to different pages such as Inbox, Data Protection, About, and Login.
+ * It renders links to different pages such as Desktop, Data Protection, About, and Login.
  * It also includes a language toggle and a logout option if the user is logged in.
  * The navigation bar is responsive and collapses on smaller screens.
  */
@@ -22,8 +21,8 @@ export class NavigationBarPage implements Page {
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const ul: HTMLUListElement = this.createNavBar(parent, pageContext, "APP_NAME");
         if (pageContext.getAuthenticationClient().isLoggedIn()) {
-            this.createNavItem(ul, pageContext, "INBOX", new ShowInboxPageAction());
-            this.createNavItem(ul, pageContext, "ENCRYPTION_KEY", new ShowDataProtectionPageAction());
+            this.createNavItem(ul, pageContext, "DESKTOP", new ShowDesktopPageAction());
+            this.createNavItem(ul, pageContext, "DATA_PROTECTIONENCRYPTION_KEY", new ShowDataProtectionPageAction());
         } else {
             this.createNavItem(ul, pageContext, "BUTTON_LOGIN", new ShowLoginPageAction());
         }
@@ -76,7 +75,7 @@ export class AboutPage implements Page {
 
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const aboutMessage: HTMLDivElement = Controls.createDiv(parent, "alert alert-success");
-        aboutMessage.textContent = `Version 0.0.3 ${pageContext.getLocale().translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.getLocale().translate("COPYRIGHT")}`;
+        aboutMessage.textContent = `Version 0.0.4 ${pageContext.getLocale().translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.getLocale().translate("COPYRIGHT")}`;
     }
 }
 
@@ -135,7 +134,7 @@ export class DataProtectionPage implements Page {
         try {
             const user: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
             await Security.setEncryptionKeyAsync(user, keyPwd.value);
-            pageContext.setPageType("INBOX");
+            pageContext.setPageType("DESKTOP");
             await pageContext.renderAsync();
         }
         catch (error: Error | unknown) {
@@ -145,14 +144,14 @@ export class DataProtectionPage implements Page {
 }
 
 /**
- * Page implementation for the Inbox page.
+ * Page implementation for the Desktop page.
  */
-export class InboxPage implements Page {
+export class DesktopPage implements Page {
 
     private currentTab: string = "BIRTHDAYS";
 
     public getPageType(): PageType {
-        return "INBOX";
+        return "DESKTOP";
     }
 
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
@@ -301,7 +300,7 @@ export class InboxPage implements Page {
 /**
  * Page implementation for the Contact Detail page.
  * It displays detailed information about a specific contact, including name, phone, address, email, birthday, and notes.
- * It also provides a back button to return to the Inbox page.
+ * It also provides a back button to return to the Desktop page.
  */
 export class ContactDetailPage implements Page {
 
@@ -343,7 +342,7 @@ export class ContactDetailPage implements Page {
         const backButton: HTMLButtonElement = Controls.createButton(cardBody, "button", "back-button-id", pageContext.getLocale().translate("BUTTON_BACK"), "btn btn-primary");
         backButton.addEventListener("click", async (e: MouseEvent) => {
             e.preventDefault();
-            pageContext.setPageType("INBOX");
+            pageContext.setPageType("DESKTOP");
             pageContext.setContact(null);
             await pageContext.renderAsync();
         });
@@ -353,7 +352,7 @@ export class ContactDetailPage implements Page {
 /**
  * Page implementation for the Note Detail page.
  * It displays detailed information about a specific note, including title, content, and last modified date.
- * It also provides a back button to return to the Inbox page.
+ * It also provides a back button to return to the Desktop page.
  */
 export class NoteDetailPage implements Page {
 
@@ -386,7 +385,7 @@ export class NoteDetailPage implements Page {
             const backButton: HTMLButtonElement = Controls.createButton(cardBody, "button", "back-button-id", pageContext.getLocale().translate("BUTTON_BACK"), "btn btn-primary");
             backButton.addEventListener("click", async (e: MouseEvent) => {
                 e.preventDefault();
-                pageContext.setPageType("INBOX");
+                pageContext.setPageType("DESKTOP");
                 pageContext.setNote(null);
                 await pageContext.renderAsync();
             });
@@ -435,7 +434,7 @@ export class LoginPass2Page implements Page {
                 if (encryptionKey == null) {
                     await Security.setEncryptionKeyAsync(user, Security.generateEncryptionKey());
                 }
-                pageContext.setPageType("INBOX");
+                pageContext.setPageType("DESKTOP");
             }
             await pageContext.renderAsync();
         }
@@ -483,7 +482,7 @@ export class LoginPinPage implements Page {
                 if (encryptionKey == null) {
                     await Security.setEncryptionKeyAsync(user, Security.generateEncryptionKey());
                 }
-                pageContext.setPageType("INBOX");
+                pageContext.setPageType("DESKTOP");
             }
             await pageContext.renderAsync();
         }
@@ -541,7 +540,7 @@ export class LoginUsernamePasswordPage implements Page {
                 if (encryptionKey == null) {
                     await Security.setEncryptionKeyAsync(user, Security.generateEncryptionKey());
                 }
-                pageContext.setPageType("INBOX");
+                pageContext.setPageType("DESKTOP");
             }
             await pageContext.renderAsync();
         }

@@ -1,4 +1,3 @@
-
 /**
  * Provides utility functions to create and manipulate HTML elements.
  * This class includes methods for creating various HTML elements such as divs, forms, labels,

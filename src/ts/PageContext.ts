@@ -6,7 +6,7 @@ import { ContactResult, NoteResult } from "./TypeDefinitions";
 /**
  * Type representing the different pages in the application.
  */
-export type PageType = "LOGIN_USERNAME_PASSWORD" | "LOGIN_PIN" | "LOGIN_PASS2" | "ABOUT" | "INBOX"
+export type PageType = "LOGIN_USERNAME_PASSWORD" | "LOGIN_PIN" | "LOGIN_PASS2" | "ABOUT" | "DESKTOP"
     | "DATA_PROTECTION" | "NAVIGATION_BAR" | "CONTACT_DETAIL" | "NOTE_DETAIL";
 
 

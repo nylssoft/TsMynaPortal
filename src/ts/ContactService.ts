@@ -1,6 +1,7 @@
 import { FetchHelper } from "./FetchHelper";
 import { Security } from "./Security";
-import { ContactResult, ContactsResult, ErrorResult, UserInfoResult } from "./TypeDefinitions";
+import { ContactResult, ContactsResult, UserInfoResult } from "./TypeDefinitions";
+
 
 type DayAndMonth = {
     day: number,

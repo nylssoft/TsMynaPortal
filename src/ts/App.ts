@@ -1,5 +1,5 @@
 import { PageContext } from "./PageContext";
-import { NavigationBarPage, AboutPage, DataProtectionPage, InboxPage, LoginPass2Page, LoginPinPage, LoginUsernamePasswordPage, ContactDetailPage, NoteDetailPage } from "./Pages";
+import { NavigationBarPage, AboutPage, DataProtectionPage, DesktopPage, LoginPass2Page, LoginPinPage, LoginUsernamePasswordPage, ContactDetailPage, NoteDetailPage } from "./Pages";
 
 /**
  * Main application class that initializes the application, handles authentication, and renders the UI.
@@ -29,7 +29,7 @@ export class App {
         const pageContext: PageContext = new PageContext();
         pageContext.registerPage(new NavigationBarPage());
         pageContext.registerPage(new AboutPage());
-        pageContext.registerPage(new InboxPage());
+        pageContext.registerPage(new DesktopPage());
         pageContext.registerPage(new LoginUsernamePasswordPage());
         pageContext.registerPage(new LoginPinPage());
         pageContext.registerPage(new LoginPass2Page());
@@ -39,7 +39,7 @@ export class App {
         await pageContext.getLocale().setLanguageAsync();
         await pageContext.getAuthenticationClient().loginWithLongLivedTokenAsync();
         if (pageContext.getAuthenticationClient().isLoggedIn()) {
-            pageContext.setPageType("INBOX");
+            pageContext.setPageType("DESKTOP");
         } else if (pageContext.getAuthenticationClient().isRequiresPin()) {
             pageContext.setPageType("LOGIN_PIN");
         } else if (pageContext.getAuthenticationClient().isRequiresPass2()) {

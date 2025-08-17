@@ -1,6 +1,6 @@
 import { FetchHelper } from "./FetchHelper";
 import { Security } from "./Security";
-import { AuthResult, ErrorResult, ClientInfo, UserInfoResult, AuditResult } from "./TypeDefinitions";
+import { AuthResult, ClientInfo, UserInfoResult, AuditResult } from "./TypeDefinitions";
 
 /**
  * Provides methods for managing authentication of the current user.
