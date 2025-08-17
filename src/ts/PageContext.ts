@@ -1,13 +1,13 @@
 import { Locale } from "./Locale";
 import { AuthenticationClient } from "./AuthenticationClient";
 import { Controls } from "./Controls";
-import { ContactResult, NoteResult } from "./TypeDefinitions";
+import { ContactResult, NoteResult, PasswordItemResult } from "./TypeDefinitions";
 
 /**
  * Type representing the different pages in the application.
  */
 export type PageType = "LOGIN_USERNAME_PASSWORD" | "LOGIN_PIN" | "LOGIN_PASS2" | "ABOUT" | "DESKTOP"
-    | "DATA_PROTECTION" | "NAVIGATION_BAR" | "CONTACT_DETAIL" | "NOTE_DETAIL";
+    | "DATA_PROTECTION" | "NAVIGATION_BAR" | "CONTACT_DETAIL" | "NOTE_DETAIL" | "PASSWORD_ITEM_DETAIL";
 
 
 /**
@@ -38,6 +38,7 @@ export class PageContext {
     private authenticationClient: AuthenticationClient = new AuthenticationClient();
     private contact: ContactResult | null = null;
     private note: NoteResult | null = null;
+    private passwordItem: PasswordItemResult | null = null;
     private pageType: PageType = "LOGIN_USERNAME_PASSWORD";
     private pageRegistrations = new Map<PageType, Page>();
 
@@ -139,5 +140,13 @@ export class PageContext {
      */
     public setNote(note: NoteResult | null) {
         this.note = note;
+    }
+
+    public getPasswordItem(): PasswordItemResult | null {
+        return this.passwordItem;
+    }
+
+    public setPasswordItem(item: PasswordItemResult | null) {
+        this.passwordItem = item;
     }
 }

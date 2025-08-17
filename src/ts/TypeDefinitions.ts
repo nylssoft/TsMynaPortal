@@ -112,3 +112,11 @@ export type AuditResult = {
   performedUtc: string,
   action: string
 }
+
+export type PasswordItemResult = {
+  Description: string,
+  Login: string,
+  Name: string,
+  Password: string,
+  Url: string
+}

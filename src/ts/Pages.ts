@@ -3,8 +3,9 @@ import { ContactService } from "./ContactService";
 import { Controls } from "./Controls";
 import { NoteService } from "./NoteService";
 import { PageContext, Page, PageType } from "./PageContext";
+import { PasswordManagerService } from "./PasswordManagerService";
 import { Security } from "./Security";
-import { ContactResult, ContactsResult, NoteResult, UserInfoResult } from "./TypeDefinitions";
+import { ContactResult, ContactsResult, NoteResult, PasswordItemResult, UserInfoResult } from "./TypeDefinitions";
 
 /**
  * Page implementation for the navigation bar.
@@ -75,7 +76,7 @@ export class AboutPage implements Page {
 
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const aboutMessage: HTMLDivElement = Controls.createDiv(parent, "alert alert-success");
-        aboutMessage.textContent = `Version 0.0.4 ${pageContext.getLocale().translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.getLocale().translate("COPYRIGHT")}`;
+        aboutMessage.textContent = `Version 0.0.5 ${pageContext.getLocale().translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.getLocale().translate("COPYRIGHT")}`;
     }
 }
 
@@ -102,6 +103,8 @@ export class DataProtectionPage implements Page {
         Controls.createLabel(divCol1, "key-id", "form-label", pageContext.getLocale().translate("LABEL_KEY"));
         const keyPwd: HTMLInputElement = Controls.createInput(divCol1, "password", "key-id", "form-control");
         keyPwd.setAttribute("aria-describedby", "keyhelp-id");
+        keyPwd.setAttribute("autocomplete", "off");
+        keyPwd.setAttribute("spellcheck", "false");
         if (encKey != null) {
             keyPwd.value = encKey;
         }
@@ -116,7 +119,7 @@ export class DataProtectionPage implements Page {
         icon.addEventListener("click", (e: MouseEvent) => this.onTogglePassword(e, keyPwd, icon));
     }
 
-    private async onTogglePassword(e: MouseEvent, keyPwd: HTMLInputElement, icon: HTMLElement) {
+    private onTogglePassword(e: MouseEvent, keyPwd: HTMLInputElement, icon: HTMLElement) {
         e.preventDefault();
         if (keyPwd.type == "password") {
             keyPwd.type = "text";
@@ -181,12 +184,18 @@ export class DesktopPage implements Page {
             const aNotes: HTMLAnchorElement = Controls.createAnchor(tabNotes, "notes", "", "nav-link", this.currentTab === "NOTES");
             Controls.createSpan(aNotes, "bi bi-journal");
             aNotes.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, "NOTES"));
+            const tabPasswordManager: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
+            const aPasswordManager: HTMLAnchorElement = Controls.createAnchor(tabPasswordManager, "passwordmanager", "", "nav-link", this.currentTab === "PASSWORD_MANAGER");
+            Controls.createSpan(aPasswordManager, "bi bi-lock");
+            aPasswordManager.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, "PASSWORD_MANAGER"));
             if (this.currentTab === "BIRTHDAYS") {
                 await this.renderBirthdaysAsync(pageContext, parent, alertDiv);
             } else if (this.currentTab === "CONTACTS") {
                 await this.renderContactsAsync(pageContext, parent, alertDiv);
             } else if (this.currentTab === "NOTES") {
                 await this.renderNotesAsync(pageContext, parent, alertDiv);
+            } else if (this.currentTab === "PASSWORD_MANAGER") {
+                await this.renderPasswordManagerAsync(pageContext, parent, alertDiv);
             }
         }
         catch (error: Error | unknown) {
@@ -216,7 +225,7 @@ export class DesktopPage implements Page {
             if (birthdays.length > 0) {
                 birthdays.sort((a, b) => a.daysUntilBirthday! - b.daysUntilBirthday!);
                 const listGroup: HTMLDivElement = Controls.createDiv(parent, "list-group");
-                birthdays.forEach((contact) => {
+                birthdays.forEach(contact => {
                     const a: HTMLAnchorElement = Controls.createAnchor(listGroup, "contactdetails", "", "list-group-item");
                     Controls.createSpan(a, "bi bi-person");
                     Controls.createSpan(a, "ms-2", contact.name);
@@ -251,7 +260,7 @@ export class DesktopPage implements Page {
             if (contacts.items.length > 0) {
                 contacts.items.sort((a, b) => a.name.localeCompare(b.name));
                 const listGroup: HTMLDivElement = Controls.createDiv(parent, "list-group");
-                contacts.items.forEach((contact) => {
+                contacts.items.forEach(contact => {
                     const a: HTMLAnchorElement = Controls.createAnchor(listGroup, "contactdetails", "", "list-group-item");
                     Controls.createSpan(a, "bi bi-person");
                     Controls.createSpan(a, "ms-2", contact.name);
@@ -278,7 +287,7 @@ export class DesktopPage implements Page {
             if (notes.length > 0) {
                 notes.sort((a, b) => a.title.localeCompare(b.title));
                 const listGroup: HTMLDivElement = Controls.createDiv(parent, "list-group");
-                notes.forEach((note) => {
+                notes.forEach(note => {
                     const a: HTMLAnchorElement = Controls.createAnchor(listGroup, "notedetails", "", "list-group-item");
                     Controls.createSpan(a, "bi bi-journal");
                     Controls.createSpan(a, "ms-2", note.title);
@@ -289,6 +298,35 @@ export class DesktopPage implements Page {
                         await pageContext.renderAsync();
                     });
                 });
+            }
+        }
+        catch (error: Error | unknown) {
+            Controls.createAlert(alertDiv, pageContext.getLocale().translateError(error));
+        }
+    }
+
+    private async renderPasswordManagerAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
+        try {
+            Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("PASSWORD_MANAGER"));
+            const token: string = pageContext.getAuthenticationClient().getToken()!;
+            const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
+            if (userInfo.hasPasswordManagerFile) {
+                const passwordItems: PasswordItemResult[] = await PasswordManagerService.getPasswordFileAsync(token, userInfo);
+                if (passwordItems.length > 0) {
+                    passwordItems.sort((a, b) => a.Name.localeCompare(b.Name));
+                    const listGroup: HTMLDivElement = Controls.createDiv(parent, "list-group");
+                    passwordItems.forEach(item => {
+                        const a: HTMLAnchorElement = Controls.createAnchor(listGroup, "passworddetails", "", "list-group-item");
+                        Controls.createSpan(a, "bi bi-lock");
+                        Controls.createSpan(a, "ms-2", item.Name);
+                        a.addEventListener("click", async (e: MouseEvent) => {
+                            e.preventDefault();
+                            pageContext.setPageType("PASSWORD_ITEM_DETAIL");
+                            pageContext.setPasswordItem(item);
+                            await pageContext.renderAsync();
+                        });
+                    });
+                }
             }
         }
         catch (error: Error | unknown) {
@@ -381,6 +419,8 @@ export class NoteDetailPage implements Page {
                 const textarea: HTMLTextAreaElement = Controls.createElement(divFormFloating, "textarea", "form-control text-dark bg-light", note.content!) as HTMLTextAreaElement;
                 textarea.style.height = "400px";
                 textarea.setAttribute("readonly", "true");
+                textarea.setAttribute("spellcheck", "false");
+                textarea.setAttribute("autocomplete", "off");
             }
             const backButton: HTMLButtonElement = Controls.createButton(cardBody, "button", "back-button-id", pageContext.getLocale().translate("BUTTON_BACK"), "btn btn-primary");
             backButton.addEventListener("click", async (e: MouseEvent) => {
@@ -393,6 +433,102 @@ export class NoteDetailPage implements Page {
         catch (error: Error | unknown) {
             Controls.createAlert(alertDiv, pageContext.getLocale().translateError(error));
         }
+    }
+}
+
+export class PasswordItemDetailPage implements Page {
+
+    public getPageType(): PageType {
+        return "PASSWORD_ITEM_DETAIL";
+    }
+
+    public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
+        const alertDiv: HTMLDivElement = Controls.createDiv(parent);
+        parent = Controls.createDiv(parent, "card p-4 shadow-sm bg-light");
+        parent.style.maxWidth = "600px";
+        try {
+            const passwordItem: PasswordItemResult = pageContext.getPasswordItem()!;
+            const cardBody: HTMLDivElement = Controls.createDiv(parent, "card-body text-dark");
+            Controls.createHeading(cardBody, 2, "card-title mb-3", passwordItem.Name);
+            if (passwordItem.Login.length > 0) {
+                const cardTextLogin: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
+                Controls.createSpan(cardTextLogin, "bi bi-person");
+                const inputLogin: HTMLInputElement = Controls.createInput(cardTextLogin, "text", "login-id", "ms-2 bg-light text-dark border-0", passwordItem.Login);
+                inputLogin.setAttribute("readonly", "true");
+                inputLogin.setAttribute("autocomplete", "off");
+                inputLogin.setAttribute("spellcheck", "false");
+                const iconCopy: HTMLElement = Controls.createElement(cardTextLogin, "i", "ms-2 bi bi-clipboard");
+                iconCopy.setAttribute("style", "cursor:pointer; font-size: 1.5rem;");
+                iconCopy.addEventListener("click", async (e: MouseEvent) => await this.copyToClipboardAsync(passwordItem.Login));
+            }
+            const user: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
+            const pwd: string = await PasswordManagerService.getPasswordAsync(user, passwordItem);
+            if (pwd.length > 0) {
+                const cardTextPassword: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
+                Controls.createSpan(cardTextPassword, "bi bi-shield-lock");
+                const inputPassword: HTMLInputElement = Controls.createInput(cardTextPassword, "password", "password-id", "ms-2 bg-light text-dark border-0", pwd);
+                inputPassword.setAttribute("readonly", "true");
+                inputPassword.setAttribute("autocomplete", "off");
+                inputPassword.setAttribute("spellcheck", "false");
+                const iconCopy: HTMLElement = Controls.createElement(cardTextPassword, "i", "ms-2 bi bi-clipboard");
+                iconCopy.setAttribute("style", "cursor:pointer; font-size: 1.5rem;");
+                iconCopy.addEventListener("click", async (e: MouseEvent) => await this.copyToClipboardAsync(pwd));
+                const iconToggle: HTMLElement = Controls.createElement(cardTextPassword, "i", "ms-2 bi bi-eye-slash");
+                iconToggle.setAttribute("style", "cursor:pointer; font-size: 1.5rem;");
+                iconToggle.id = "toggle-password-id";
+                iconToggle.addEventListener("click", (e: MouseEvent) => this.onTogglePassword(e, inputPassword, iconToggle));
+            }
+            if (passwordItem.Url.length > 0) {
+                const cardTextUrl: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
+                Controls.createSpan(cardTextUrl, "bi bi-link-45deg");
+                const aUrl = Controls.createAnchor(cardTextUrl, this.getUrl(passwordItem), passwordItem.Url, "ms-2");
+                aUrl.setAttribute("target", "_blank");
+            }
+            if (passwordItem.Description.length > 0) {
+                const cardTextDesc: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
+                Controls.createSpan(cardTextDesc, "bi bi-card-text");
+                Controls.createSpan(cardTextDesc, "ms-2", passwordItem.Description);
+            }
+            const backButton: HTMLButtonElement = Controls.createButton(cardBody, "button", "back-button-id", pageContext.getLocale().translate("BUTTON_BACK"), "btn btn-primary");
+            backButton.addEventListener("click", async (e: MouseEvent) => {
+                e.preventDefault();
+                pageContext.setPageType("DESKTOP");
+                pageContext.setPasswordItem(null);
+                await pageContext.renderAsync();
+            });
+        }
+        catch (error: Error | unknown) {
+            Controls.createAlert(alertDiv, pageContext.getLocale().translateError(error));
+        }
+    }
+
+    private onTogglePassword(e: MouseEvent, inputPwd: HTMLInputElement, icon: HTMLElement) {
+        e.preventDefault();
+        if (inputPwd.type == "password") {
+            inputPwd.type = "text";
+            icon.classList.remove("bi-eye-slash");
+            icon.classList.add("bi-eye");
+        } else {
+            inputPwd.type = "password";
+            icon.classList.remove("bi-eye");
+            icon.classList.add("bi-eye-slash");
+        }
+    }
+
+    private async copyToClipboardAsync(text: string): Promise<void> {
+        try {
+            await navigator.clipboard.writeText(text);
+        }
+        catch (err: Error | unknown) {
+            console.error(`Failed to copy to the clibboard: ${err}`);
+        }
+    }
+
+    private getUrl(item: PasswordItemResult): string {
+        if (item.Url.startsWith("http")) {
+            return item.Url;
+        }
+        return `https://${item.Url}`;
     }
 }
 
@@ -415,6 +551,8 @@ export class LoginPass2Page implements Page {
         Controls.createLabel(divPass2, "pass2-id", "form-label", pageContext.getLocale().translate("LABEL_SEC_KEY"));
         const inputPass2: HTMLInputElement = Controls.createInput(divPass2, "text", "pass2-id", "form-control");
         inputPass2.setAttribute("aria-describedby", "pass2help-id");
+        inputPass2.setAttribute("autocomplete", "off");
+        inputPass2.setAttribute("spellcheck", "false");
         inputPass2.focus();
         const pass2HelpDiv: HTMLDivElement = Controls.createDiv(divPass2, "form-text", pageContext.getLocale().translate("INFO_ENTER_SEC_KEY"));
         pass2HelpDiv.id = "pass2help-id";
@@ -463,6 +601,8 @@ export class LoginPinPage implements Page {
         Controls.createLabel(divPin, "pin-id", "form-label", pageContext.getLocale().translate("LABEL_PIN"));
         const inputPin: HTMLInputElement = Controls.createInput(divPin, "password", "pin-id", "form-control");
         inputPin.setAttribute("aria-describedby", "pinhelp-id");
+        inputPin.setAttribute("autocomplete", "off");
+        inputPin.setAttribute("spellcheck", "false");
         inputPin.focus();
         const pinHelpDiv: HTMLDivElement = Controls.createDiv(divPin, "form-text", pageContext.getLocale().translate("INFO_ENTER_PIN"));
         pinHelpDiv.id = "pinhelp-id";
@@ -511,6 +651,8 @@ export class LoginUsernamePasswordPage implements Page {
         Controls.createLabel(divUsername, "username-id", "form-label", pageContext.getLocale().translate("LABEL_NAME"));
         const inputUsername: HTMLInputElement = Controls.createInput(divUsername, "text", "username-id", "form-control");
         inputUsername.setAttribute("aria-describedby", "usernamehelp-id");
+        inputUsername.setAttribute("autocomplete", "off");
+        inputUsername.setAttribute("spellcheck", "false");
         inputUsername.focus();
         const usernameHelpDiv: HTMLDivElement = Controls.createDiv(divUsername, "form-text", pageContext.getLocale().translate("INFO_ENTER_USERNAME"));
         usernameHelpDiv.id = "usernamehelp-id";
@@ -518,6 +660,8 @@ export class LoginUsernamePasswordPage implements Page {
         Controls.createLabel(divPassword, "password-id", "form-label", pageContext.getLocale().translate("LABEL_PWD"));
         const inputPassword: HTMLInputElement = Controls.createInput(divPassword, "password", "password-id", "form-control");
         inputPassword.setAttribute("aria-describedby", "passwordhelp-id");
+        inputPassword.setAttribute("autocomplete", "off");
+        inputPassword.setAttribute("spellcheck", "false");
         const passwordHelpDiv: HTMLDivElement = Controls.createDiv(divPassword, "form-text", pageContext.getLocale().translate("INFO_ENTER_PASSWORD"));
         passwordHelpDiv.id = "passwordhelp-id";
         const divSaySignedIn: HTMLDivElement = Controls.createDiv(divRows, "mb-3 form-check");

@@ -39,7 +39,7 @@ export class ContactService {
         try {
             const cryptoKey: CryptoKey = await Security.createCryptoKeyAsync(encryptionKey!, user.passwordManagerSalt)
             const contactsJson: string = await Security.decodeMessageAsync(cryptoKey, json!);
-            return JSON.parse(contactsJson);
+            return JSON.parse(contactsJson) as ContactsResult;
         } catch (e: Error | unknown) {
             console.error("Error decoding contacts:", e);
             throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
