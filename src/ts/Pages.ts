@@ -22,7 +22,7 @@ export class NavigationBarPage implements Page {
         const ul: HTMLUListElement = this.createNavBar(parent, pageContext, "APP_NAME");
         if (pageContext.getAuthenticationClient().isLoggedIn()) {
             this.createNavItem(ul, pageContext, "DESKTOP", new ShowDesktopPageAction());
-            this.createNavItem(ul, pageContext, "DATA_PROTECTIONENCRYPTION_KEY", new ShowDataProtectionPageAction());
+            this.createNavItem(ul, pageContext, "DATA_PROTECTION", new ShowDataProtectionPageAction());
         } else {
             this.createNavItem(ul, pageContext, "BUTTON_LOGIN", new ShowLoginPageAction());
         }
