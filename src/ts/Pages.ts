@@ -5,7 +5,7 @@ import { Controls } from "./Controls";
 import { NoteService } from "./NoteService";
 import { PageContext, Page, PageType } from "./PageContext";
 import { Security } from "./Security";
-import { ContactResult, ContactsResult, ErrorResult, NoteResult, UserInfoResult } from "./TypeDefinitions";
+import { AuditResult, ContactResult, ContactsResult, ErrorResult, NoteResult, UserInfoResult } from "./TypeDefinitions";
 
 /**
  * Page implementation for the navigation bar.
@@ -76,7 +76,7 @@ export class AboutPage implements Page {
 
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const aboutMessage: HTMLDivElement = Controls.createDiv(parent, "alert alert-success");
-        aboutMessage.textContent = `Version 0.0.2 ${pageContext.getLocale().translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.getLocale().translate("COPYRIGHT")}`;
+        aboutMessage.textContent = `Version 0.0.3 ${pageContext.getLocale().translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.getLocale().translate("COPYRIGHT")}`;
     }
 }
 
@@ -157,31 +157,41 @@ export class InboxPage implements Page {
 
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
-        const welcomeMessage: HTMLDivElement = Controls.createDiv(parent, "alert alert-success");
-        const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
-        const now: Date = new Date();
-        const longDate: string = now.toLocaleDateString(pageContext.getLocale().getLanguage(), { dateStyle: "long" });
-        const longTime: string = now.toLocaleTimeString(pageContext.getLocale().getLanguage(), { timeStyle: "long" });
-        welcomeMessage.textContent = pageContext.getLocale().translateWithArgs("MESSAGE_WELCOME_1_2_3", [userInfo.name, longDate, longTime]);
-        const tabs: HTMLUListElement = Controls.createElement(parent, "ul", "nav nav-pills") as HTMLUListElement;
-        const tabBirthdays: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
-        const aBirthdays: HTMLAnchorElement = Controls.createAnchor(tabBirthdays, "birthdays", "", "nav-link", this.currentTab === "BIRTHDAYS");
-        Controls.createSpan(aBirthdays, "bi bi-cake");
-        aBirthdays.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, "BIRTHDAYS"));
-        const tabContacts: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
-        const aContacts: HTMLAnchorElement = Controls.createAnchor(tabContacts, "contacts", "", "nav-link", this.currentTab === "CONTACTS");
-        Controls.createSpan(aContacts, "bi bi-person");
-        aContacts.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, "CONTACTS"));
-        const tabNotes: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
-        const aNotes: HTMLAnchorElement = Controls.createAnchor(tabNotes, "notes", "", "nav-link", this.currentTab === "NOTES");
-        Controls.createSpan(aNotes, "bi bi-journal");
-        aNotes.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, "NOTES"));
-        if (this.currentTab === "BIRTHDAYS") {
-            await this.renderBirthdaysAsync(pageContext, parent, alertDiv);
-        } else if (this.currentTab === "CONTACTS") {
-            await this.renderContactsAsync(pageContext, parent, alertDiv);
-        } else if (this.currentTab === "NOTES") {
-            await this.renderNotesAsync(pageContext, parent, alertDiv);
+        try {
+            const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
+            const now: Date = new Date();
+            const longDate: string = now.toLocaleDateString(pageContext.getLocale().getLanguage(), { dateStyle: "long" });
+            const longTime: string = now.toLocaleTimeString(pageContext.getLocale().getLanguage(), { timeStyle: "long" });
+            const welcomeMessage: HTMLDivElement = Controls.createDiv(parent, "alert alert-success");
+            Controls.createDiv(welcomeMessage, undefined, pageContext.getLocale().translateWithArgs("MESSAGE_WELCOME_1_2_3", [userInfo.name, longDate, longTime]));
+            const lastLoginDate: Date | null = await pageContext.getAuthenticationClient().getLastLoginDateAsync();
+            if (lastLoginDate != null) {
+                const lastLoginStr: string = lastLoginDate.toLocaleString(pageContext.getLocale().getLanguage(), { dateStyle: "long", timeStyle: "long" });
+                Controls.createDiv(welcomeMessage, "mt-2", pageContext.getLocale().translateWithArgs("MESSAGE_LAST_LOGIN_1", [lastLoginStr]));
+            }
+            const tabs: HTMLUListElement = Controls.createElement(parent, "ul", "nav nav-pills") as HTMLUListElement;
+            const tabBirthdays: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
+            const aBirthdays: HTMLAnchorElement = Controls.createAnchor(tabBirthdays, "birthdays", "", "nav-link", this.currentTab === "BIRTHDAYS");
+            Controls.createSpan(aBirthdays, "bi bi-cake");
+            aBirthdays.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, "BIRTHDAYS"));
+            const tabContacts: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
+            const aContacts: HTMLAnchorElement = Controls.createAnchor(tabContacts, "contacts", "", "nav-link", this.currentTab === "CONTACTS");
+            Controls.createSpan(aContacts, "bi bi-person");
+            aContacts.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, "CONTACTS"));
+            const tabNotes: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
+            const aNotes: HTMLAnchorElement = Controls.createAnchor(tabNotes, "notes", "", "nav-link", this.currentTab === "NOTES");
+            Controls.createSpan(aNotes, "bi bi-journal");
+            aNotes.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, "NOTES"));
+            if (this.currentTab === "BIRTHDAYS") {
+                await this.renderBirthdaysAsync(pageContext, parent, alertDiv);
+            } else if (this.currentTab === "CONTACTS") {
+                await this.renderContactsAsync(pageContext, parent, alertDiv);
+            } else if (this.currentTab === "NOTES") {
+                await this.renderNotesAsync(pageContext, parent, alertDiv);
+            }
+        }
+        catch (error: Error | unknown) {
+            Controls.createAlert(alertDiv, pageContext.getLocale().translateError(error));
         }
     }
 
@@ -352,32 +362,38 @@ export class NoteDetailPage implements Page {
     }
 
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
-        const token: string = pageContext.getAuthenticationClient().getToken()!;
-        const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
+        const alertDiv: HTMLDivElement = Controls.createDiv(parent);
         parent = Controls.createDiv(parent, "card p-4 shadow-sm bg-light");
         parent.style.maxWidth = "600px";
-        const note: NoteResult = await NoteService.getNoteAsync(token, userInfo, pageContext.getNote()!.id);
-        const date: Date = new Date(note.lastModifiedUtc);
-        const longDate: string = date.toLocaleDateString(pageContext.getLocale().getLanguage(), { dateStyle: "long" });
-        const longTime: string = date.toLocaleTimeString(pageContext.getLocale().getLanguage(), { timeStyle: "long" });
-        const cardBody: HTMLDivElement = Controls.createDiv(parent, "card-body text-dark");
-        Controls.createHeading(cardBody, 2, "card-title mb-3", note.title);
-        const cardTextDate: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
-        Controls.createSpan(cardTextDate, "bi bi-calendar");
-        Controls.createSpan(cardTextDate, "ms-2", `${longDate} ${longTime}`);
-        if (note.content!.length > 0) {
-            const divFormFloating: HTMLDivElement = Controls.createDiv(cardBody, "form-floating mb-4");
-            const textarea: HTMLTextAreaElement = Controls.createElement(divFormFloating, "textarea", "form-control text-dark bg-light", note.content!) as HTMLTextAreaElement;
-            textarea.style.height = "400px";
-            textarea.setAttribute("readonly", "true");
+        try {
+            const token: string = pageContext.getAuthenticationClient().getToken()!;
+            const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
+            const note: NoteResult = await NoteService.getNoteAsync(token, userInfo, pageContext.getNote()!.id);
+            const date: Date = new Date(note.lastModifiedUtc);
+            const longDate: string = date.toLocaleDateString(pageContext.getLocale().getLanguage(), { dateStyle: "long" });
+            const longTime: string = date.toLocaleTimeString(pageContext.getLocale().getLanguage(), { timeStyle: "long" });
+            const cardBody: HTMLDivElement = Controls.createDiv(parent, "card-body text-dark");
+            Controls.createHeading(cardBody, 2, "card-title mb-3", note.title);
+            const cardTextDate: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
+            Controls.createSpan(cardTextDate, "bi bi-calendar");
+            Controls.createSpan(cardTextDate, "ms-2", `${longDate} ${longTime}`);
+            if (note.content!.length > 0) {
+                const divFormFloating: HTMLDivElement = Controls.createDiv(cardBody, "form-floating mb-4");
+                const textarea: HTMLTextAreaElement = Controls.createElement(divFormFloating, "textarea", "form-control text-dark bg-light", note.content!) as HTMLTextAreaElement;
+                textarea.style.height = "400px";
+                textarea.setAttribute("readonly", "true");
+            }
+            const backButton: HTMLButtonElement = Controls.createButton(cardBody, "button", "back-button-id", pageContext.getLocale().translate("BUTTON_BACK"), "btn btn-primary");
+            backButton.addEventListener("click", async (e: MouseEvent) => {
+                e.preventDefault();
+                pageContext.setPageType("INBOX");
+                pageContext.setNote(null);
+                await pageContext.renderAsync();
+            });
         }
-        const backButton: HTMLButtonElement = Controls.createButton(cardBody, "button", "back-button-id", pageContext.getLocale().translate("BUTTON_BACK"), "btn btn-primary");
-        backButton.addEventListener("click", async (e: MouseEvent) => {
-            e.preventDefault();
-            pageContext.setPageType("INBOX");
-            pageContext.setNote(null);
-            await pageContext.renderAsync();
-        });
+        catch (error: Error | unknown) {
+            Controls.createAlert(alertDiv, pageContext.getLocale().translateError(error));
+        }
     }
 }
 

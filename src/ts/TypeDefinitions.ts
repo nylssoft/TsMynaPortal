@@ -102,3 +102,13 @@ export type NoteResult = {
   lastModifiedUtc: string,
   content: string | null
 }
+
+/**
+ * AuditResult represents a single audit entry.
+ * It includes properties such as performedUtc and action.
+ * This type is used to manage audit logs in the application.
+ */
+export type AuditResult = {
+  performedUtc: string,
+  action: string
+}

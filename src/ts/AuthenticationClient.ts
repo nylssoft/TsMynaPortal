@@ -1,6 +1,6 @@
 import { FetchHelper } from "./FetchHelper";
 import { Security } from "./Security";
-import { AuthResult, ErrorResult, ClientInfo, UserInfoResult } from "./TypeDefinitions";
+import { AuthResult, ErrorResult, ClientInfo, UserInfoResult, AuditResult } from "./TypeDefinitions";
 
 /**
  * Provides methods for managing authentication of the current user.
@@ -271,5 +271,28 @@ export class AuthenticationClient {
         }
         return this.userInfo;
     }
+
+    /**
+     * Retrieves the last login date asynchronously.
+     * 
+     * @returns a promise that resolves to the last login date or null if not found
+     */
+    public async getLastLoginDateAsync(): Promise<Date | null> {
+        const token: string | null = this.getToken();
+        if (token == null) throw new Error("ERROR_INVALID_PARAMETERS");
+        const resp: Response = await FetchHelper.fetchAsync('/api/pwdman/user/audit?max=10', { headers: { 'token': token } });
+        const audits: AuditResult[] = await resp.json() as AuditResult[];
+        let cnt: number = 0;
+        for (const audit of audits) {
+            const parts: string[] = audit.action.split(":");
+            const action: string = parts[0];
+            if (action == "AUDIT_LOGIN_BASIC_1" || action == "AUDIT_LOGIN_LLTOKEN_1" || action == "AUDIT_LOGIN_PIN_1" || action == "AUDIT_LOGIN_2FA_1") {
+                cnt++;
+                if (cnt == 2) {
+                    return new Date(audit.performedUtc);
+                }
+            }
+        }
+        return null;
+    }
 }
- 

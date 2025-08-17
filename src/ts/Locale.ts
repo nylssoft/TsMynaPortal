@@ -10,6 +10,7 @@ export class Locale {
     private german = {
         "APP_NAME": "Myna Portal",
         "MESSAGE_WELCOME_1_2_3": "Hallo {0}, willkommen im Myna Portal! Heute ist der {1}. Es ist {2}.",
+        "MESSAGE_LAST_LOGIN_1": "Deine letzte Anmeldung war am {0}.",
         "LANGUAGE": "Sprache",
         "ABOUT": "Über",
         "INFO_ENTER_USERNAME": "Gib deinen Benutzernamen oder E-Mail-Adresse ein.",
@@ -33,6 +34,7 @@ export class Locale {
     private englisch = {
         "APP_NAME": "Myna Portal",
         "MESSAGE_WELCOME_1_2_3": "Hello {0}, welcome to the Myna Portal! Today is {1}. It is {2}.",
+        "MESSAGE_LAST_LOGIN_1": "Your last login was on {0}.",
         "LANGUAGE": "Language",
         "ABOUT": "About",
         "INFO_ENTER_USERNAME": "Enter your username or email address.",
@@ -49,7 +51,7 @@ export class Locale {
         "TOMORROW": "Tomorrow",
         "CONTACTS": "Contacts",
         "NOTES": "Notes",
-        
+
         "ERROR_WRONG_DATA_PROTECTION_KEY": "The key to decrypt the data is invalid or missing. Please check your key on the 'Data Protection' page.",
     }
 
