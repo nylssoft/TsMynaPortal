@@ -77,7 +77,7 @@ export class AboutPage implements Page {
 
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const aboutMessage: HTMLDivElement = Controls.createDiv(parent, "alert alert-success");
-        aboutMessage.textContent = `Version 0.0.5 ${pageContext.getLocale().translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.getLocale().translate("COPYRIGHT")}`;
+        aboutMessage.textContent = `Version 0.1.0 ${pageContext.getLocale().translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.getLocale().translate("COPYRIGHT")}`;
     }
 }
 
@@ -307,24 +307,16 @@ export class DesktopPage implements Page {
 
     private async renderNotesAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
         try {
-            Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("NOTES"));
             const token: string = pageContext.getAuthenticationClient().getToken()!;
             const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
             const notes: NoteResult[] = await NoteService.getNotesAsync(token, userInfo);
+            notes.sort((a, b) => a.title.localeCompare(b.title));
+            const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("NOTES"));
             if (notes.length > 0) {
-                notes.sort((a, b) => a.title.localeCompare(b.title));
+                SearchComponent.create(heading, parent, pageContext, pageContext.getNoteFilter(), (filter: string) => this.filterNoteItemList(pageContext, filter, notes));
                 const listGroup: HTMLDivElement = Controls.createDiv(parent, "list-group");
-                notes.forEach(note => {
-                    const a: HTMLAnchorElement = Controls.createAnchor(listGroup, "notedetails", "", "list-group-item");
-                    Controls.createSpan(a, "bi bi-journal");
-                    Controls.createSpan(a, "ms-2", note.title);
-                    a.addEventListener("click", async (e: MouseEvent) => {
-                        e.preventDefault();
-                        pageContext.setPageType("NOTE_DETAIL");
-                        pageContext.setNote(note);
-                        await pageContext.renderAsync();
-                    });
-                });
+                listGroup.id = "list-group-id";
+                this.filterNoteItemList(pageContext, pageContext.getNoteFilter(), notes);
             }
         }
         catch (error: Error | unknown) {
@@ -332,33 +324,71 @@ export class DesktopPage implements Page {
         }
     }
 
+    private filterNoteItemList(pageContext: PageContext, filter: string, items: NoteResult[]) {
+        pageContext.setNoteFilter(filter);
+        const filteredItems: NoteResult[] = [];
+        items.forEach(item => {
+            if (filter.length == 0 || item.title.toLocaleLowerCase().includes(filter)) {
+                filteredItems.push(item);
+            }
+        });
+        const listGroup: HTMLElement = document.getElementById("list-group-id")!;
+        Controls.removeAllChildren(listGroup);
+        filteredItems.forEach(item => {
+            const a: HTMLAnchorElement = Controls.createAnchor(listGroup, "notedetails", "", "list-group-item");
+            Controls.createSpan(a, "bi bi-journal");
+            Controls.createSpan(a, "ms-2", item.title);
+            a.addEventListener("click", async (e: MouseEvent) => {
+                e.preventDefault();
+                pageContext.setPageType("NOTE_DETAIL");
+                pageContext.setNote(item);
+                await pageContext.renderAsync();
+            });
+        });
+    }
+
     private async renderPasswordManagerAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
         try {
-            Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("PASSWORD_MANAGER"));
             const token: string = pageContext.getAuthenticationClient().getToken()!;
             const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
+            const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("PASSWORD_MANAGER"));
             if (userInfo.hasPasswordManagerFile) {
                 const passwordItems: PasswordItemResult[] = await PasswordManagerService.getPasswordFileAsync(token, userInfo);
+                passwordItems.sort((a, b) => a.Name.localeCompare(b.Name));
                 if (passwordItems.length > 0) {
-                    passwordItems.sort((a, b) => a.Name.localeCompare(b.Name));
+                    SearchComponent.create(heading, parent, pageContext, pageContext.getNoteFilter(), (filter: string) => this.filterPasswordItemList(pageContext, filter, passwordItems));
                     const listGroup: HTMLDivElement = Controls.createDiv(parent, "list-group");
-                    passwordItems.forEach(item => {
-                        const a: HTMLAnchorElement = Controls.createAnchor(listGroup, "passworddetails", "", "list-group-item");
-                        Controls.createSpan(a, "bi bi-lock");
-                        Controls.createSpan(a, "ms-2", item.Name);
-                        a.addEventListener("click", async (e: MouseEvent) => {
-                            e.preventDefault();
-                            pageContext.setPageType("PASSWORD_ITEM_DETAIL");
-                            pageContext.setPasswordItem(item);
-                            await pageContext.renderAsync();
-                        });
-                    });
+                    listGroup.id = "list-group-id";
+                    this.filterPasswordItemList(pageContext, pageContext.getPasswordItemFilter(), passwordItems);
                 }
             }
         }
         catch (error: Error | unknown) {
             Controls.createAlert(alertDiv, pageContext.getLocale().translateError(error));
         }
+    }
+
+    private filterPasswordItemList(pageContext: PageContext, filter: string, items: PasswordItemResult[]) {
+        pageContext.setPasswordItemFilter(filter);
+        const filteredItems: PasswordItemResult[] = [];
+        items.forEach(item => {
+            if (filter.length == 0 || item.Name.toLocaleLowerCase().includes(filter)) {
+                filteredItems.push(item);
+            }
+        });
+        const listGroup: HTMLElement = document.getElementById("list-group-id")!;
+        Controls.removeAllChildren(listGroup);
+        filteredItems.forEach(item => {
+            const a: HTMLAnchorElement = Controls.createAnchor(listGroup, "passworddetails", "", "list-group-item");
+            Controls.createSpan(a, "bi bi-lock");
+            Controls.createSpan(a, "ms-2", item.Name);
+            a.addEventListener("click", async (e: MouseEvent) => {
+                e.preventDefault();
+                pageContext.setPageType("PASSWORD_ITEM_DETAIL");
+                pageContext.setPasswordItem(item);
+                await pageContext.renderAsync();
+            });
+        });
     }
 }
 
