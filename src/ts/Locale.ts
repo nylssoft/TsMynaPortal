@@ -28,6 +28,7 @@ export class Locale {
         "NOTES": "Notizen",
         "PASSWORD_MANAGER": "Kennwörter",
         "SEARCH": "Suche:",
+        "COPIED_TO_CLIPBOARD": "In die Zwischenablage kopiert",
 
         "ERROR_WRONG_DATA_PROTECTION_KEY": "Der Schlüssel zum Entschlüsseln der Daten ist ungültig oder fehlt. Bitte überprüfe deinen Schlüssel auf der Seite 'Datenschutz'.",
     }
@@ -53,6 +54,7 @@ export class Locale {
         "NOTES": "Notes",
         "PASSWORD_MANAGER": "Passwords",
         "SEARCH": "Search:",
+        "COPIED_TO_CLIPBOARD": "Copied to the clipboard",
 
         "ERROR_WRONG_DATA_PROTECTION_KEY": "The key to decrypt the data is invalid or missing. Please check your key on the 'Data Protection' page.",
     }
