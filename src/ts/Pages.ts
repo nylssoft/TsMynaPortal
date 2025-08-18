@@ -503,7 +503,8 @@ export class PasswordItemDetailPage implements Page {
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
         const card = Controls.createDiv(parent, "card p-4 shadow-sm bg-light");
         card.style.maxWidth = "600px";
-        const copyAlert: HTMLDivElement = Controls.createDiv(parent, "fixed-bottom text-center alert alert-success fade")
+        const copyAlert: HTMLDivElement = Controls.createDiv(parent, "mt-5 text-center alert alert-success fade")
+        copyAlert.style.maxWidth = "600px";
         copyAlert.id = "copy-alert-id";
         copyAlert.setAttribute("role", "alert");
         Controls.createDiv(copyAlert, "", pageContext.getLocale().translate("COPIED_TO_CLIPBOARD"));
