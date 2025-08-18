@@ -157,7 +157,7 @@ export class Controls {
         Controls.removeAllChildren(parent);
         const alertDiv: HTMLDivElement = Controls.createDiv(parent, "alert alert-danger alert-dismissible");
         alertDiv.setAttribute("role", "alert");
-        const alertMessage: HTMLDivElement = Controls.createDiv(alertDiv, "", msg);
+        Controls.createDiv(alertDiv, "", msg);
         const alertButton: HTMLButtonElement = Controls.createButton(alertDiv, "button", "close-alert-id", "", "btn-close");
         alertButton.setAttribute("data-bs-dismiss", "alert");
         alertButton.setAttribute("aria-label", "Close");

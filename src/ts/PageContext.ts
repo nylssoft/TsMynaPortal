@@ -39,6 +39,8 @@ export class PageContext {
     private contact: ContactResult | null = null;
     private note: NoteResult | null = null;
     private passwordItem: PasswordItemResult | null = null;
+    private welcomeClosed: boolean = false;
+    private contactsFilter: string = "";
     private pageType: PageType = "LOGIN_USERNAME_PASSWORD";
     private pageRegistrations = new Map<PageType, Page>();
 
@@ -148,5 +150,21 @@ export class PageContext {
 
     public setPasswordItem(item: PasswordItemResult | null) {
         this.passwordItem = item;
+    }
+
+    public isWelcomeClosed() : boolean {
+        return this.welcomeClosed;
+    }
+
+    public setWelcomeClosed(closed: boolean) {
+        this.welcomeClosed = closed;
+    }
+
+    public getContactsFilter(): string {
+        return this.contactsFilter;
+    }
+
+    public setContactsFilter(filter: string) {
+        this.contactsFilter = filter;
     }
 }

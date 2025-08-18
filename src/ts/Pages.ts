@@ -4,6 +4,7 @@ import { Controls } from "./Controls";
 import { NoteService } from "./NoteService";
 import { PageContext, Page, PageType } from "./PageContext";
 import { PasswordManagerService } from "./PasswordManagerService";
+import { SearchComponent } from "./SearchComponent";
 import { Security } from "./Security";
 import { ContactResult, ContactsResult, NoteResult, PasswordItemResult, UserInfoResult } from "./TypeDefinitions";
 
@@ -160,16 +161,8 @@ export class DesktopPage implements Page {
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
         try {
-            const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
-            const now: Date = new Date();
-            const longDate: string = now.toLocaleDateString(pageContext.getLocale().getLanguage(), { dateStyle: "long" });
-            const longTime: string = now.toLocaleTimeString(pageContext.getLocale().getLanguage(), { timeStyle: "long" });
-            const welcomeMessage: HTMLDivElement = Controls.createDiv(parent, "alert alert-success");
-            Controls.createDiv(welcomeMessage, undefined, pageContext.getLocale().translateWithArgs("MESSAGE_WELCOME_1_2_3", [userInfo.name, longDate, longTime]));
-            const lastLoginDate: Date | null = await pageContext.getAuthenticationClient().getLastLoginDateAsync();
-            if (lastLoginDate != null) {
-                const lastLoginStr: string = lastLoginDate.toLocaleString(pageContext.getLocale().getLanguage(), { dateStyle: "long", timeStyle: "long" });
-                Controls.createDiv(welcomeMessage, "mt-2", pageContext.getLocale().translateWithArgs("MESSAGE_LAST_LOGIN_1", [lastLoginStr]));
+            if (!pageContext.isWelcomeClosed()) {
+                await this.renderWelcomeMessageAsync(parent, pageContext);
             }
             const tabs: HTMLUListElement = Controls.createElement(parent, "ul", "nav nav-pills") as HTMLUListElement;
             const tabBirthdays: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
@@ -201,6 +194,25 @@ export class DesktopPage implements Page {
         catch (error: Error | unknown) {
             Controls.createAlert(alertDiv, pageContext.getLocale().translateError(error));
         }
+    }
+
+    private async renderWelcomeMessageAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
+        const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
+        const now: Date = new Date();
+        const longDate: string = now.toLocaleDateString(pageContext.getLocale().getLanguage(), { dateStyle: "long" });
+        const longTime: string = now.toLocaleTimeString(pageContext.getLocale().getLanguage(), { timeStyle: "long" });
+        const welcomeElem: HTMLDivElement = Controls.createDiv(parent, "alert alert-success alert-dismissible");
+        welcomeElem.setAttribute("role", "alert");
+        Controls.createDiv(welcomeElem, "", pageContext.getLocale().translateWithArgs("MESSAGE_WELCOME_1_2_3", [userInfo.name, longDate, longTime]));
+        const welcomeCloseButton: HTMLButtonElement = Controls.createButton(welcomeElem, "button", "close-alert-id", "", "btn-close");
+        welcomeCloseButton.setAttribute("data-bs-dismiss", "alert");
+        welcomeCloseButton.setAttribute("aria-label", "Close");
+        const lastLoginDate: Date | null = await pageContext.getAuthenticationClient().getLastLoginDateAsync();
+        if (lastLoginDate != null) {
+            const lastLoginStr: string = lastLoginDate.toLocaleString(pageContext.getLocale().getLanguage(), { dateStyle: "long", timeStyle: "long" });
+            Controls.createDiv(welcomeElem, "mt-2", pageContext.getLocale().translateWithArgs("MESSAGE_LAST_LOGIN_1", [lastLoginStr]));
+        }
+        welcomeElem.addEventListener('closed.bs.alert', event => pageContext.setWelcomeClosed(true));
     }
 
     private async switchTabAsync(e: MouseEvent, pageContext: PageContext, tabName: string): Promise<void> {
@@ -253,29 +265,44 @@ export class DesktopPage implements Page {
 
     private async renderContactsAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
         try {
-            Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("CONTACTS"));
             const token: string = pageContext.getAuthenticationClient().getToken()!;
             const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
             const contacts: ContactsResult = await ContactService.getContactsAsync(token, userInfo);
+            contacts.items.sort((a, b) => a.name.localeCompare(b.name));
+            const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("CONTACTS"));
             if (contacts.items.length > 0) {
-                contacts.items.sort((a, b) => a.name.localeCompare(b.name));
+                SearchComponent.create(heading, parent, pageContext, pageContext.getContactsFilter(), (filter: string) => this.filterContactItemList(pageContext, filter, contacts.items));
                 const listGroup: HTMLDivElement = Controls.createDiv(parent, "list-group");
-                contacts.items.forEach(contact => {
-                    const a: HTMLAnchorElement = Controls.createAnchor(listGroup, "contactdetails", "", "list-group-item");
-                    Controls.createSpan(a, "bi bi-person");
-                    Controls.createSpan(a, "ms-2", contact.name);
-                    a.addEventListener("click", async (e: MouseEvent) => {
-                        e.preventDefault();
-                        pageContext.setPageType("CONTACT_DETAIL");
-                        pageContext.setContact(contact);
-                        await pageContext.renderAsync();
-                    });
-                });
+                listGroup.id = "list-group-id";
+                this.filterContactItemList(pageContext, pageContext.getContactsFilter(), contacts.items);
             }
         }
         catch (error: Error | unknown) {
             Controls.createAlert(alertDiv, pageContext.getLocale().translateError(error));
         }
+    }
+
+    private filterContactItemList(pageContext: PageContext, filter: string, items: ContactResult[]) {
+        pageContext.setContactsFilter(filter);
+        const filteredItems: ContactResult[] = [];
+        items.forEach(item => {
+            if (filter.length == 0 || item.name.toLocaleLowerCase().includes(filter)) {
+                filteredItems.push(item);
+            }
+        });
+        const listGroup: HTMLElement = document.getElementById("list-group-id")!;
+        Controls.removeAllChildren(listGroup);
+        filteredItems.forEach(item => {
+            const a: HTMLAnchorElement = Controls.createAnchor(listGroup, "contactdetails", "", "list-group-item");
+            Controls.createSpan(a, "bi bi-person");
+            Controls.createSpan(a, "ms-2", item.name);
+            a.addEventListener("click", async (e: MouseEvent) => {
+                e.preventDefault();
+                pageContext.setPageType("CONTACT_DETAIL");
+                pageContext.setContact(item);
+                await pageContext.renderAsync();
+            });
+        });
     }
 
     private async renderNotesAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
@@ -458,7 +485,7 @@ export class PasswordItemDetailPage implements Page {
                 inputLogin.setAttribute("autocomplete", "off");
                 inputLogin.setAttribute("spellcheck", "false");
                 const iconCopy: HTMLElement = Controls.createElement(cardTextLogin, "i", "ms-2 bi bi-clipboard");
-                iconCopy.setAttribute("style", "cursor:pointer; font-size: 1.5rem;");
+                iconCopy.setAttribute("style", "cursor:pointer;");
                 iconCopy.addEventListener("click", async (e: MouseEvent) => await this.copyToClipboardAsync(passwordItem.Login));
             }
             const user: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
@@ -471,10 +498,10 @@ export class PasswordItemDetailPage implements Page {
                 inputPassword.setAttribute("autocomplete", "off");
                 inputPassword.setAttribute("spellcheck", "false");
                 const iconCopy: HTMLElement = Controls.createElement(cardTextPassword, "i", "ms-2 bi bi-clipboard");
-                iconCopy.setAttribute("style", "cursor:pointer; font-size: 1.5rem;");
+                iconCopy.setAttribute("style", "cursor:pointer;");
                 iconCopy.addEventListener("click", async (e: MouseEvent) => await this.copyToClipboardAsync(pwd));
                 const iconToggle: HTMLElement = Controls.createElement(cardTextPassword, "i", "ms-2 bi bi-eye-slash");
-                iconToggle.setAttribute("style", "cursor:pointer; font-size: 1.5rem;");
+                iconToggle.setAttribute("style", "cursor:pointer;");
                 iconToggle.id = "toggle-password-id";
                 iconToggle.addEventListener("click", (e: MouseEvent) => this.onTogglePassword(e, inputPassword, iconToggle));
             }
