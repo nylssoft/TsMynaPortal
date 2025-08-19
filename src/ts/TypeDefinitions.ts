@@ -120,3 +120,8 @@ export type PasswordItemResult = {
   Password: string,
   Url: string
 }
+
+export type DiaryEntryResult = {
+  date: string,
+  entry: string
+}

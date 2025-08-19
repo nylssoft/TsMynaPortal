@@ -27,8 +27,13 @@ export class PasswordManagerService {
             if (encryptionKey == null || encryptionKey.length === 0) {
                 throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
             }
-            const cryptoKey: CryptoKey = await Security.createCryptoKeyAsync(encryptionKey!, user.passwordManagerSalt)
-            return await Security.decodeMessageAsync(cryptoKey, item.Password);
+            try {
+                const cryptoKey: CryptoKey = await Security.createCryptoKeyAsync(encryptionKey!, user.passwordManagerSalt)
+                return await Security.decodeMessageAsync(cryptoKey, item.Password);
+            } catch (e: Error | unknown) {
+                console.error("Error decoding password file:", e);
+                throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
+            }
         }
         return "";
     }

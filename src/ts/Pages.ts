@@ -1,12 +1,15 @@
 import { ClickAction, LogoutAction, ShowAboutPageAction, ShowDataProtectionPageAction, ShowDesktopPageAction, ShowLoginPageAction, ToggleLanguageAction } from "./Actions";
 import { ContactService } from "./ContactService";
 import { Controls } from "./Controls";
+import { DiaryService } from "./DiaryService";
 import { NoteService } from "./NoteService";
 import { PageContext, Page, PageType } from "./PageContext";
 import { PasswordManagerService } from "./PasswordManagerService";
 import { SearchComponent } from "./SearchComponent";
 import { Security } from "./Security";
-import { ContactResult, ContactsResult, NoteResult, PasswordItemResult, UserInfoResult } from "./TypeDefinitions";
+import { ContactResult, ContactsResult, DiaryEntryResult, NoteResult, PasswordItemResult, UserInfoResult } from "./TypeDefinitions";
+
+type DesktopTab = "BIRTHDAYS" | "CONTACTS" | "NOTES" | "PASSWORD_MANAGER" | "DIARY";
 
 /**
  * Page implementation for the navigation bar.
@@ -152,7 +155,7 @@ export class DataProtectionPage implements Page {
  */
 export class DesktopPage implements Page {
 
-    private currentTab: string = "BIRTHDAYS";
+    private currentTab: DesktopTab = "BIRTHDAYS";
 
     public getPageType(): PageType {
         return "DESKTOP";
@@ -181,6 +184,10 @@ export class DesktopPage implements Page {
             const aPasswordManager: HTMLAnchorElement = Controls.createAnchor(tabPasswordManager, "passwordmanager", "", "nav-link", this.currentTab === "PASSWORD_MANAGER");
             Controls.createSpan(aPasswordManager, "bi bi-lock");
             aPasswordManager.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, "PASSWORD_MANAGER"));
+            const tabDiary: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
+            const aDiary: HTMLAnchorElement = Controls.createAnchor(tabDiary, "diary", "", "nav-link", this.currentTab === "DIARY");
+            Controls.createSpan(aDiary, "bi bi-calendar");
+            aDiary.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, "DIARY"));
             if (this.currentTab === "BIRTHDAYS") {
                 await this.renderBirthdaysAsync(pageContext, parent, alertDiv);
             } else if (this.currentTab === "CONTACTS") {
@@ -189,6 +196,8 @@ export class DesktopPage implements Page {
                 await this.renderNotesAsync(pageContext, parent, alertDiv);
             } else if (this.currentTab === "PASSWORD_MANAGER") {
                 await this.renderPasswordManagerAsync(pageContext, parent, alertDiv);
+            } else if (this.currentTab === "DIARY") {
+                await this.renderDiaryAsync(pageContext, parent, alertDiv);
             }
         }
         catch (error: Error | unknown) {
@@ -215,7 +224,7 @@ export class DesktopPage implements Page {
         welcomeElem.addEventListener('closed.bs.alert', event => pageContext.setWelcomeClosed(true));
     }
 
-    private async switchTabAsync(e: MouseEvent, pageContext: PageContext, tabName: string): Promise<void> {
+    private async switchTabAsync(e: MouseEvent, pageContext: PageContext, tabName: DesktopTab): Promise<void> {
         e.preventDefault();
         this.currentTab = tabName;
         await pageContext.renderAsync();
@@ -223,9 +232,9 @@ export class DesktopPage implements Page {
 
     private async renderBirthdaysAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
         try {
-            Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("BIRTHDAYS"));
             const token: string = pageContext.getAuthenticationClient().getToken()!;
             const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
+            Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("BIRTHDAYS"));
             const contacts: ContactsResult = await ContactService.getContactsAsync(token, userInfo);
             const birthdays: ContactResult[] = [];
             contacts.items.forEach((contact) => {
@@ -267,9 +276,9 @@ export class DesktopPage implements Page {
         try {
             const token: string = pageContext.getAuthenticationClient().getToken()!;
             const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
+            const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("CONTACTS"));
             const contacts: ContactsResult = await ContactService.getContactsAsync(token, userInfo);
             contacts.items.sort((a, b) => a.name.localeCompare(b.name));
-            const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("CONTACTS"));
             if (contacts.items.length > 0) {
                 SearchComponent.create(heading, parent, pageContext, pageContext.getContactsFilter(), (filter: string) => this.filterContactItemList(pageContext, filter, contacts.items));
                 const listGroup: HTMLDivElement = Controls.createDiv(parent, "list-group");
@@ -309,9 +318,9 @@ export class DesktopPage implements Page {
         try {
             const token: string = pageContext.getAuthenticationClient().getToken()!;
             const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
+            const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("NOTES"));
             const notes: NoteResult[] = await NoteService.getNotesAsync(token, userInfo);
             notes.sort((a, b) => a.title.localeCompare(b.title));
-            const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("NOTES"));
             if (notes.length > 0) {
                 SearchComponent.create(heading, parent, pageContext, pageContext.getNoteFilter(), (filter: string) => this.filterNoteItemList(pageContext, filter, notes));
                 const listGroup: HTMLDivElement = Controls.createDiv(parent, "list-group");
@@ -389,6 +398,27 @@ export class DesktopPage implements Page {
                 await pageContext.renderAsync();
             });
         });
+    }
+
+    private async renderDiaryAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
+        try {
+            const token: string = pageContext.getAuthenticationClient().getToken()!;
+            const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
+            const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("DIARY"));
+            const now: Date = new Date(Date.now());
+            const year: number = now.getFullYear();
+            const month: number = now.getMonth();
+            const days: number[] = await DiaryService.getDaysAsync(token, now);
+            console.log(days);
+            for (const day of days) {
+                const d: Date = new Date(Date.UTC(year, month, day));
+                const entry: string | null = await DiaryService.getEntryAsync(token, userInfo, d);
+                console.log(`Day: ${day}, entry: ${entry}`);
+            }
+        }
+        catch (error: Error | unknown) {
+            Controls.createAlert(alertDiv, pageContext.getLocale().translateError(error));
+        }
     }
 }
 

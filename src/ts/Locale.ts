@@ -27,6 +27,7 @@ export class Locale {
         "CONTACTS": "Kontakte",
         "NOTES": "Notizen",
         "PASSWORD_MANAGER": "Kennwörter",
+        "DIARY": "Tagebuch",
         "SEARCH": "Suche:",
         "COPIED_TO_CLIPBOARD": "In die Zwischenablage kopiert",
 
@@ -53,6 +54,7 @@ export class Locale {
         "CONTACTS": "Contacts",
         "NOTES": "Notes",
         "PASSWORD_MANAGER": "Passwords",
+        "DIARY": "Diary",
         "SEARCH": "Search:",
         "COPIED_TO_CLIPBOARD": "Copied to the clipboard",
 

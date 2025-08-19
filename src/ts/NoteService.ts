@@ -27,10 +27,10 @@ export class NoteService {
         if (encryptionKey == null || encryptionKey.length === 0) {
             throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
         }
+        const resp: Response = await FetchHelper.fetchAsync('/api/notes/note', { headers: { 'token': token } });
+        const notes: NoteResult[] = await resp.json() as NoteResult[];
         try {
             const cryptoKey: CryptoKey = await Security.createCryptoKeyAsync(encryptionKey!, user.passwordManagerSalt)
-            const resp: Response = await FetchHelper.fetchAsync('/api/notes/note', { headers: { 'token': token } });
-            const notes: NoteResult[] = await resp.json() as NoteResult[];
             for (const note of notes) {
                 if (note.title.length > 0) {
                     note.title = await Security.decodeMessageAsync(cryptoKey, note.title);
@@ -38,7 +38,7 @@ export class NoteService {
             }
             return notes;
         } catch (e: Error | unknown) {
-            console.error("Error decoding contacts:", e);
+            console.error("Error decoding note:", e);
             throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
         }
     }
@@ -58,10 +58,10 @@ export class NoteService {
         if (encryptionKey == null || encryptionKey.length === 0) {
             throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
         }
+        const resp: Response = await FetchHelper.fetchAsync(`/api/notes/note/${noteId}`, { headers: { 'token': token } });
+        const note: NoteResult = await resp.json() as NoteResult;
         try {
             const cryptoKey: CryptoKey = await Security.createCryptoKeyAsync(encryptionKey!, user.passwordManagerSalt)
-            const resp: Response = await FetchHelper.fetchAsync(`/api/notes/note/${noteId}`, { headers: { 'token': token } });
-            const note: NoteResult = await resp.json() as NoteResult;
             if (note.content == null) {
                 note.content = "";
             } else if (note.content.length > 0) {
