@@ -17,6 +17,8 @@ export class AuthenticationClient {
 
     private useLongLivedToken: boolean = false;
 
+    private lastLoginDate: Date | null = null;
+
     /**
      * Initializes the authentication client by loading the auth result and long-lived token from storage.
      */
@@ -131,6 +133,7 @@ export class AuthenticationClient {
         this.authResult = null;
         this.lltoken = null;
         this.userInfo = null;
+        this.lastLoginDate = null;
         window.sessionStorage.removeItem("authresult");
         window.localStorage.removeItem("pwdman-lltoken");
     }
@@ -278,6 +281,7 @@ export class AuthenticationClient {
      * @returns a promise that resolves to the last login date or null if not found
      */
     public async getLastLoginDateAsync(): Promise<Date | null> {
+        if (this.lastLoginDate != null) return this.lastLoginDate;
         const token: string | null = this.getToken();
         if (token == null) throw new Error("ERROR_INVALID_PARAMETERS");
         const resp: Response = await FetchHelper.fetchAsync('/api/pwdman/user/audit?max=10', { headers: { 'token': token } });
@@ -289,10 +293,13 @@ export class AuthenticationClient {
             if (action == "AUDIT_LOGIN_BASIC_1" || action == "AUDIT_LOGIN_LLTOKEN_1" || action == "AUDIT_LOGIN_PIN_1" || action == "AUDIT_LOGIN_2FA_1") {
                 cnt++;
                 if (cnt == 2) {
-                    return new Date(audit.performedUtc);
+                    this.lastLoginDate = new Date(audit.performedUtc);
+                    return this.lastLoginDate;
                 }
             }
         }
-        return null;
+        // use now for the first login ever
+        this.lastLoginDate = new Date();
+        return this.lastLoginDate;
     }
 }

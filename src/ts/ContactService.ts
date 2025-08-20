@@ -1,12 +1,6 @@
 import { FetchHelper } from "./FetchHelper";
 import { Security } from "./Security";
-import { ContactResult, ContactsResult, UserInfoResult } from "./TypeDefinitions";
-
-
-type DayAndMonth = {
-    day: number,
-    month: number
-}
+import { ContactResult, ContactsResult, DayAndMonth, UserInfoResult } from "./TypeDefinitions";
 
 /**
  * ContactService provides methods to manage contacts.

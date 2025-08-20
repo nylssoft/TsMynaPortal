@@ -1,13 +1,15 @@
 import { Locale } from "./Locale";
 import { AuthenticationClient } from "./AuthenticationClient";
 import { Controls } from "./Controls";
-import { ContactResult, NoteResult, PasswordItemResult } from "./TypeDefinitions";
+import { ContactResult, DesktopTab, MonthAndYear, NoteResult, PasswordItemResult } from "./TypeDefinitions";
+import { DesktopPage } from "./Pages";
 
 /**
  * Type representing the different pages in the application.
  */
 export type PageType = "LOGIN_USERNAME_PASSWORD" | "LOGIN_PIN" | "LOGIN_PASS2" | "ABOUT" | "DESKTOP"
-    | "DATA_PROTECTION" | "NAVIGATION_BAR" | "CONTACT_DETAIL" | "NOTE_DETAIL" | "PASSWORD_ITEM_DETAIL";
+    | "DATA_PROTECTION" | "NAVIGATION_BAR" | "CONTACT_DETAIL" | "NOTE_DETAIL" | "PASSWORD_ITEM_DETAIL"
+    | "DIARY_DETAIL";
 
 
 /**
@@ -34,17 +36,57 @@ export interface Page {
  * Context for the current page, containing information about the locale, authentication client, and page type.
  */
 export class PageContext {
+    // translation
     private locale: Locale = new Locale();
+    // authentication
     private authenticationClient: AuthenticationClient = new AuthenticationClient();
-    private contact: ContactResult | null = null;
-    private note: NoteResult | null = null;
-    private passwordItem: PasswordItemResult | null = null;
-    private welcomeClosed: boolean = false;
-    private contactsFilter: string = "";
-    private noteFilter: string = "";
-    private passwordItemFilter: string = "";
+    // current page
     private pageType: PageType = "LOGIN_USERNAME_PASSWORD";
+    // page registrations
     private pageRegistrations = new Map<PageType, Page>();
+
+    // --- desktop page
+
+    // welcome message closed
+    private welcomeClosed: boolean = false;
+    // selected tab in desktop page
+    private desktopTab: DesktopTab = "BIRTHDAYS";
+
+    // --- contacts tab in desktop page
+
+    // filter
+    private contactsFilter: string = "";
+    // selected contact in contact detail page
+    private contact: ContactResult | null = null;
+
+    // --- notes tab in desktop page
+
+    // filter
+    private noteFilter: string = "";
+    // selected note in note detail page
+    private note: NoteResult | null = null;
+
+    // --- passwords tab in desktop page
+
+    // filter
+    private passwordItemFilter: string = "";
+    // selected password item in password detail page
+    private passwordItem: PasswordItemResult | null = null;
+
+    // --- diary tab in desktop page
+
+    // month and year shown
+    private diaryMonthAndYear: MonthAndYear;
+    // selected day in diary details page
+    private diaryDay: number | null = null;
+
+    public constructor() {
+        const now: Date = new Date(Date.now());
+        this.diaryMonthAndYear = {
+            month: now.getMonth(),
+            year: now.getFullYear()
+        }
+    }
 
     /**
      * Registers a page implementation.
@@ -106,6 +148,22 @@ export class PageContext {
         this.pageType = pageType;
     }
 
+    public getDesktopTab(): DesktopTab {
+        return this.desktopTab;
+    }
+
+    public setDesktopTab(desktopTab: DesktopTab) {
+        this.desktopTab = desktopTab;
+    }
+
+    public isWelcomeClosed(): boolean {
+        return this.welcomeClosed;
+    }
+
+    public setWelcomeClosed(closed: boolean) {
+        this.welcomeClosed = closed;
+    }
+
     /**
      * Retrieves the currently set contact.
      * If no contact is set, it returns null.
@@ -124,6 +182,14 @@ export class PageContext {
      */
     public setContact(contact: ContactResult | null) {
         this.contact = contact;
+    }
+
+    public getContactsFilter(): string {
+        return this.contactsFilter;
+    }
+
+    public setContactsFilter(filter: string) {
+        this.contactsFilter = filter;
     }
 
     /**
@@ -146,30 +212,6 @@ export class PageContext {
         this.note = note;
     }
 
-    public getPasswordItem(): PasswordItemResult | null {
-        return this.passwordItem;
-    }
-
-    public setPasswordItem(item: PasswordItemResult | null) {
-        this.passwordItem = item;
-    }
-
-    public isWelcomeClosed() : boolean {
-        return this.welcomeClosed;
-    }
-
-    public setWelcomeClosed(closed: boolean) {
-        this.welcomeClosed = closed;
-    }
-
-    public getContactsFilter(): string {
-        return this.contactsFilter;
-    }
-
-    public setContactsFilter(filter: string) {
-        this.contactsFilter = filter;
-    }
-
     public getNoteFilter(): string {
         return this.noteFilter;
     }
@@ -178,11 +220,47 @@ export class PageContext {
         this.noteFilter = filter;
     }
 
+    public getPasswordItem(): PasswordItemResult | null {
+        return this.passwordItem;
+    }
+
+    public setPasswordItem(item: PasswordItemResult | null) {
+        this.passwordItem = item;
+    }
+
     public getPasswordItemFilter(): string {
         return this.passwordItemFilter;
     }
 
     public setPasswordItemFilter(filter: string) {
         this.passwordItemFilter = filter;
+    }
+
+    public getDiaryMonthAndYear(): MonthAndYear {
+        return this.diaryMonthAndYear;
+    }
+
+    public nextDiaryMonthAndYear() {
+        this.diaryMonthAndYear.month += 1;
+        if (this.diaryMonthAndYear.month >= 12) {
+            this.diaryMonthAndYear.month = 0;
+            this.diaryMonthAndYear.year += 1;
+        }
+    }
+
+    public previousDiaryMonthAnyYear() {
+        this.diaryMonthAndYear.month -= 1;
+        if (this.diaryMonthAndYear.month < 0) {
+            this.diaryMonthAndYear.year -= 1;
+            this.diaryMonthAndYear.month = 11;
+        }
+    }
+
+    public getDiaryDay(): number | null {
+        return this.diaryDay;
+    }
+
+    public setDiaryDay(day: number | null) {
+        this.diaryDay = day;
     }
 }

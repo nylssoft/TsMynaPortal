@@ -117,17 +117,14 @@ export class Controls {
      * 
      * @param parent parent element to append the new button to
      * @param type type of the button (e.g., "button", "submit")
-     * @param id ID of the button element
      * @param txt text content to set for the button
      * @param classname optional class name to assign to the button
      * @returns HTMLButtonElement created with the specified type, ID, text content, and class
      */
-    public static createButton(parent: HTMLElement, type: string, id: string, txt: string, classname?: string): HTMLButtonElement {
-        const b: HTMLButtonElement = Controls.createElement(parent, "button", classname) as HTMLButtonElement;
+    public static createButton(parent: HTMLElement, type: string, txt: string, classname?: string): HTMLButtonElement {
+        const b: HTMLButtonElement = Controls.createElement(parent, "button", classname, txt) as HTMLButtonElement;
         b.setAttribute("type", type);
-        b.id = id;
         b.title = txt;
-        b.textContent = txt;
         return b;
     }
 
@@ -158,7 +155,7 @@ export class Controls {
         const alertDiv: HTMLDivElement = Controls.createDiv(parent, "alert alert-danger alert-dismissible");
         alertDiv.setAttribute("role", "alert");
         Controls.createDiv(alertDiv, "", msg);
-        const alertButton: HTMLButtonElement = Controls.createButton(alertDiv, "button", "close-alert-id", "", "btn-close");
+        const alertButton: HTMLButtonElement = Controls.createButton(alertDiv, "button", "", "btn-close");
         alertButton.setAttribute("data-bs-dismiss", "alert");
         alertButton.setAttribute("aria-label", "Close");
         return alertDiv;

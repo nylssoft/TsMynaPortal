@@ -125,3 +125,15 @@ export type DiaryEntryResult = {
   date: string,
   entry: string
 }
+
+export type DayAndMonth = {
+  day: number,
+  month: number
+}
+
+export type MonthAndYear = {
+  month: number,
+  year: number
+}
+
+export type DesktopTab = "BIRTHDAYS" | "CONTACTS" | "NOTES" | "PASSWORD_MANAGER" | "DIARY";

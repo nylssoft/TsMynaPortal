@@ -1,5 +1,5 @@
 import { PageContext } from "./PageContext";
-import { NavigationBarPage, AboutPage, DataProtectionPage, DesktopPage, LoginPass2Page, LoginPinPage, LoginUsernamePasswordPage, ContactDetailPage, NoteDetailPage, PasswordItemDetailPage } from "./Pages";
+import { NavigationBarPage, AboutPage, DataProtectionPage, DesktopPage, LoginPass2Page, LoginPinPage, LoginUsernamePasswordPage, ContactDetailPage, NoteDetailPage, PasswordItemDetailPage, DiaryDetailPage } from "./Pages";
 
 /**
  * Main application class that initializes the application, handles authentication, and renders the UI.
@@ -37,6 +37,7 @@ export class App {
         pageContext.registerPage(new ContactDetailPage());
         pageContext.registerPage(new NoteDetailPage());
         pageContext.registerPage(new PasswordItemDetailPage());
+        pageContext.registerPage(new DiaryDetailPage());
         await pageContext.getLocale().setLanguageAsync();
         await pageContext.getAuthenticationClient().loginWithLongLivedTokenAsync();
         if (pageContext.getAuthenticationClient().isLoggedIn()) {
