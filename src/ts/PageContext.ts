@@ -1,7 +1,7 @@
 import { Locale } from "./Locale";
 import { AuthenticationClient } from "./AuthenticationClient";
 import { Controls } from "./Controls";
-import { ContactResult, DesktopTab, MonthAndYear, NoteResult, PageType, PasswordItemResult } from "./TypeDefinitions";
+import { ContactResult, DesktopTab, NoteResult, PageType, PasswordItemResult } from "./TypeDefinitions";
 import { Theme } from "./Theme";
 import { Diary } from "./Diary";
 
@@ -88,7 +88,7 @@ export class PageContext {
         const main: HTMLElement | null = document.getElementById("main-id");
         if (main != null) {
             Controls.removeAllChildren(main);
-            this.pageRegistrations.get("NAVIGATION_BAR")?.renderAsync(main, this);
+            await this.pageRegistrations.get("NAVIGATION_BAR")?.renderAsync(main, this);
             const content: HTMLDivElement = Controls.createDiv(main, "container py-4 px-3 mx-auto");
             await this.pageRegistrations.get(this.pageType)?.renderAsync(content, this);
         }

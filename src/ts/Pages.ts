@@ -82,7 +82,7 @@ export class AboutPage implements Page {
 
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const aboutMessage: HTMLDivElement = Controls.createDiv(parent, "alert alert-success");
-        aboutMessage.textContent = `Version 0.1.2 ${pageContext.getLocale().translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.getLocale().translate("COPYRIGHT")}`;
+        aboutMessage.textContent = `Version 0.1.3 ${pageContext.getLocale().translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.getLocale().translate("COPYRIGHT")}`;
     }
 }
 
@@ -227,7 +227,7 @@ export class DesktopPage implements Page {
             const lastLoginStr: string = lastLoginDate.toLocaleString(pageContext.getLocale().getLanguage(), { dateStyle: "long", timeStyle: "long" });
             Controls.createDiv(welcomeElem, "mt-2", pageContext.getLocale().translateWithArgs("MESSAGE_LAST_LOGIN_1", [lastLoginStr]));
         }
-        welcomeElem.addEventListener('closed.bs.alert', event => pageContext.setWelcomeClosed(true));
+        welcomeElem.addEventListener('closed.bs.alert', _ => pageContext.setWelcomeClosed(true));
     }
 
     // birthday tab
@@ -730,6 +730,8 @@ export class DiaryDetailPage implements Page {
                 pageContext.getDiary().nextDay();
                 await pageContext.renderAsync();
             });
+            const dayTexts: string[] = ["TEXT_SUNDAY", "TEXT_MONDAY", "TEXT_TUESDAY", "TEXT_WEDNESDAY", "TEXT_THURSDAY", "TEXT_FRIDAY", "TEXT_SATURDAY"];
+            Controls.createDiv(cardBody, "mb-1 text-center", pageContext.getLocale().translate(dayTexts[date.getDay()]));
             const divFormFloating: HTMLDivElement = Controls.createDiv(cardBody, "form-floating mb-4");
             const textarea: HTMLTextAreaElement = Controls.createElement(divFormFloating, "textarea", "form-control", entry!) as HTMLTextAreaElement;
             textarea.style.height = "400px";

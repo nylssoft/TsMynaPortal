@@ -1,4 +1,5 @@
-import { PageContext, PageType } from "./PageContext";
+import { PageContext } from "./PageContext";
+import { PageType } from "./TypeDefinitions";
 
 /**
  * Interface for actions that can be triggered by clicking on navigation items.
