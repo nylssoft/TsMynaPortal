@@ -1,16 +1,9 @@
 import { Locale } from "./Locale";
 import { AuthenticationClient } from "./AuthenticationClient";
 import { Controls } from "./Controls";
-import { ContactResult, DesktopTab, MonthAndYear, NoteResult, PasswordItemResult } from "./TypeDefinitions";
-import { DesktopPage } from "./Pages";
-
-/**
- * Type representing the different pages in the application.
- */
-export type PageType = "LOGIN_USERNAME_PASSWORD" | "LOGIN_PIN" | "LOGIN_PASS2" | "ABOUT" | "DESKTOP"
-    | "DATA_PROTECTION" | "NAVIGATION_BAR" | "CONTACT_DETAIL" | "NOTE_DETAIL" | "PASSWORD_ITEM_DETAIL"
-    | "DIARY_DETAIL";
-
+import { ContactResult, DesktopTab, MonthAndYear, NoteResult, PageType, PasswordItemResult } from "./TypeDefinitions";
+import { Theme } from "./Theme";
+import { Diary } from "./Diary";
 
 /**
  * Interface for a page that can be rendered in the application.
@@ -38,12 +31,16 @@ export interface Page {
 export class PageContext {
     // translation
     private locale: Locale = new Locale();
+    // theme
+    private theme: Theme = new Theme();
     // authentication
     private authenticationClient: AuthenticationClient = new AuthenticationClient();
     // current page
     private pageType: PageType = "LOGIN_USERNAME_PASSWORD";
     // page registrations
     private pageRegistrations = new Map<PageType, Page>();
+    // diary
+    private diary: Diary = new Diary();
 
     // --- desktop page
 
@@ -72,21 +69,6 @@ export class PageContext {
     private passwordItemFilter: string = "";
     // selected password item in password detail page
     private passwordItem: PasswordItemResult | null = null;
-
-    // --- diary tab in desktop page
-
-    // month and year shown
-    private diaryMonthAndYear: MonthAndYear;
-    // selected day in diary details page
-    private diaryDay: number | null = null;
-
-    public constructor() {
-        const now: Date = new Date(Date.now());
-        this.diaryMonthAndYear = {
-            month: now.getMonth(),
-            year: now.getFullYear()
-        }
-    }
 
     /**
      * Registers a page implementation.
@@ -119,6 +101,14 @@ export class PageContext {
      */
     public getLocale(): Locale {
         return this.locale;
+    }
+
+    public getTheme(): Theme {
+        return this.theme;
+    }
+
+    public getDiary(): Diary {
+        return this.diary;
     }
 
     /**
@@ -234,33 +224,5 @@ export class PageContext {
 
     public setPasswordItemFilter(filter: string) {
         this.passwordItemFilter = filter;
-    }
-
-    public getDiaryMonthAndYear(): MonthAndYear {
-        return this.diaryMonthAndYear;
-    }
-
-    public nextDiaryMonthAndYear() {
-        this.diaryMonthAndYear.month += 1;
-        if (this.diaryMonthAndYear.month >= 12) {
-            this.diaryMonthAndYear.month = 0;
-            this.diaryMonthAndYear.year += 1;
-        }
-    }
-
-    public previousDiaryMonthAnyYear() {
-        this.diaryMonthAndYear.month -= 1;
-        if (this.diaryMonthAndYear.month < 0) {
-            this.diaryMonthAndYear.year -= 1;
-            this.diaryMonthAndYear.month = 11;
-        }
-    }
-
-    public getDiaryDay(): number | null {
-        return this.diaryDay;
-    }
-
-    public setDiaryDay(day: number | null) {
-        this.diaryDay = day;
     }
 }

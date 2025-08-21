@@ -1,13 +1,12 @@
 import { ClickAction, LogoutAction, ShowAboutPageAction, ShowDataProtectionPageAction, ShowDesktopPageAction, ShowLoginPageAction, ToggleLanguageAction } from "./Actions";
 import { ContactService } from "./ContactService";
 import { Controls } from "./Controls";
-import { DiaryService } from "./DiaryService";
 import { NoteService } from "./NoteService";
-import { PageContext, Page, PageType } from "./PageContext";
+import { PageContext, Page } from "./PageContext";
 import { PasswordManagerService } from "./PasswordManagerService";
 import { SearchComponent } from "./SearchComponent";
 import { Security } from "./Security";
-import { ContactResult, ContactsResult, DesktopTab, NoteResult, PasswordItemResult, UserInfoResult } from "./TypeDefinitions";
+import { ContactResult, ContactsResult, DesktopTab, NoteResult, PageType, PasswordItemResult, UserInfoResult } from "./TypeDefinitions";
 
 /**
  * Page implementation for the navigation bar.
@@ -43,8 +42,8 @@ export class NavigationBarPage implements Page {
         const aBrand: HTMLAnchorElement = Controls.createElement(container, "a", "navbar-brand", pageContext.getLocale().translate(label)) as HTMLAnchorElement;
         aBrand.setAttribute("role", "button");
         aBrand.addEventListener("click", (e: MouseEvent) => {
-            const theme: string = document.documentElement.getAttribute("data-bs-theme")!;
-            document.documentElement.setAttribute("data-bs-theme", theme == "light" ? "dark" : "light");
+            e.preventDefault();
+            pageContext.getTheme().toggle();
         });
         const button: HTMLButtonElement = Controls.createElement(container, "button", "navbar-toggler") as HTMLButtonElement;
         button.setAttribute("type", "button");
@@ -83,7 +82,7 @@ export class AboutPage implements Page {
 
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const aboutMessage: HTMLDivElement = Controls.createDiv(parent, "alert alert-success");
-        aboutMessage.textContent = `Version 0.1.1 ${pageContext.getLocale().translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.getLocale().translate("COPYRIGHT")}`;
+        aboutMessage.textContent = `Version 0.1.2 ${pageContext.getLocale().translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.getLocale().translate("COPYRIGHT")}`;
     }
 }
 
@@ -415,9 +414,9 @@ export class DesktopPage implements Page {
         try {
             const token: string = pageContext.getAuthenticationClient().getToken()!;
             Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("DIARY"));
-            const d: Date = new Date(Date.UTC(pageContext.getDiaryMonthAndYear().year, pageContext.getDiaryMonthAndYear().month));
-            const days: number[] = await DiaryService.getDaysAsync(token, d);
-            const datestr: string = d.toLocaleDateString(pageContext.getLocale().getLanguage(), { year: "numeric", month: "long" });
+            const date: Date = pageContext.getDiary().getDate();
+            const days: number[] = await pageContext.getDiary().getDaysAsync(token, date);
+            const datestr: string = date.toLocaleDateString(pageContext.getLocale().getLanguage(), { year: "numeric", month: "long" });
             const calendarDiv: HTMLDivElement = Controls.createDiv(parent);
             calendarDiv.style.maxWidth = "400px";
             this.renderCalendar(pageContext, calendarDiv, days, datestr);
@@ -437,17 +436,16 @@ export class DesktopPage implements Page {
         iRight.setAttribute("role", "button");
         iLeft.addEventListener("click", async (e: MouseEvent) => {
             e.preventDefault();
-            pageContext.previousDiaryMonthAnyYear();
+            pageContext.getDiary().previousMonth();
             await pageContext.renderAsync();
         });
         iRight.addEventListener("click", async (e: MouseEvent) => {
             e.preventDefault();
-            pageContext.nextDiaryMonthAndYear();
+            pageContext.getDiary().nextMonth();
             await pageContext.renderAsync();
         });
-        const date: Date = new Date(pageContext.getDiaryMonthAndYear().year, pageContext.getDiaryMonthAndYear().month);
-        const firstDay: number = (date.getDay() + 6) % 7;
-        const daysInMonth: number = 32 - new Date(pageContext.getDiaryMonthAndYear().year, pageContext.getDiaryMonthAndYear().month, 32).getDate();
+        const firstDay: number = pageContext.getDiary().getFirstDayInMonth();
+        const daysInMonth: number = pageContext.getDiary().getDaysInMonth();
         const table: HTMLTableElement = Controls.createElement(parent, "table", "table") as HTMLTableElement;
         const theader: HTMLTableSectionElement = Controls.createElement(table, "thead") as HTMLTableSectionElement;
         const trhead: HTMLTableRowElement = Controls.createElement(theader, "tr") as HTMLTableRowElement;
@@ -465,7 +463,7 @@ export class DesktopPage implements Page {
             th.title = pageContext.getLocale().translate(val.title);
         });
         let tbody = Controls.createElement(table, "tbody");
-        const today: Date = new Date();
+        const now: Date = new Date();
         let day: number = 1;
         for (let i: number = 0; i < 6; i++) {
             const tr: HTMLTableRowElement = Controls.createElement(tbody, "tr") as HTMLTableRowElement;
@@ -474,20 +472,18 @@ export class DesktopPage implements Page {
                     Controls.createElement(tr, "td", "text-center", "\u00A0");
                 } else {
                     const td: HTMLTableCellElement = Controls.createElement(tr, "td", "text-center", `${day}`) as HTMLTableCellElement;
+                    td.setAttribute("role", "button");
+                    const constDay: number = day; // bind to const for the following capture
+                    td.addEventListener("click", async (e: MouseEvent) => {
+                        e.preventDefault();
+                        pageContext.getDiary().setDay(constDay);
+                        pageContext.setPageType("DIARY_DETAIL");
+                        await pageContext.renderAsync();
+                    });
                     if (!days.includes(day)) {
                         td.classList.add("text-secondary");
-                    } else {
-                        td.setAttribute("role", "button");
-                        const constDay: number = day; // bind to const for the following capture
-                        td.addEventListener("click", async (e: MouseEvent) => {
-                            e.preventDefault();
-                            pageContext.setDiaryDay(constDay);
-                            pageContext.setPageType("DIARY_DETAIL");
-                            await pageContext.renderAsync();
-                        });
                     }
-                    const isToday: boolean = day == today.getDate() && pageContext.getDiaryMonthAndYear().year == today.getFullYear() && pageContext.getDiaryMonthAndYear().month == today.getMonth();
-                    if (isToday) {
+                    if (pageContext.getDiary().isToday(now, day)) {
                         td.classList.add("bg-secondary-subtle");
                     }
                     day++;
@@ -714,11 +710,26 @@ export class DiaryDetailPage implements Page {
         try {
             const token: string = pageContext.getAuthenticationClient().getToken()!;
             const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
-            const date: Date = new Date(Date.UTC(pageContext.getDiaryMonthAndYear().year, pageContext.getDiaryMonthAndYear().month, pageContext.getDiaryDay()!))
-            const entry: string | null = await DiaryService.getEntryAsync(token, userInfo, date);
+            const date: Date = pageContext.getDiary().getDate();
+            const entry: string | null = await pageContext.getDiary().getEntryAsync(token, userInfo, date);
             const longDate: string = date.toLocaleDateString(pageContext.getLocale().getLanguage(), { dateStyle: "long" });
             const cardBody: HTMLDivElement = Controls.createDiv(parent, "card-body");
-            Controls.createHeading(cardBody, 2, "card-title mb-3", `${longDate}`);
+            const heading: HTMLHeadingElement = Controls.createHeading(cardBody, 2, "card-title mb-3 d-flex justify-content-between align-items-center");
+            const iLeft: HTMLElement = Controls.createElement(heading, "i", "ms-4 bi bi-arrow-left");
+            iLeft.setAttribute("role", "button");
+            Controls.createSpan(heading, "mx-auto", longDate);
+            const iRight: HTMLElement = Controls.createElement(heading, "i", "me-4 bi bi-arrow-right")
+            iRight.setAttribute("role", "button");
+            iLeft.addEventListener("click", async (e: MouseEvent) => {
+                e.preventDefault();
+                pageContext.getDiary().previousDay();
+                await pageContext.renderAsync();
+            });
+            iRight.addEventListener("click", async (e: MouseEvent) => {
+                e.preventDefault();
+                pageContext.getDiary().nextDay();
+                await pageContext.renderAsync();
+            });
             const divFormFloating: HTMLDivElement = Controls.createDiv(cardBody, "form-floating mb-4");
             const textarea: HTMLTextAreaElement = Controls.createElement(divFormFloating, "textarea", "form-control", entry!) as HTMLTextAreaElement;
             textarea.style.height = "400px";
@@ -729,7 +740,7 @@ export class DiaryDetailPage implements Page {
             backButton.addEventListener("click", async (e: MouseEvent) => {
                 e.preventDefault();
                 pageContext.setPageType("DESKTOP");
-                pageContext.setDiaryDay(null);
+                pageContext.getDiary().setDay(null);
                 await pageContext.renderAsync();
             });
         }
