@@ -37,7 +37,7 @@ export class NavigationBarPage implements Page {
     }
 
     private createNavBar(parent: HTMLElement, pageContext: PageContext, label: string): HTMLUListElement {
-        const nav: HTMLElement = Controls.createElement(parent, "nav", "navbar navbar-expand-lg navbar-dark bg-dark");
+        const nav: HTMLElement = Controls.createElement(parent, "nav", "navbar navbar-expand-lg");
         const container: HTMLDivElement = Controls.createDiv(nav, "container");
         const aBrand: HTMLAnchorElement = Controls.createElement(container, "a", "navbar-brand", pageContext.getLocale().translate(label)) as HTMLAnchorElement;
         aBrand.setAttribute("role", "button");
