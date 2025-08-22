@@ -30,6 +30,7 @@ export class Locale {
         "DIARY": "Tagebuch",
         "SEARCH": "Suche:",
         "COPIED_TO_CLIPBOARD": "In die Zwischenablage kopiert",
+        "WEBSITE_INFO": "Dies ist eine private Website. Sie wird ausschließlich für persönliche oder familiäre Zwecke verwendet.",
 
         "ERROR_WRONG_DATA_PROTECTION_KEY": "Der Schlüssel zum Entschlüsseln der Daten ist ungültig oder fehlt. Bitte überprüfe deinen Schlüssel auf der Seite 'Datenschutz'.",
     }
@@ -57,6 +58,7 @@ export class Locale {
         "DIARY": "Diary",
         "SEARCH": "Search:",
         "COPIED_TO_CLIPBOARD": "Copied to the clipboard",
+        "WEBSITE_INFO": "This is a private website. It is intended for personal or family use only.",
 
         "ERROR_WRONG_DATA_PROTECTION_KEY": "The key to decrypt the data is invalid or missing. Please check your key on the 'Data Protection' page.",
     }

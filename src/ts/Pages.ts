@@ -82,7 +82,10 @@ export class AboutPage implements Page {
 
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const aboutMessage: HTMLDivElement = Controls.createDiv(parent, "alert alert-success");
-        aboutMessage.textContent = `Version 0.1.3 ${pageContext.getLocale().translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.getLocale().translate("COPYRIGHT")}`;
+        Controls.createParagraph(aboutMessage, "", pageContext.getLocale().translate("WEBSITE_INFO"));
+        Controls.createParagraph(aboutMessage, "", `Version 0.1.4 ${pageContext.getLocale().translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.getLocale().translate("COPYRIGHT")}`);
+        const anchor: HTMLAnchorElement = Controls.createAnchor(aboutMessage, "https://github.com/nylssoft/TsMynaPortal", "Soruce Code");
+        anchor.setAttribute("target", "_blank");
     }
 }
 
@@ -96,33 +99,38 @@ export class DataProtectionPage implements Page {
     }
 
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
-        const user: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
-        const encKey: string | null = await Security.getEncryptionKeyAsync(user);
-        parent = Controls.createDiv(parent, "card p-4 shadow-sm");
-        parent.style.maxWidth = "400px";
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
-        const infoDiv: HTMLDivElement = Controls.createDiv(parent, "alert alert-warning", pageContext.getLocale().translate("KEY_INFO"));
-        infoDiv.setAttribute("role", "alert");
-        const formElement: HTMLFormElement = Controls.createForm(parent);
-        const divRows: HTMLDivElement = Controls.createDiv(formElement, "row g-3 align-items-center");
-        const divCol1: HTMLDivElement = Controls.createDiv(divRows, "col");
-        Controls.createLabel(divCol1, "key-id", "form-label", pageContext.getLocale().translate("LABEL_KEY"));
-        const keyPwd: HTMLInputElement = Controls.createInput(divCol1, "password", "key-id", "form-control");
-        keyPwd.setAttribute("aria-describedby", "keyhelp-id");
-        keyPwd.setAttribute("autocomplete", "off");
-        keyPwd.setAttribute("spellcheck", "false");
-        if (encKey != null) {
-            keyPwd.value = encKey;
+        try {
+            const user: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
+            const encKey: string | null = await Security.getEncryptionKeyAsync(user);
+            const card: HTMLDivElement = Controls.createDiv(parent, "card p-4 shadow-sm");
+            card.style.maxWidth = "400px";
+            const infoDiv: HTMLDivElement = Controls.createDiv(card, "alert alert-warning", pageContext.getLocale().translate("KEY_INFO"));
+            infoDiv.setAttribute("role", "alert");
+            const formElement: HTMLFormElement = Controls.createForm(card);
+            const divRows: HTMLDivElement = Controls.createDiv(formElement, "row g-3 align-items-center");
+            const divCol1: HTMLDivElement = Controls.createDiv(divRows, "col");
+            Controls.createLabel(divCol1, "key-id", "form-label", pageContext.getLocale().translate("LABEL_KEY"));
+            const keyPwd: HTMLInputElement = Controls.createInput(divCol1, "password", "key-id", "form-control");
+            keyPwd.setAttribute("aria-describedby", "keyhelp-id");
+            keyPwd.setAttribute("autocomplete", "off");
+            keyPwd.setAttribute("spellcheck", "false");
+            if (encKey != null) {
+                keyPwd.value = encKey;
+            }
+            const divCol2: HTMLDivElement = Controls.createDiv(divRows, "col-auto align-self-end");
+            const icon: HTMLElement = Controls.createElement(divCol2, "i", "bi bi-eye-slash");
+            icon.setAttribute("style", "cursor:pointer; font-size: 1.5rem;");
+            icon.id = "toggle-password-id";
+            const helpDiv: HTMLDivElement = Controls.createDiv(divRows, "form-text", pageContext.getLocale().translate("INFO_ENTER_KEY"));
+            helpDiv.id = "keyhelp-id";
+            const buttonSave: HTMLButtonElement = Controls.createButton(divRows, "submit", pageContext.getLocale().translate("BUTTON_SAVE"), "btn btn-primary");
+            buttonSave.addEventListener("click", async (e: MouseEvent) => this.onClickSaveAsync(e, pageContext, keyPwd, alertDiv));
+            icon.addEventListener("click", (e: MouseEvent) => this.onTogglePassword(e, keyPwd, icon));
         }
-        const divCol2: HTMLDivElement = Controls.createDiv(divRows, "col-auto align-self-end");
-        const icon: HTMLElement = Controls.createElement(divCol2, "i", "bi bi-eye-slash");
-        icon.setAttribute("style", "cursor:pointer; font-size: 1.5rem;");
-        icon.id = "toggle-password-id";
-        const helpDiv: HTMLDivElement = Controls.createDiv(divRows, "form-text", pageContext.getLocale().translate("INFO_ENTER_KEY"));
-        helpDiv.id = "keyhelp-id";
-        const buttonSave: HTMLButtonElement = Controls.createButton(divRows, "submit", pageContext.getLocale().translate("BUTTON_SAVE"), "btn btn-primary");
-        buttonSave.addEventListener("click", async (e: MouseEvent) => this.onClickSaveAsync(e, pageContext, keyPwd, alertDiv));
-        icon.addEventListener("click", (e: MouseEvent) => this.onTogglePassword(e, keyPwd, icon));
+        catch (error: Error | unknown) {
+            Controls.createAlert(alertDiv, pageContext.getLocale().translateError(error));
+        }
     }
 
     private onTogglePassword(e: MouseEvent, keyPwd: HTMLInputElement, icon: HTMLElement) {
@@ -213,6 +221,7 @@ export class DesktopPage implements Page {
 
     private async renderWelcomeMessageAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
+        const lastLoginDate: Date | null = await pageContext.getAuthenticationClient().getLastLoginDateAsync();
         const now: Date = new Date();
         const longDate: string = now.toLocaleDateString(pageContext.getLocale().getLanguage(), { dateStyle: "long" });
         const longTime: string = now.toLocaleTimeString(pageContext.getLocale().getLanguage(), { timeStyle: "long" });
@@ -222,7 +231,6 @@ export class DesktopPage implements Page {
         const welcomeCloseButton: HTMLButtonElement = Controls.createButton(welcomeElem, "button", "", "btn-close");
         welcomeCloseButton.setAttribute("data-bs-dismiss", "alert");
         welcomeCloseButton.setAttribute("aria-label", "Close");
-        const lastLoginDate: Date | null = await pageContext.getAuthenticationClient().getLastLoginDateAsync();
         if (lastLoginDate != null) {
             const lastLoginStr: string = lastLoginDate.toLocaleString(pageContext.getLocale().getLanguage(), { dateStyle: "long", timeStyle: "long" });
             Controls.createDiv(welcomeElem, "mt-2", pageContext.getLocale().translateWithArgs("MESSAGE_LAST_LOGIN_1", [lastLoginStr]));
@@ -236,8 +244,8 @@ export class DesktopPage implements Page {
         try {
             const token: string = pageContext.getAuthenticationClient().getToken()!;
             const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
-            Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("BIRTHDAYS"));
             const contacts: ContactsResult = await ContactService.getContactsAsync(token, userInfo);
+            Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("BIRTHDAYS"));
             const birthdays: ContactResult[] = [];
             contacts.items.forEach((contact) => {
                 contact.daysUntilBirthday = ContactService.getDaysUntilBirthday(contact);
@@ -280,8 +288,8 @@ export class DesktopPage implements Page {
         try {
             const token: string = pageContext.getAuthenticationClient().getToken()!;
             const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
-            const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("CONTACTS"));
             const contacts: ContactsResult = await ContactService.getContactsAsync(token, userInfo);
+            const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("CONTACTS"));
             contacts.items.sort((a, b) => a.name.localeCompare(b.name));
             if (contacts.items.length > 0) {
                 SearchComponent.create(heading, parent, pageContext, pageContext.getContactsFilter(), (filter: string) => this.filterContactItemList(pageContext, filter, contacts.items));
@@ -324,8 +332,8 @@ export class DesktopPage implements Page {
         try {
             const token: string = pageContext.getAuthenticationClient().getToken()!;
             const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
-            const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("NOTES"));
             const notes: NoteResult[] = await NoteService.getNotesAsync(token, userInfo);
+            const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("NOTES"));
             notes.sort((a, b) => a.title.localeCompare(b.title));
             if (notes.length > 0) {
                 SearchComponent.create(heading, parent, pageContext, pageContext.getNoteFilter(), (filter: string) => this.filterNoteItemList(pageContext, filter, notes));
@@ -368,16 +376,14 @@ export class DesktopPage implements Page {
         try {
             const token: string = pageContext.getAuthenticationClient().getToken()!;
             const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
+            const passwordItems: PasswordItemResult[] = userInfo.hasPasswordManagerFile ? await PasswordManagerService.getPasswordFileAsync(token, userInfo) : [];
             const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("PASSWORD_MANAGER"));
-            if (userInfo.hasPasswordManagerFile) {
-                const passwordItems: PasswordItemResult[] = await PasswordManagerService.getPasswordFileAsync(token, userInfo);
-                passwordItems.sort((a, b) => a.Name.localeCompare(b.Name));
-                if (passwordItems.length > 0) {
-                    SearchComponent.create(heading, parent, pageContext, pageContext.getPasswordItemFilter(), (filter: string) => this.filterPasswordItemList(pageContext, filter, passwordItems));
-                    const listGroup: HTMLDivElement = Controls.createDiv(parent, "list-group");
-                    listGroup.id = "list-group-id";
-                    this.filterPasswordItemList(pageContext, pageContext.getPasswordItemFilter(), passwordItems);
-                }
+            passwordItems.sort((a, b) => a.Name.localeCompare(b.Name));
+            if (passwordItems.length > 0) {
+                SearchComponent.create(heading, parent, pageContext, pageContext.getPasswordItemFilter(), (filter: string) => this.filterPasswordItemList(pageContext, filter, passwordItems));
+                const listGroup: HTMLDivElement = Controls.createDiv(parent, "list-group");
+                listGroup.id = "list-group-id";
+                this.filterPasswordItemList(pageContext, pageContext.getPasswordItemFilter(), passwordItems);
             }
         }
         catch (error: Error | unknown) {
@@ -413,9 +419,9 @@ export class DesktopPage implements Page {
     private async renderDiaryAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
         try {
             const token: string = pageContext.getAuthenticationClient().getToken()!;
-            Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("DIARY"));
             const date: Date = pageContext.getDiary().getDate();
             const days: number[] = await pageContext.getDiary().getDaysAsync(token, date);
+            Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.getLocale().translate("DIARY"));
             const datestr: string = date.toLocaleDateString(pageContext.getLocale().getLanguage(), { year: "numeric", month: "long" });
             const calendarDiv: HTMLDivElement = Controls.createDiv(parent);
             calendarDiv.style.maxWidth = "400px";
@@ -558,8 +564,6 @@ export class NoteDetailPage implements Page {
 
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
-        parent = Controls.createDiv(parent, "card p-1 shadow-sm");
-        parent.style.maxWidth = "600px";
         try {
             const token: string = pageContext.getAuthenticationClient().getToken()!;
             const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
@@ -567,7 +571,9 @@ export class NoteDetailPage implements Page {
             const date: Date = new Date(note.lastModifiedUtc);
             const longDate: string = date.toLocaleDateString(pageContext.getLocale().getLanguage(), { dateStyle: "long" });
             const longTime: string = date.toLocaleTimeString(pageContext.getLocale().getLanguage(), { timeStyle: "long" });
-            const cardBody: HTMLDivElement = Controls.createDiv(parent, "card-body");
+            const card: HTMLDivElement = Controls.createDiv(parent, "card p-1 shadow-sm");
+            card.style.maxWidth = "600px";
+            const cardBody: HTMLDivElement = Controls.createDiv(card, "card-body");
             Controls.createHeading(cardBody, 2, "card-title mb-3", note.title);
             const cardTextDate: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
             Controls.createSpan(cardTextDate, "bi bi-calendar");
@@ -602,15 +608,17 @@ export class PasswordItemDetailPage implements Page {
 
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
-        const card = Controls.createDiv(parent, "card p-4 shadow-sm");
-        card.style.maxWidth = "600px";
-        const copyAlert: HTMLDivElement = Controls.createDiv(parent, "mt-5 text-center alert alert-success fade")
-        copyAlert.style.maxWidth = "600px";
-        copyAlert.id = "copy-alert-id";
-        copyAlert.setAttribute("role", "alert");
-        Controls.createDiv(copyAlert, "", pageContext.getLocale().translate("COPIED_TO_CLIPBOARD"));
         try {
             const passwordItem: PasswordItemResult = pageContext.getPasswordItem()!;
+            const user: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
+            const pwd: string = await PasswordManagerService.getPasswordAsync(user, passwordItem);
+            const card = Controls.createDiv(parent, "card p-4 shadow-sm");
+            card.style.maxWidth = "600px";
+            const copyAlert: HTMLDivElement = Controls.createDiv(parent, "mt-5 text-center alert alert-success fade")
+            copyAlert.style.maxWidth = "600px";
+            copyAlert.id = "copy-alert-id";
+            copyAlert.setAttribute("role", "alert");
+            Controls.createDiv(copyAlert, "", pageContext.getLocale().translate("COPIED_TO_CLIPBOARD"));
             const cardBody: HTMLDivElement = Controls.createDiv(card, "card-body");
             Controls.createHeading(cardBody, 2, "card-title mb-3", passwordItem.Name);
             if (passwordItem.Login.length > 0) {
@@ -624,8 +632,6 @@ export class PasswordItemDetailPage implements Page {
                 iconCopy.setAttribute("style", "cursor:pointer;");
                 iconCopy.addEventListener("click", async (e: MouseEvent) => await this.copyToClipboardAsync(pageContext, alertDiv, passwordItem.Login));
             }
-            const user: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
-            const pwd: string = await PasswordManagerService.getPasswordAsync(user, passwordItem);
             if (pwd.length > 0) {
                 const cardTextPassword: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
                 Controls.createSpan(cardTextPassword, "bi bi-shield-lock");
@@ -705,15 +711,15 @@ export class DiaryDetailPage implements Page {
 
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
-        parent = Controls.createDiv(parent, "card p-1 shadow-sm");
-        parent.style.maxWidth = "600px";
         try {
             const token: string = pageContext.getAuthenticationClient().getToken()!;
             const userInfo: UserInfoResult = await pageContext.getAuthenticationClient().getUserInfoAsync();
             const date: Date = pageContext.getDiary().getDate();
             const entry: string | null = await pageContext.getDiary().getEntryAsync(token, userInfo, date);
+            const card: HTMLDivElement = Controls.createDiv(parent, "card p-1 shadow-sm");
+            card.style.maxWidth = "600px";
             const longDate: string = date.toLocaleDateString(pageContext.getLocale().getLanguage(), { dateStyle: "long" });
-            const cardBody: HTMLDivElement = Controls.createDiv(parent, "card-body");
+            const cardBody: HTMLDivElement = Controls.createDiv(card, "card-body");
             const heading: HTMLHeadingElement = Controls.createHeading(cardBody, 2, "card-title mb-3 d-flex justify-content-between align-items-center");
             const iLeft: HTMLElement = Controls.createElement(heading, "i", "ms-4 bi bi-arrow-left");
             iLeft.setAttribute("role", "button");
