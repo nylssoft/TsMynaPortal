@@ -41,9 +41,10 @@ export class NavigationBarPage implements Page {
         const container: HTMLDivElement = Controls.createDiv(nav, "container");
         const aBrand: HTMLAnchorElement = Controls.createElement(container, "a", "navbar-brand", pageContext.getLocale().translate(label)) as HTMLAnchorElement;
         aBrand.setAttribute("role", "button");
-        aBrand.addEventListener("click", (e: MouseEvent) => {
+        aBrand.addEventListener("click", async (e: MouseEvent) => {
             e.preventDefault();
             pageContext.getTheme().toggle();
+            await pageContext.renderAsync();
         });
         const button: HTMLButtonElement = Controls.createElement(container, "button", "navbar-toggler") as HTMLButtonElement;
         button.setAttribute("type", "button");
@@ -83,7 +84,7 @@ export class AboutPage implements Page {
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const aboutMessage: HTMLDivElement = Controls.createDiv(parent, "alert alert-success");
         Controls.createParagraph(aboutMessage, "", pageContext.getLocale().translate("WEBSITE_INFO"));
-        Controls.createParagraph(aboutMessage, "", `Version 0.1.4 ${pageContext.getLocale().translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.getLocale().translate("COPYRIGHT")}`);
+        Controls.createParagraph(aboutMessage, "", `Version 0.1.5 ${pageContext.getLocale().translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.getLocale().translate("COPYRIGHT")}`);
         const anchor: HTMLAnchorElement = Controls.createAnchor(aboutMessage, "https://github.com/nylssoft/TsMynaPortal", "Soruce Code");
         anchor.setAttribute("target", "_blank");
     }
@@ -488,9 +489,12 @@ export class DesktopPage implements Page {
                     });
                     if (!days.includes(day)) {
                         td.classList.add("text-secondary");
+                        if (pageContext.getTheme().isLight()) {
+                            td.classList.add("opacity-25");
+                        }
                     }
                     if (pageContext.getDiary().isToday(now, day)) {
-                        td.classList.add("bg-secondary-subtle");
+                        td.classList.add("table-active");
                     }
                     day++;
                 }

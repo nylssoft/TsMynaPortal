@@ -16,4 +16,8 @@ export class Theme {
     public toggle() {
         this.set(this.theme == "light" ? "dark" : "light");
     }
+
+    public isLight(): boolean {
+        return this.theme == "light";
+    }
 }
