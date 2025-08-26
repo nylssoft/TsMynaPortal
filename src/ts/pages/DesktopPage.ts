@@ -326,9 +326,9 @@ export class DesktopPage implements Page {
                     const constDay: number = day; // bind to const for the following capture
                     td.addEventListener("click", async (e: MouseEvent) => {
                         e.preventDefault();
-                        pageContext.diary.setDay(constDay);
-                        pageContext.diary.setChanged(false);
-                        pageContext.diary.setConfirmationTargetid("");
+                        pageContext.diary.day = constDay;
+                        pageContext.diary.changed = false;
+                        pageContext.diary.confirmationTargetId = "";
                         pageContext.pageType = "DIARY_DETAIL";
                         await pageContext.renderAsync();
                     });

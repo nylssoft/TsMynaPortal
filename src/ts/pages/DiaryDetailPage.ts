@@ -30,14 +30,14 @@ export class DiaryDetailPage implements Page {
             iRight.setAttribute("data-bs-target", "#confirmationdialog-id");
             iLeft.addEventListener("click", async (e: MouseEvent) => {
                 e.preventDefault();
-                if (!pageContext.diary.isChanged()) {
+                if (!pageContext.diary.changed) {
                     pageContext.diary.previousDay();
                     await pageContext.renderAsync();
                 }
             });
             iRight.addEventListener("click", async (e: MouseEvent) => {
                 e.preventDefault();
-                if (!pageContext.diary.isChanged()) {
+                if (!pageContext.diary.changed) {
                     pageContext.diary.nextDay();
                     await pageContext.renderAsync();
                 }
@@ -51,8 +51,8 @@ export class DiaryDetailPage implements Page {
             textarea.setAttribute("autocomplete", "off");
             textarea.addEventListener("input", (e: Event) => {
                 e.preventDefault();
-                if (!pageContext.diary.isChanged()) {
-                    pageContext.diary.setChanged(true);
+                if (!pageContext.diary.changed) {
+                    pageContext.diary.changed = true;
                     document.getElementById("savebutton-id")!.classList.remove("d-none");
                     document.getElementById("backbutton-id")!.setAttribute("data-bs-toggle", "modal");
                     document.getElementById("rightbutton-id")!.setAttribute("data-bs-toggle", "modal");
@@ -63,15 +63,15 @@ export class DiaryDetailPage implements Page {
             const backButton: HTMLButtonElement = Controls.createButton(cardBody, "button", pageContext.locale.translate("BUTTON_BACK"), "btn btn-primary", "backbutton-id");
             backButton.setAttribute("data-bs-target", "#confirmationdialog-id");
             backButton.addEventListener("click", async (e: MouseEvent) => {
-                if (!pageContext.diary.isChanged()) {
+                if (!pageContext.diary.changed) {
                     pageContext.pageType = "DESKTOP";
-                    pageContext.diary.setDay(null);
+                    pageContext.diary.day = null;
                     await pageContext.renderAsync();
                 }
             });
             saveButton.addEventListener("click", async (e: MouseEvent) => {
                 e.preventDefault();
-                pageContext.diary.setChanged(false);
+                pageContext.diary.changed = false;
                 saveButton.classList.add("d-none");
                 document.getElementById("backbutton-id")!.removeAttribute("data-bs-toggle");
                 document.getElementById("leftbutton-id")!.removeAttribute("data-bs-toggle");
@@ -89,11 +89,11 @@ export class DiaryDetailPage implements Page {
                 pageContext.locale.translate("CONFIRMATION_SAVE"),
                 pageContext.locale.translate("BUTTON_YES"),
                 pageContext.locale.translate("BUTTON_NO"));
-            modalDiv.addEventListener("show.bs.modal", (e: any) => pageContext.diary.setConfirmationTargetid(e.relatedTarget.id));
+            modalDiv.addEventListener("show.bs.modal", (e: any) => pageContext.diary.confirmationTargetId = e.relatedTarget.id);
             document.getElementById("confirmationyesbutton-id")!.addEventListener("click", (e: Event) => {
                 e.preventDefault();
-                pageContext.diary.setChanged(false);
-                document.getElementById(pageContext.diary.getConfirmationTargetId())!.click();
+                pageContext.diary.changed = false;
+                document.getElementById(pageContext.diary.confirmationTargetId)!.click();
             });
         }
         catch (error: Error | unknown) {

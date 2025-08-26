@@ -3,13 +3,13 @@ import { MonthAndYear } from "../TypeDefinitions";
 export class Diary {
 
     // month and year shown
-    private monthAndYear: MonthAndYear;
+    readonly monthAndYear: MonthAndYear;
     // selected day in diary details page
-    private day: number | null = null;
+    day: number | null = null;
     // flag whether the diary entry has been changed but not saved
-    private changed: boolean = false;
+    changed: boolean = false;
     // ID of the HTML element that triggered the confirmation dialog
-    private confirmationTargetId: string = "";
+    confirmationTargetId: string = "";
 
     constructor() {
         const now: Date = new Date(Date.now());
@@ -19,35 +19,7 @@ export class Diary {
         }
     }
 
-    public isChanged(): boolean {
-        return this.changed;
-    }
-
-    public setChanged(changed: boolean) {
-        this.changed = changed;
-    }
-
-    public setConfirmationTargetid(targetId: string) {
-        this.confirmationTargetId = targetId;
-    }
-
-    public getConfirmationTargetId(): string {
-        return this.confirmationTargetId;
-    }
-
-    public getMonthAndYear(): MonthAndYear {
-        return this.monthAndYear;
-    }
-
-    public getDay(): number | null {
-        return this.day;
-    }
-
-    public setDay(day: number | null) {
-        this.day = day;
-    }
-
-    public nextMonth() {
+    nextMonth() {
         this.monthAndYear.month += 1;
         if (this.monthAndYear.month >= 12) {
             this.monthAndYear.month = 0;
@@ -55,7 +27,7 @@ export class Diary {
         }
     }
 
-    public previousMonth() {
+    previousMonth() {
         this.monthAndYear.month -= 1;
         if (this.monthAndYear.month < 0) {
             this.monthAndYear.year -= 1;
@@ -63,7 +35,7 @@ export class Diary {
         }
     }
 
-    public nextDay() {
+    nextDay() {
         if (this.day != null) {
             this.day += 1;
             if (this.day >= this.getDaysInMonth()) {
@@ -73,7 +45,7 @@ export class Diary {
         }
     }
 
-    public previousDay() {
+    previousDay() {
         if (this.day != null) {
             this.day -= 1;
             if (this.day < 0) {
@@ -83,20 +55,20 @@ export class Diary {
         }
     }
 
-    public getDaysInMonth(): number {
+    getDaysInMonth(): number {
         return 32 - new Date(this.monthAndYear.year, this.monthAndYear.month, 32).getDate();
     }
 
-    public getFirstDayInMonth(): number {
+    getFirstDayInMonth(): number {
         const date: Date = new Date(this.monthAndYear.year, this.monthAndYear.month);
         return (date.getDay() + 6) % 7;
     }
 
-    public isToday(now: Date, day: number): boolean {
+    isToday(now: Date, day: number): boolean {
         return day == now.getDate() && this.monthAndYear.year == now.getFullYear() && this.monthAndYear.month == now.getMonth();
     }
 
-    public getDate(): Date {
+    getDate(): Date {
         return new Date(Date.UTC(this.monthAndYear.year, this.monthAndYear.month, this.day != null ? this.day : 1));
     }
 }
