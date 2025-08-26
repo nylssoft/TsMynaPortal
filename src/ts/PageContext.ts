@@ -5,6 +5,7 @@ import { Controls } from "./utils/Controls";
 import { ContactResult, DesktopTab, NoteResult, PageType, PasswordItemResult } from "./TypeDefinitions";
 import { Diary } from "./models/Diary";
 import { Contact } from "./models/Contact";
+import { Desktop } from "./models/Desktop";
 
 /**
  * Interface for a page that can be rendered in the application.
@@ -34,21 +35,14 @@ export class PageContext {
     readonly theme: Theme = new Theme();
     // authentication
     readonly authenticationClient: AuthenticationClient = new AuthenticationClient();
-    // diary model
+    // models
     readonly diary: Diary = new Diary();
-    // contact model
     readonly contact: Contact = new Contact();
+    readonly desktop: Desktop = new Desktop();
     // current page
     pageType: PageType = "LOGIN_USERNAME_PASSWORD";
-    // page registrations
+    // all page registrations
     private pageRegistrations = new Map<PageType, Page>();
-
-    // --- desktop page
-
-    // welcome message closed
-    private welcomeClosed: boolean = false;
-    // selected tab in desktop page
-    private desktopTab: DesktopTab = "BIRTHDAYS";
 
     // --- notes tab in desktop page
 
@@ -93,22 +87,6 @@ export class PageContext {
             await page.renderAsync(content, this);
         }
         loading.classList.add("d-none");
-    }
-
-    public getDesktopTab(): DesktopTab {
-        return this.desktopTab;
-    }
-
-    public setDesktopTab(desktopTab: DesktopTab) {
-        this.desktopTab = desktopTab;
-    }
-
-    public isWelcomeClosed(): boolean {
-        return this.welcomeClosed;
-    }
-
-    public setWelcomeClosed(closed: boolean) {
-        this.welcomeClosed = closed;
     }
 
     /**

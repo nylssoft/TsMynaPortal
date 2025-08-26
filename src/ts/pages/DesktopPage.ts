@@ -16,39 +16,39 @@ export class DesktopPage implements Page {
     async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
         try {
-            if (!pageContext.isWelcomeClosed()) {
+            if (!pageContext.desktop.welcomeClosed) {
                 await this.renderWelcomeMessageAsync(parent, pageContext);
             }
             const tabs: HTMLUListElement = Controls.createElement(parent, "ul", "nav nav-pills") as HTMLUListElement;
             const tabBirthdays: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
-            const aBirthdays: HTMLAnchorElement = Controls.createAnchor(tabBirthdays, "birthdays", "", "nav-link", pageContext.getDesktopTab() === "BIRTHDAYS");
+            const aBirthdays: HTMLAnchorElement = Controls.createAnchor(tabBirthdays, "birthdays", "", "nav-link", pageContext.desktop.tab === "BIRTHDAYS");
             Controls.createSpan(aBirthdays, "bi bi-cake");
             aBirthdays.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, "BIRTHDAYS"));
             const tabContacts: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
-            const aContacts: HTMLAnchorElement = Controls.createAnchor(tabContacts, "contacts", "", "nav-link", pageContext.getDesktopTab() === "CONTACTS");
+            const aContacts: HTMLAnchorElement = Controls.createAnchor(tabContacts, "contacts", "", "nav-link", pageContext.desktop.tab === "CONTACTS");
             Controls.createSpan(aContacts, "bi bi-person");
             aContacts.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, "CONTACTS"));
             const tabNotes: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
-            const aNotes: HTMLAnchorElement = Controls.createAnchor(tabNotes, "notes", "", "nav-link", pageContext.getDesktopTab() === "NOTES");
+            const aNotes: HTMLAnchorElement = Controls.createAnchor(tabNotes, "notes", "", "nav-link", pageContext.desktop.tab === "NOTES");
             Controls.createSpan(aNotes, "bi bi-journal");
             aNotes.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, "NOTES"));
             const tabPasswordManager: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
-            const aPasswordManager: HTMLAnchorElement = Controls.createAnchor(tabPasswordManager, "passwordmanager", "", "nav-link", pageContext.getDesktopTab() === "PASSWORD_MANAGER");
+            const aPasswordManager: HTMLAnchorElement = Controls.createAnchor(tabPasswordManager, "passwordmanager", "", "nav-link", pageContext.desktop.tab === "PASSWORD_MANAGER");
             Controls.createSpan(aPasswordManager, "bi bi-lock");
             aPasswordManager.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, "PASSWORD_MANAGER"));
             const tabDiary: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
-            const aDiary: HTMLAnchorElement = Controls.createAnchor(tabDiary, "diary", "", "nav-link", pageContext.getDesktopTab() === "DIARY");
+            const aDiary: HTMLAnchorElement = Controls.createAnchor(tabDiary, "diary", "", "nav-link", pageContext.desktop.tab === "DIARY");
             Controls.createSpan(aDiary, "bi bi-calendar");
             aDiary.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, "DIARY"));
-            if (pageContext.getDesktopTab() === "BIRTHDAYS") {
+            if (pageContext.desktop.tab === "BIRTHDAYS") {
                 await this.renderBirthdaysAsync(pageContext, parent, alertDiv);
-            } else if (pageContext.getDesktopTab() === "CONTACTS") {
+            } else if (pageContext.desktop.tab === "CONTACTS") {
                 await this.renderContactsAsync(pageContext, parent, alertDiv);
-            } else if (pageContext.getDesktopTab() === "NOTES") {
+            } else if (pageContext.desktop.tab === "NOTES") {
                 await this.renderNotesAsync(pageContext, parent, alertDiv);
-            } else if (pageContext.getDesktopTab() === "PASSWORD_MANAGER") {
+            } else if (pageContext.desktop.tab === "PASSWORD_MANAGER") {
                 await this.renderPasswordManagerAsync(pageContext, parent, alertDiv);
-            } else if (pageContext.getDesktopTab() === "DIARY") {
+            } else if (pageContext.desktop.tab === "DIARY") {
                 await this.renderDiaryAsync(pageContext, parent, alertDiv);
             }
         }
@@ -59,7 +59,7 @@ export class DesktopPage implements Page {
 
     private async switchTabAsync(e: MouseEvent, pageContext: PageContext, tabName: DesktopTab): Promise<void> {
         e.preventDefault();
-        pageContext.setDesktopTab(tabName);
+        pageContext.desktop.tab = tabName;
         await pageContext.renderAsync();
     }
 
@@ -79,7 +79,7 @@ export class DesktopPage implements Page {
             const lastLoginStr: string = lastLoginDate.toLocaleString(pageContext.locale.getLanguage(), { dateStyle: "long", timeStyle: "long" });
             Controls.createDiv(welcomeElem, "mt-2", pageContext.locale.translateWithArgs("MESSAGE_LAST_LOGIN_1", [lastLoginStr]));
         }
-        welcomeElem.addEventListener('closed.bs.alert', _ => pageContext.setWelcomeClosed(true));
+        welcomeElem.addEventListener('closed.bs.alert', _ => pageContext.desktop.welcomeClosed = true);
     }
 
     // birthday tab
