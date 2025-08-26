@@ -12,11 +12,12 @@ export class Controls {
      * 
      * @param parent parent element to append the new element to
      * @param name name of the HTML element to create
-     * @param classname class name to assign to the element
-     * @param txt text content to set for the element
+     * @param classname optional class name to assign to the element
+     * @param txt optional text content to set for the element
+     * @param id optional id to set for the element
      * @returns HTML element created with the specified name, class, and text content
      */
-    public static createElement(parent: HTMLElement, name: string, classname?: string, txt?: string): HTMLElement {
+    public static createElement(parent: HTMLElement, name: string, classname?: string, txt?: string, id?: string): HTMLElement {
         const e: HTMLElement = document.createElement(name);
         if (classname) {
             e.setAttribute("class", classname);
@@ -24,6 +25,9 @@ export class Controls {
         parent.appendChild(e);
         if (txt) {
             e.textContent = txt;
+        }
+        if (id) {
+            e.id = id;
         }
         return e;
     }
@@ -119,12 +123,16 @@ export class Controls {
      * @param type type of the button (e.g., "button", "submit")
      * @param txt text content to set for the button
      * @param classname optional class name to assign to the button
+     * @param id optional id to set for the button
      * @returns HTMLButtonElement created with the specified type, ID, text content, and class
      */
-    public static createButton(parent: HTMLElement, type: string, txt: string, classname?: string): HTMLButtonElement {
+    public static createButton(parent: HTMLElement, type: string, txt: string, classname?: string, id?: string): HTMLButtonElement {
         const b: HTMLButtonElement = Controls.createElement(parent, "button", classname, txt) as HTMLButtonElement;
         b.setAttribute("type", type);
         b.title = txt;
+        if (id) {
+            b.id = id;
+        }
         return b;
     }
 
@@ -159,6 +167,30 @@ export class Controls {
         alertButton.setAttribute("data-bs-dismiss", "alert");
         alertButton.setAttribute("aria-label", "Close");
         return alertDiv;
+    }
+
+    public static createConfirmationDialog(parent: HTMLElement, title: string, body: string, yes: string, no: string): HTMLDivElement {
+        const modalDiv: HTMLDivElement = Controls.createDiv(parent, "modal fade");
+        modalDiv.id = "confirmationdialog-id";
+        modalDiv.setAttribute("tabIndex", "-1");
+        modalDiv.setAttribute("aria-labelledby", "confirmationdialoglabel-id");
+        modalDiv.setAttribute("aria-hidden", "true");
+        const modalDialogDiv: HTMLDivElement = Controls.createDiv(modalDiv, "modal-dialog");
+        const modalContentDiv: HTMLDivElement = Controls.createDiv(modalDialogDiv, "modal-content");
+        const modalHeaderDiv: HTMLDivElement = Controls.createDiv(modalContentDiv, "modal-header");
+        const h1: HTMLHeadingElement = Controls.createHeading(modalHeaderDiv, 1, "modal-title fs-5", title);
+        h1.id = "confirmationdialoglabel-id";
+        const buttonCloseHeader: HTMLButtonElement = Controls.createButton(modalHeaderDiv, "button", "", "btn-close");
+        buttonCloseHeader.setAttribute("data-bs-dismiss", "modal");
+        buttonCloseHeader.setAttribute("aria-label", "Close");
+        const modalBodyDiv: HTMLDivElement = Controls.createDiv(modalContentDiv, "modal-body");
+        Controls.createParagraph(modalBodyDiv, "alert alert-danger", body);
+        const modalFooterDiv: HTMLDivElement = Controls.createDiv(modalContentDiv, "modal-footer");
+        const buttonYes: HTMLButtonElement = Controls.createButton(modalFooterDiv, "button", yes, "btn btn-secondary", "confirmationyesbutton-id");
+        const buttonNo: HTMLButtonElement = Controls.createButton(modalFooterDiv, "button", no, "btn btn-primary", "confirmationnobutton-id");
+        buttonYes.setAttribute("data-bs-dismiss", "modal");
+        buttonNo.setAttribute("data-bs-dismiss", "modal");
+        return modalDiv;
     }
 
     /**

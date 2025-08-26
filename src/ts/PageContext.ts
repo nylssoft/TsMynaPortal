@@ -9,6 +9,9 @@ import { Diary } from "./Diary";
  * Interface for a page that can be rendered in the application.
  */
 export interface Page {
+
+    hideNavBar?: boolean;
+
     /**
      * Renders the page asynchronously.
      * 
@@ -87,11 +90,17 @@ export class PageContext {
     public async renderAsync(): Promise<void> {
         const loading = document.getElementById("loading-progress-id") as HTMLElement;
         loading.classList.remove("d-none");
-        const main: HTMLElement = document.getElementById("main-id") as HTMLElement;
-        Controls.removeAllChildren(main);
-        await this.pageRegistrations.get("NAVIGATION_BAR")?.renderAsync(main, this);
-        const content: HTMLDivElement = Controls.createDiv(main, "container py-4 px-3 mx-auto");
-        await this.pageRegistrations.get(this.pageType)?.renderAsync(content, this);
+        const page: Page | undefined = this.pageRegistrations.get(this.pageType);
+        const navBar: Page | undefined = this.pageRegistrations.get("NAVIGATION_BAR");
+        if (page && navBar) {
+            const main: HTMLElement = document.getElementById("main-id") as HTMLElement;
+            Controls.removeAllChildren(main);
+            if (!page.hideNavBar) {
+                await navBar.renderAsync(main, this);
+            }
+            const content: HTMLDivElement = Controls.createDiv(main, "container py-4 px-3 mx-auto");
+            await page.renderAsync(content, this);
+        }
         loading.classList.add("d-none");
     }
 

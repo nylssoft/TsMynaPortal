@@ -84,7 +84,7 @@ export class AboutPage implements Page {
     public async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const aboutMessage: HTMLDivElement = Controls.createDiv(parent, "alert alert-success");
         Controls.createParagraph(aboutMessage, "", pageContext.getLocale().translate("WEBSITE_INFO"));
-        Controls.createParagraph(aboutMessage, "", `Version 0.1.5 ${pageContext.getLocale().translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.getLocale().translate("COPYRIGHT")}`);
+        Controls.createParagraph(aboutMessage, "", `Version 0.1.6 ${pageContext.getLocale().translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.getLocale().translate("COPYRIGHT")}`);
         const anchor: HTMLAnchorElement = Controls.createAnchor(aboutMessage, "https://github.com/nylssoft/TsMynaPortal", "Soruce Code");
         anchor.setAttribute("target", "_blank");
     }
@@ -484,6 +484,8 @@ export class DesktopPage implements Page {
                     td.addEventListener("click", async (e: MouseEvent) => {
                         e.preventDefault();
                         pageContext.getDiary().setDay(constDay);
+                        pageContext.getDiary().setChanged(false);
+                        pageContext.getDiary().setConfirmationTargetid("");
                         pageContext.setPageType("DIARY_DETAIL");
                         await pageContext.renderAsync();
                     });
@@ -509,6 +511,8 @@ export class DesktopPage implements Page {
  * It also provides a back button to return to the Desktop page.
  */
 export class ContactDetailPage implements Page {
+
+    hideNavBar?: boolean | undefined = true;
 
     public getPageType(): PageType {
         return "CONTACT_DETAIL";
@@ -561,6 +565,8 @@ export class ContactDetailPage implements Page {
  * It also provides a back button to return to the Desktop page.
  */
 export class NoteDetailPage implements Page {
+
+    hideNavBar?: boolean | undefined = true;
 
     public getPageType(): PageType {
         return "NOTE_DETAIL";
@@ -709,6 +715,8 @@ export class PasswordItemDetailPage implements Page {
 
 export class DiaryDetailPage implements Page {
 
+    hideNavBar: boolean | undefined = true;
+
     public getPageType(): PageType {
         return "DIARY_DETAIL";
     }
@@ -725,35 +733,79 @@ export class DiaryDetailPage implements Page {
             const longDate: string = date.toLocaleDateString(pageContext.getLocale().getLanguage(), { dateStyle: "long" });
             const cardBody: HTMLDivElement = Controls.createDiv(card, "card-body");
             const heading: HTMLHeadingElement = Controls.createHeading(cardBody, 2, "card-title mb-3 d-flex justify-content-between align-items-center");
-            const iLeft: HTMLElement = Controls.createElement(heading, "i", "ms-4 bi bi-arrow-left");
+            const iLeft: HTMLElement = Controls.createElement(heading, "i", "ms-4 bi bi-arrow-left", undefined, "leftbutton-id");
             iLeft.setAttribute("role", "button");
+            iLeft.setAttribute("data-bs-target", "#confirmationdialog-id");
             Controls.createSpan(heading, "mx-auto", longDate);
-            const iRight: HTMLElement = Controls.createElement(heading, "i", "me-4 bi bi-arrow-right")
+            const iRight: HTMLElement = Controls.createElement(heading, "i", "me-4 bi bi-arrow-right", undefined, "rightbutton-id");
             iRight.setAttribute("role", "button");
+            iRight.setAttribute("data-bs-target", "#confirmationdialog-id");
             iLeft.addEventListener("click", async (e: MouseEvent) => {
                 e.preventDefault();
-                pageContext.getDiary().previousDay();
-                await pageContext.renderAsync();
+                if (!pageContext.getDiary().isChanged()) {
+                    pageContext.getDiary().previousDay();
+                    await pageContext.renderAsync();
+                }
             });
             iRight.addEventListener("click", async (e: MouseEvent) => {
                 e.preventDefault();
-                pageContext.getDiary().nextDay();
-                await pageContext.renderAsync();
+                if (!pageContext.getDiary().isChanged()) {
+                    pageContext.getDiary().nextDay();
+                    await pageContext.renderAsync();
+                }
             });
             const dayTexts: string[] = ["TEXT_SUNDAY", "TEXT_MONDAY", "TEXT_TUESDAY", "TEXT_WEDNESDAY", "TEXT_THURSDAY", "TEXT_FRIDAY", "TEXT_SATURDAY"];
             Controls.createDiv(cardBody, "mb-1 text-center", pageContext.getLocale().translate(dayTexts[date.getDay()]));
             const divFormFloating: HTMLDivElement = Controls.createDiv(cardBody, "form-floating mb-4");
             const textarea: HTMLTextAreaElement = Controls.createElement(divFormFloating, "textarea", "form-control", entry!) as HTMLTextAreaElement;
             textarea.style.height = "400px";
-            textarea.setAttribute("readonly", "true");
             textarea.setAttribute("spellcheck", "false");
             textarea.setAttribute("autocomplete", "off");
-            const backButton: HTMLButtonElement = Controls.createButton(cardBody, "button", pageContext.getLocale().translate("BUTTON_BACK"), "btn btn-primary");
-            backButton.addEventListener("click", async (e: MouseEvent) => {
+            textarea.addEventListener("input", (e: Event) => {
                 e.preventDefault();
-                pageContext.setPageType("DESKTOP");
-                pageContext.getDiary().setDay(null);
-                await pageContext.renderAsync();
+                if (!pageContext.getDiary().isChanged()) {
+                    pageContext.getDiary().setChanged(true);
+                    document.getElementById("savebutton-id")!.classList.remove("d-none");
+                    document.getElementById("backbutton-id")!.setAttribute("data-bs-toggle", "modal");
+                    document.getElementById("rightbutton-id")!.setAttribute("data-bs-toggle", "modal");
+                    document.getElementById("leftbutton-id")!.setAttribute("data-bs-toggle", "modal");
+                }
+            });
+            const saveButton: HTMLButtonElement = Controls.createButton(cardBody, "button", pageContext.getLocale().translate("BUTTON_SAVE"), "btn btn-primary d-none me-4", "savebutton-id");
+            const backButton: HTMLButtonElement = Controls.createButton(cardBody, "button", pageContext.getLocale().translate("BUTTON_BACK"), "btn btn-primary", "backbutton-id");
+            backButton.setAttribute("data-bs-target", "#confirmationdialog-id");
+            backButton.addEventListener("click", async (e: MouseEvent) => {
+                if (!pageContext.getDiary().isChanged()) {
+                    pageContext.setPageType("DESKTOP");
+                    pageContext.getDiary().setDay(null);
+                    await pageContext.renderAsync();
+                }
+            });
+            saveButton.addEventListener("click", async (e: MouseEvent) => {
+                e.preventDefault();
+                pageContext.getDiary().setChanged(false);
+                saveButton.classList.add("d-none");
+                document.getElementById("backbutton-id")!.removeAttribute("data-bs-toggle");
+                document.getElementById("leftbutton-id")!.removeAttribute("data-bs-toggle");
+                document.getElementById("rightbutton-id")!.removeAttribute("data-bs-toggle");
+                try {
+                    await pageContext.getDiary().saveEntryAsync(token, userInfo, textarea.value, date);
+                }
+                catch (error: Error | unknown) {
+                    Controls.createAlert(alertDiv, pageContext.getLocale().translateError(error));
+                }
+            });
+            const modalDiv: HTMLDivElement = Controls.createConfirmationDialog(
+                parent,
+                pageContext.getLocale().translate("HEADER_DIARY"),
+                pageContext.getLocale().translate("CONFIRMATION_SAVE"),
+                pageContext.getLocale().translate("BUTTON_YES"),
+                pageContext.getLocale().translate("BUTTON_NO"));
+            modalDiv.addEventListener("show.bs.modal", (e: any) => pageContext.getDiary().setConfirmationTargetid(e.relatedTarget.id));
+            document.getElementById("confirmationyesbutton-id")!.addEventListener("click", (e: Event) => {
+                e.preventDefault();
+                pageContext.getDiary().setChanged(false);
+                document.getElementById(pageContext.getDiary().getConfirmationTargetId())!.click();
             });
         }
         catch (error: Error | unknown) {

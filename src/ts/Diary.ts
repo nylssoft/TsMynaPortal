@@ -8,6 +8,10 @@ export class Diary {
     private monthAndYear: MonthAndYear;
     // selected day in diary details page
     private day: number | null = null;
+    // flag whether the diary entry has been changed but not saved
+    private changed: boolean = false;
+    // ID of the HTML element that triggered the confirmation dialog
+    private confirmationTargetId: string = "";
 
     constructor() {
         const now: Date = new Date(Date.now());
@@ -15,6 +19,22 @@ export class Diary {
             month: now.getMonth(),
             year: now.getFullYear()
         }
+    }
+
+    public isChanged(): boolean {
+        return this.changed;
+    }
+
+    public setChanged(changed: boolean) {
+        this.changed = changed;
+    }
+
+    public setConfirmationTargetid(targetId: string) {
+        this.confirmationTargetId = targetId;
+    }
+
+    public getConfirmationTargetId(): string {
+        return this.confirmationTargetId;
     }
 
     public getMonthAndYear(): MonthAndYear {
@@ -104,5 +124,27 @@ export class Diary {
             console.error("Error decoding diary entry:", e);
             throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
         }
+    }
+
+    public async saveEntryAsync(token: string, user: UserInfoResult, text: string, date: Date): Promise<void> {
+        const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
+        if (encryptionKey == null || encryptionKey.length === 0) {
+            throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
+        }
+        const datestr: string = date.toISOString();
+        let encodedText: string;
+        try {
+            const cryptoKey: CryptoKey = await Security.createCryptoKeyAsync(encryptionKey!, user.passwordManagerSalt)
+            encodedText = await Security.encodeMessageAsync(cryptoKey, text);
+        } catch (e: Error | unknown) {
+            console.error("Error encoding diary entry:", e);
+            throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
+        }
+        const diaryEntry: DiaryEntryResult = { "date": datestr, "entry": encodedText };
+        await FetchHelper.fetchAsync(`/api/diary/entry?date=${datestr}`, {
+            method: 'POST',
+            headers: { 'token': token, 'Accept': 'application/json', 'Content-Type': 'application/json' },
+            body: JSON.stringify(diaryEntry)
+        });
     }
 }
