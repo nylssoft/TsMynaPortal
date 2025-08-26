@@ -1,6 +1,6 @@
-import { FetchHelper } from "./FetchHelper";
-import { Security } from "./Security";
-import { ContactResult, ContactsResult, DayAndMonth, UserInfoResult } from "./TypeDefinitions";
+import { FetchHelper } from "../utils/FetchHelper";
+import { Security } from "../utils/Security";
+import { ContactResult, ContactsResult, DayAndMonth, UserInfoResult } from "../TypeDefinitions";
 
 /**
  * ContactService provides methods to manage contacts.
@@ -20,7 +20,7 @@ export class ContactService {
      * @param user current user information
      * @returns contacts for the user
      */
-    public static async getContactsAsync(token: string, user: UserInfoResult): Promise<ContactsResult> {
+    static async getContactsAsync(token: string, user: UserInfoResult): Promise<ContactsResult> {
         const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
         if (encryptionKey == null || encryptionKey.length === 0) {
             throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
@@ -49,7 +49,7 @@ export class ContactService {
      * @param contact the contact to check
      * @returns number of days until the contact's birthday, or null if the birthday is invalid
      */
-    public static getDaysUntilBirthday(contact: ContactResult): number | null {
+    static getDaysUntilBirthday(contact: ContactResult): number | null {
         const now: Date = new Date();
         const refDate: Date = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const dayMonth: DayAndMonth | null = this.parseDayMonth(contact.birthday);

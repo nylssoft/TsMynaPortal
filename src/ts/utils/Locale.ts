@@ -70,7 +70,7 @@ export class Locale {
      * 
      * @returns the language code, e.g. "de" for German and "en" for English
      */
-    public getLanguage(): string {
+    getLanguage(): string {
         return this.language;
     }
 
@@ -79,7 +79,7 @@ export class Locale {
      * 
      * @param language the language code to set, e.g. "de" for German and "en" for English or undefined to use the current language
      */
-    public async setLanguageAsync(language?: string): Promise<void> {
+    async setLanguageAsync(language?: string): Promise<void> {
         if (language) {
             this.language = language;
             window.localStorage.setItem("locale", language);
@@ -106,7 +106,7 @@ export class Locale {
      * @param key the key to translate
      * @returns the translated string or the key itself if no translation is found
      */
-    public translate(key: string): string {
+    translate(key: string): string {
         const arr: string[] = key.split(":");
         if (arr.length > 1) {
             const params: (string | undefined)[] = arr.slice(1).map(p => {
@@ -132,7 +132,7 @@ export class Locale {
      * @param restArgs optional additional arguments to format the translation
      * @returns the formatted translated string
      */
-    public translateWithArgs(key: string, restArgs: string[]): string {
+    translateWithArgs(key: string, restArgs: string[]): string {
         return this.format(this.translate(key), restArgs);
     }
 
@@ -146,7 +146,7 @@ export class Locale {
      * @param error the error to translate
      * @returns the translated error message
      */
-    public translateError(error: Error | unknown): string {
+    translateError(error: Error | unknown): string {
         if (error instanceof Error) {
             return this.translate(error.message);
         }

@@ -1,5 +1,15 @@
 import { PageContext } from "./PageContext";
-import { NavigationBarPage, AboutPage, DataProtectionPage, DesktopPage, LoginPass2Page, LoginPinPage, LoginUsernamePasswordPage, ContactDetailPage, NoteDetailPage, PasswordItemDetailPage, DiaryDetailPage } from "./Pages";
+import { AboutPage } from "./pages/AboutPage";
+import { ContactDetailPage } from "./pages/ContactDetailPage";
+import { DataProtectionPage } from "./pages/DataProtectionPage";
+import { DesktopPage } from "./pages/DesktopPage";
+import { DiaryDetailPage } from "./pages/DiaryDetailPage";
+import { LoginPass2Page } from "./pages/LoginPass2Page";
+import { LoginPinPage } from "./pages/LoginPinPage";
+import { LoginUsernamePasswordPage } from "./pages/LoginUsernamePasswordPage";
+import { NavigationBarPage } from "./pages/NavigationBarPage";
+import { NoteDetailPage } from "./pages/NoteDetailPage";
+import { PasswordItemDetailPage } from "./pages/PasswordItemDetailPage";
 
 /**
  * Main application class that initializes the application, handles authentication, and renders the UI.
@@ -15,7 +25,7 @@ export class App {
      * 
      * @returns the singleton instance of the App class
      */
-    public static getInstance(): App {
+    static getInstance(): App {
         if (!App.instance) {
             App.instance = new App();
         }
@@ -25,7 +35,7 @@ export class App {
     /**
      * Runs the application asynchronously.
      */
-    public async runAsync(): Promise<void> {
+    async runAsync(): Promise<void> {
         const pageContext: PageContext = new PageContext();
         pageContext.registerPage(new NavigationBarPage());
         pageContext.registerPage(new AboutPage());
@@ -38,16 +48,16 @@ export class App {
         pageContext.registerPage(new NoteDetailPage());
         pageContext.registerPage(new PasswordItemDetailPage());
         pageContext.registerPage(new DiaryDetailPage());
-        await pageContext.getLocale().setLanguageAsync();
-        await pageContext.getAuthenticationClient().loginWithLongLivedTokenAsync();
-        if (pageContext.getAuthenticationClient().isLoggedIn()) {
-            pageContext.setPageType("DESKTOP");
-        } else if (pageContext.getAuthenticationClient().isRequiresPin()) {
-            pageContext.setPageType("LOGIN_PIN");
-        } else if (pageContext.getAuthenticationClient().isRequiresPass2()) {
-            pageContext.setPageType("LOGIN_PASS2");
+        await pageContext.locale.setLanguageAsync();
+        await pageContext.authenticationClient.loginWithLongLivedTokenAsync();
+        if (pageContext.authenticationClient.isLoggedIn()) {
+            pageContext.pageType = "DESKTOP";
+        } else if (pageContext.authenticationClient.isRequiresPin()) {
+            pageContext.pageType = "LOGIN_PIN";
+        } else if (pageContext.authenticationClient.isRequiresPass2()) {
+            pageContext.pageType = "LOGIN_PASS2";
         } else {
-            pageContext.setPageType("LOGIN_USERNAME_PASSWORD");
+            pageContext.pageType = "LOGIN_USERNAME_PASSWORD";
         }
         await pageContext.renderAsync();
     }

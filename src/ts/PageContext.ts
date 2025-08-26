@@ -1,16 +1,18 @@
-import { Locale } from "./Locale";
+import { Locale } from "./utils/Locale";
+import { Theme } from "./utils/Theme";
 import { AuthenticationClient } from "./AuthenticationClient";
-import { Controls } from "./Controls";
+import { Controls } from "./utils/Controls";
 import { ContactResult, DesktopTab, NoteResult, PageType, PasswordItemResult } from "./TypeDefinitions";
-import { Theme } from "./Theme";
-import { Diary } from "./Diary";
+import { Diary } from "./models/Diary";
 
 /**
  * Interface for a page that can be rendered in the application.
  */
 export interface Page {
 
-    hideNavBar?: boolean;
+    readonly hideNavBar?: boolean;
+
+    readonly pageType: PageType;
 
     /**
      * Renders the page asynchronously.
@@ -19,13 +21,6 @@ export interface Page {
      * @param pageContext PageContext containing information about the current page and user authentication
      */
     renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void>;
-
-    /**
-     * Retrieves the page type of the current page.
-     * 
-     * @returns PageType representing the type of the current page
-     */
-    getPageType(): PageType;
 }
 
 /**
@@ -33,17 +28,17 @@ export interface Page {
  */
 export class PageContext {
     // translation
-    private locale: Locale = new Locale();
+    readonly locale: Locale = new Locale();
     // theme
-    private theme: Theme = new Theme();
+    readonly theme: Theme = new Theme();
     // authentication
-    private authenticationClient: AuthenticationClient = new AuthenticationClient();
+    readonly authenticationClient: AuthenticationClient = new AuthenticationClient();
+    // diary model
+    readonly diary: Diary = new Diary();
     // current page
-    private pageType: PageType = "LOGIN_USERNAME_PASSWORD";
+    pageType: PageType = "LOGIN_USERNAME_PASSWORD";
     // page registrations
     private pageRegistrations = new Map<PageType, Page>();
-    // diary
-    private diary: Diary = new Diary();
 
     // --- desktop page
 
@@ -78,8 +73,8 @@ export class PageContext {
      * 
      * @param page page implementation that will be rendered
      */
-    public registerPage(page: Page): void {
-        this.pageRegistrations.set(page.getPageType(), page);
+    registerPage(page: Page): void {
+        this.pageRegistrations.set(page.pageType, page);
     }
 
     /**
@@ -87,7 +82,7 @@ export class PageContext {
      * This method clears the main element and appends the current page's content to it.
      * It also renders the navigation bar if available.
      */
-    public async renderAsync(): Promise<void> {
+    async renderAsync(): Promise<void> {
         const loading = document.getElementById("loading-progress-id") as HTMLElement;
         loading.classList.remove("d-none");
         const page: Page | undefined = this.pageRegistrations.get(this.pageType);
@@ -102,50 +97,6 @@ export class PageContext {
             await page.renderAsync(content, this);
         }
         loading.classList.add("d-none");
-    }
-
-    /**
-     * Retrieves the locale object containing translations and language settings.
-     * 
-     * @returns locale object containing translations and language settings
-     */
-    public getLocale(): Locale {
-        return this.locale;
-    }
-
-    public getTheme(): Theme {
-        return this.theme;
-    }
-
-    public getDiary(): Diary {
-        return this.diary;
-    }
-
-    /**
-     * Retrieves the authentication client used for user authentication.
-     * 
-     * @returns authentication client used for user authentication
-     */
-    public getAuthenticationClient(): AuthenticationClient {
-        return this.authenticationClient;
-    }
-
-    /**
-     * Retrieves the current page type.
-     * 
-     * @returns current page type
-     */
-    public getPageType(): PageType {
-        return this.pageType;
-    }
-
-    /**
-     * Sets the current page type.
-     * 
-     * @param pageType current page type to be set
-     */
-    public setPageType(pageType: PageType) {
-        this.pageType = pageType;
     }
 
     public getDesktopTab(): DesktopTab {

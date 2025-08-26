@@ -17,7 +17,7 @@ export class Controls {
      * @param id optional id to set for the element
      * @returns HTML element created with the specified name, class, and text content
      */
-    public static createElement(parent: HTMLElement, name: string, classname?: string, txt?: string, id?: string): HTMLElement {
+    static createElement(parent: HTMLElement, name: string, classname?: string, txt?: string, id?: string): HTMLElement {
         const e: HTMLElement = document.createElement(name);
         if (classname) {
             e.setAttribute("class", classname);
@@ -41,7 +41,7 @@ export class Controls {
      * @param txt text content to set for the div
      * @returns HTMLDivElement created with the specified class and text content
      */
-    public static createDiv(parent: HTMLElement, classname?: string, txt?: string): HTMLDivElement {
+    static createDiv(parent: HTMLElement, classname?: string, txt?: string): HTMLDivElement {
         return Controls.createElement(parent, "div", classname, txt) as HTMLDivElement;
     }
 
@@ -53,7 +53,7 @@ export class Controls {
      * @param classname class name to assign to the form
      * @returns HTMLFormElement created with the specified class
      */
-    public static createForm(parent: HTMLElement, classname?: string): HTMLFormElement {
+    static createForm(parent: HTMLElement, classname?: string): HTMLFormElement {
         return Controls.createElement(parent, "form", classname) as HTMLFormElement;
     }
 
@@ -67,7 +67,7 @@ export class Controls {
      * @param txt text content to set for the label
      * @returns HTMLLabelElement created with the specified for attribute, class, and text content
      */
-    public static createLabel(parent: HTMLElement, forid: string, classname?: string, txt?: string): HTMLLabelElement {
+    static createLabel(parent: HTMLElement, forid: string, classname?: string, txt?: string): HTMLLabelElement {
         const label: HTMLLabelElement = Controls.createElement(parent, "label", classname) as HTMLLabelElement;
         label.setAttribute("for", forid);
         if (txt) {
@@ -87,7 +87,7 @@ export class Controls {
      * @param value value to set for the input element
      * @returns HTMLInputElement created with the specified type, ID, class, and value
      */
-    public static createInput(parent: HTMLElement, type: string, id: string, classname?: string, value?: string): HTMLInputElement {
+    static createInput(parent: HTMLElement, type: string, id: string, classname?: string, value?: string): HTMLInputElement {
         const input: HTMLInputElement = Controls.createElement(parent, "input", classname) as HTMLInputElement;
         input.type = type;
         input.id = id;
@@ -107,7 +107,7 @@ export class Controls {
      * @param txt text content to set for the heading
      * @returns HTMLHeadingElement created with the specified level, class, and text content
      */
-    public static createHeading(parent: HTMLElement, level: number, classname?: string, txt?: string): HTMLHeadingElement {
+    static createHeading(parent: HTMLElement, level: number, classname?: string, txt?: string): HTMLHeadingElement {
         const h: HTMLHeadingElement = Controls.createElement(parent, `h${level}`, classname) as HTMLHeadingElement;
         if (txt) {
             h.textContent = txt;
@@ -126,7 +126,7 @@ export class Controls {
      * @param id optional id to set for the button
      * @returns HTMLButtonElement created with the specified type, ID, text content, and class
      */
-    public static createButton(parent: HTMLElement, type: string, txt: string, classname?: string, id?: string): HTMLButtonElement {
+    static createButton(parent: HTMLElement, type: string, txt: string, classname?: string, id?: string): HTMLButtonElement {
         const b: HTMLButtonElement = Controls.createElement(parent, "button", classname, txt) as HTMLButtonElement;
         b.setAttribute("type", type);
         b.title = txt;
@@ -145,7 +145,7 @@ export class Controls {
      * @param txt text content to set for the span
      * @returns HTMLSpanElement created with the specified class and text content
      */
-    public static createSpan(parent: HTMLElement, classname?: string, txt?: string): HTMLSpanElement {
+    static createSpan(parent: HTMLElement, classname?: string, txt?: string): HTMLSpanElement {
         const span: HTMLSpanElement = Controls.createElement(parent, "span", classname, txt) as HTMLSpanElement;
         return span;
     }
@@ -158,7 +158,7 @@ export class Controls {
      * @param msg message to display in the alert
      * @returns HTMLDivElement representing the alert
      */
-    public static createAlert(parent: HTMLElement, msg: string): HTMLDivElement {
+    static createAlert(parent: HTMLElement, msg: string): HTMLDivElement {
         Controls.removeAllChildren(parent);
         const alertDiv: HTMLDivElement = Controls.createDiv(parent, "alert alert-danger alert-dismissible");
         alertDiv.setAttribute("role", "alert");
@@ -169,7 +169,7 @@ export class Controls {
         return alertDiv;
     }
 
-    public static createConfirmationDialog(parent: HTMLElement, title: string, body: string, yes: string, no: string): HTMLDivElement {
+    static createConfirmationDialog(parent: HTMLElement, title: string, body: string, yes: string, no: string): HTMLDivElement {
         const modalDiv: HTMLDivElement = Controls.createDiv(parent, "modal fade");
         modalDiv.id = "confirmationdialog-id";
         modalDiv.setAttribute("tabIndex", "-1");
@@ -204,7 +204,7 @@ export class Controls {
      * @param active flag indicating if the anchor is active
      * @returns HTMLAnchorElement created with the specified href, text content, class, and active state
      */
-    public static createAnchor(parent: HTMLElement, href: string, txt: string, classname?: string, active?: boolean): HTMLAnchorElement {
+    static createAnchor(parent: HTMLElement, href: string, txt: string, classname?: string, active?: boolean): HTMLAnchorElement {
         const a: HTMLAnchorElement = Controls.createElement(parent, "a", classname) as HTMLAnchorElement;
         a.href = href;
         a.textContent = txt;
@@ -224,8 +224,36 @@ export class Controls {
      * @param txt text content to set for the paragraph
      * @returns HTMLParagraphElement created with the specified class and text content
      */
-    public static createParagraph(parent: HTMLElement, classname?: string, txt?: string): HTMLParagraphElement {
+    static createParagraph(parent: HTMLElement, classname?: string, txt?: string): HTMLParagraphElement {
         return Controls.createElement(parent, "p", classname, txt) as HTMLParagraphElement;
+    }
+
+    static createSearch(heading: HTMLHeadingElement, parent: HTMLElement, label: string, filter: string, renderItems: (filter: string) => void) {
+        const iconFilter: HTMLElement = Controls.createElement(heading, "i", "ms-2 bi bi-search");
+        iconFilter.setAttribute("style", "cursor:pointer;");
+        const formElement: HTMLFormElement = Controls.createForm(parent, "align-items-center");
+        if (filter.length == 0) {
+            formElement.classList.add("d-none");
+        }
+        formElement.id = "search-form-id";
+        const divFilter: HTMLDivElement = Controls.createDiv(formElement, "d-flex align-items-center mb-2");
+        Controls.createLabel(divFilter, "search-id", "form-label mb-0 me-2", label);
+        const inputFilter: HTMLInputElement = Controls.createInput(divFilter, "text", "search-id", "form-control", filter);
+        inputFilter.setAttribute("autocomplete", "off");
+        inputFilter.setAttribute("spellcheck", "false");
+        formElement.addEventListener("submit", (e: SubmitEvent) => {
+            e.preventDefault();
+            renderItems(inputFilter.value.trim().toLocaleLowerCase());
+        });
+        iconFilter.addEventListener("click", (e: MouseEvent) => {
+            const elem: HTMLElement = document.getElementById("search-form-id")!;
+            if (elem.classList.contains("d-none")) {
+                elem.classList.remove("d-none");
+                document.getElementById("search-id")!.focus();
+            } else {
+                elem.classList.add("d-none");
+            }
+        });
     }
 
     /**
@@ -234,7 +262,7 @@ export class Controls {
      * 
      * @param parent parent element whose children will be removed
      */
-    public static removeAllChildren(parent: HTMLElement): void {
+    static removeAllChildren(parent: HTMLElement): void {
         const node: HTMLElement = parent;
         while (node.lastChild) {
             node.removeChild(node.lastChild);

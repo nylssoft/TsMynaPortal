@@ -1,6 +1,6 @@
-import { FetchHelper } from "./FetchHelper";
-import { Security } from "./Security";
-import { NoteResult, UserInfoResult } from "./TypeDefinitions";
+import { FetchHelper } from "../utils/FetchHelper";
+import { Security } from "../utils/Security";
+import { NoteResult, UserInfoResult } from "../TypeDefinitions";
 
 /**
  * NoteService provides methods to manage notes.
@@ -22,7 +22,7 @@ export class NoteService {
      * @param user current user information
      * @returns notes for the user
      */
-    public static async getNotesAsync(token: string, user: UserInfoResult): Promise<NoteResult[]> {
+    static async getNotesAsync(token: string, user: UserInfoResult): Promise<NoteResult[]> {
         const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
         if (encryptionKey == null || encryptionKey.length === 0) {
             throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
@@ -53,7 +53,7 @@ export class NoteService {
      * @param noteId note ID to retrieve
      * @returns note with the specified ID
      */
-    public static async getNoteAsync(token: string, user: UserInfoResult, noteId: number): Promise<NoteResult> {
+    static async getNoteAsync(token: string, user: UserInfoResult, noteId: number): Promise<NoteResult> {
         const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
         if (encryptionKey == null || encryptionKey.length === 0) {
             throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");

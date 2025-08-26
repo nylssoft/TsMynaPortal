@@ -1,4 +1,4 @@
-import { UserInfoResult } from "./TypeDefinitions";
+import { UserInfoResult } from "../TypeDefinitions";
 
 /**
  * Security class provides methods for creating cryptographic keys,
@@ -15,7 +15,7 @@ export class Security {
      * @param salt salt to use for key derivation
      * @returns 
      */
-    public static async createCryptoKeyAsync(key: string, salt: string): Promise<CryptoKey> {
+    static async createCryptoKeyAsync(key: string, salt: string): Promise<CryptoKey> {
         const pwdCryptoKey: CryptoKey = await window.crypto.subtle.importKey("raw", new TextEncoder().encode(key), "PBKDF2", false, ["deriveKey"]);
         const algo: Pbkdf2Params = {
             "name": "PBKDF2",
@@ -35,7 +35,7 @@ export class Security {
      * @param msg message to encrypt
      * @returns encoded message as a hex string
      */
-    public static async encodeMessageAsync(cryptoKey: CryptoKey, msg: string): Promise<string> {
+    static async encodeMessageAsync(cryptoKey: CryptoKey, msg: string): Promise<string> {
         const arr: Uint8Array<ArrayBuffer> = new TextEncoder().encode(msg);
         const iv: Uint8Array<ArrayBuffer> = window.crypto.getRandomValues(new Uint8Array(12));
         const options: AesGcmParams = { name: "AES-GCM", iv: iv };
@@ -52,7 +52,7 @@ export class Security {
      * @param msg message to decrypt, which should be a hex string prefixed with the IV used for encryption
      * @returns decoded message as a string
      */
-    public static async decodeMessageAsync(cryptoKey: CryptoKey, msg: string): Promise<string> {
+    static async decodeMessageAsync(cryptoKey: CryptoKey, msg: string): Promise<string> {
         const iv: number[] = this.hex2arr(msg.substring(0, 12 * 2));
         const data: number[] = this.hex2arr(msg.substring(12 * 2));
         const options: AesGcmParams = { name: "AES-GCM", iv: new Uint8Array(iv) };
@@ -72,7 +72,7 @@ export class Security {
      * @param user UserInfoResult object containing user information
      * @returns encryption key for the user, or null if not found
      */
-    public static async getEncryptionKeyAsync(user: UserInfoResult): Promise<string | null> {
+    static async getEncryptionKeyAsync(user: UserInfoResult): Promise<string | null> {
         const storageKey: string = "encryptkey";
         const sessionKey: string = `${storageKey}-${user.id}`;
         let encryptKey = window.sessionStorage.getItem(sessionKey);
@@ -93,7 +93,7 @@ export class Security {
      * @param user UserInfoResult object containing user information
      * @param encryptKey encryption key to set for the user
      */
-    public static async setEncryptionKeyAsync(user: UserInfoResult, encryptKey: string | null) {
+    static async setEncryptionKeyAsync(user: UserInfoResult, encryptKey: string | null) {
         const storageKey: string = "encryptkey";
         const sessionKey: string = `${storageKey}-${user.id}`;
         if (encryptKey != null && encryptKey.length > 0) {
@@ -114,7 +114,7 @@ export class Security {
      * @param user UserInfoResult object containing user information
      * @returns session storage key for the user's encryption key
      */
-    public static getSessionStorageKey(user: UserInfoResult): string {
+    static getSessionStorageKey(user: UserInfoResult): string {
         return `encryptkey-${user.id}`;
     }
 
@@ -126,7 +126,7 @@ export class Security {
      * @returns a randomly generated encryption key consisting of 24 characters
      *          from a predefined set of characters.
      */
-    public static generateEncryptionKey(): string {
+    static generateEncryptionKey(): string {
         const chars: string = "!@$()=+-,:.ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         const arr: Uint32Array<ArrayBuffer> = new Uint32Array(24);
         window.crypto.getRandomValues(arr);
@@ -203,5 +203,4 @@ export class Security {
         }
         return ret;
     }
-
 }

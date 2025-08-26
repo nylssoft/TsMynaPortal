@@ -1,10 +1,10 @@
-import { FetchHelper } from "./FetchHelper";
-import { Security } from "./Security";
-import { PasswordItemResult, UserInfoResult } from "./TypeDefinitions";
+import { FetchHelper } from "../utils/FetchHelper";
+import { Security } from "../utils/Security";
+import { PasswordItemResult, UserInfoResult } from "../TypeDefinitions";
 
 export class PasswordManagerService {
 
-    public static async getPasswordFileAsync(token: string, user: UserInfoResult): Promise<PasswordItemResult[]> {
+    static async getPasswordFileAsync(token: string, user: UserInfoResult): Promise<PasswordItemResult[]> {
         const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
         if (encryptionKey == null || encryptionKey.length === 0) {
             throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
@@ -21,7 +21,7 @@ export class PasswordManagerService {
         }
     }
 
-    public static async getPasswordAsync(user: UserInfoResult, item: PasswordItemResult): Promise<string> {
+    static async getPasswordAsync(user: UserInfoResult, item: PasswordItemResult): Promise<string> {
         if (item.Password.length > 0) {
             const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
             if (encryptionKey == null || encryptionKey.length === 0) {

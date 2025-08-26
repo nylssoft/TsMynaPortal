@@ -1,4 +1,4 @@
-import { ErrorResult } from "./TypeDefinitions";
+import { ErrorResult } from "../TypeDefinitions";
 
 /**
  * FetchHelper provides methods to fetch data from the API.
@@ -16,7 +16,7 @@ export class FetchHelper {
      * @throws Error if the response is not ok or if there is an error in the
      * @returns response object.
      */
-    public static async fetchAsync(url: string, options?: RequestInit): Promise<Response> {
+    static async fetchAsync(url: string, options?: RequestInit): Promise<Response> {
         const resp: Response = await window.fetch(url, options);
         if (!resp.ok) {
             const errorResult: ErrorResult | null = await resp.json() as ErrorResult;

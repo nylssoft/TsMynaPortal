@@ -1,5 +1,5 @@
-import { FetchHelper } from "./FetchHelper";
-import { Security } from "./Security";
+import { FetchHelper } from "./utils/FetchHelper";
+import { Security } from "./utils/Security";
 import { AuthResult, ClientInfo, UserInfoResult, AuditResult } from "./TypeDefinitions";
 
 /**
