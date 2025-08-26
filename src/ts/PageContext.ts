@@ -2,11 +2,12 @@ import { Locale } from "./utils/Locale";
 import { Theme } from "./utils/Theme";
 import { AuthenticationClient } from "./AuthenticationClient";
 import { Controls } from "./utils/Controls";
-import { ContactResult, DesktopTab, NoteResult, PageType, PasswordItemResult } from "./TypeDefinitions";
+import { PageType } from "./TypeDefinitions";
 import { Diary } from "./models/Diary";
 import { Contact } from "./models/Contact";
 import { Desktop } from "./models/Desktop";
 import { Note } from "./models/Note";
+import { PasswordItem } from "./models/PasswordItem";
 
 /**
  * Interface for a page that can be rendered in the application.
@@ -40,18 +41,12 @@ export class PageContext {
     readonly desktop: Desktop = new Desktop();
     readonly contact: Contact = new Contact();
     readonly note: Note = new Note();
+    readonly passwordItem: PasswordItem = new PasswordItem();
     readonly diary: Diary = new Diary();
     // current page
     pageType: PageType = "LOGIN_USERNAME_PASSWORD";
     // all page registrations
     private pageRegistrations = new Map<PageType, Page>();
-
-    // --- passwords tab in desktop page
-
-    // filter
-    private passwordItemFilter: string = "";
-    // selected password item in password detail page
-    private passwordItem: PasswordItemResult | null = null;
 
     /**
      * Registers a page implementation.
@@ -82,21 +77,5 @@ export class PageContext {
             await page.renderAsync(content, this);
         }
         loading.classList.add("d-none");
-    }
-
-    public getPasswordItem(): PasswordItemResult | null {
-        return this.passwordItem;
-    }
-
-    public setPasswordItem(item: PasswordItemResult | null) {
-        this.passwordItem = item;
-    }
-
-    public getPasswordItemFilter(): string {
-        return this.passwordItemFilter;
-    }
-
-    public setPasswordItemFilter(filter: string) {
-        this.passwordItemFilter = filter;
     }
 }

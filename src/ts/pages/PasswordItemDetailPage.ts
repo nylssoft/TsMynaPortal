@@ -12,7 +12,7 @@ export class PasswordItemDetailPage implements Page {
     async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
         try {
-            const passwordItem: PasswordItemResult = pageContext.getPasswordItem()!;
+            const passwordItem: PasswordItemResult = pageContext.passwordItem.result!;
             const user: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
             const pwd: string = await PasswordManagerService.getPasswordAsync(user, passwordItem);
             const card = Controls.createDiv(parent, "card p-4 shadow-sm");
@@ -65,7 +65,7 @@ export class PasswordItemDetailPage implements Page {
             backButton.addEventListener("click", async (e: MouseEvent) => {
                 e.preventDefault();
                 pageContext.pageType = "DESKTOP";
-                pageContext.setPasswordItem(null);
+                pageContext.passwordItem.result = null;
                 await pageContext.renderAsync();
             });
         }

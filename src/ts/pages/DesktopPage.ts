@@ -224,10 +224,10 @@ export class DesktopPage implements Page {
             const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.locale.translate("PASSWORD_MANAGER"));
             passwordItems.sort((a, b) => a.Name.localeCompare(b.Name));
             if (passwordItems.length > 0) {
-                Controls.createSearch(heading, parent, pageContext.locale.translate("SEARCH"), pageContext.getPasswordItemFilter(), (filter: string) => this.filterPasswordItemList(pageContext, filter, passwordItems));
+                Controls.createSearch(heading, parent, pageContext.locale.translate("SEARCH"), pageContext.passwordItem.filter, (filter: string) => this.filterPasswordItemList(pageContext, filter, passwordItems));
                 const listGroup: HTMLDivElement = Controls.createDiv(parent, "list-group");
                 listGroup.id = "list-group-id";
-                this.filterPasswordItemList(pageContext, pageContext.getPasswordItemFilter(), passwordItems);
+                this.filterPasswordItemList(pageContext, pageContext.passwordItem.filter, passwordItems);
             }
         }
         catch (error: Error | unknown) {
@@ -236,7 +236,7 @@ export class DesktopPage implements Page {
     }
 
     private filterPasswordItemList(pageContext: PageContext, filter: string, items: PasswordItemResult[]) {
-        pageContext.setPasswordItemFilter(filter);
+        pageContext.passwordItem.filter = filter;
         const filteredItems: PasswordItemResult[] = [];
         items.forEach(item => {
             if (filter.length == 0 || item.Name.toLocaleLowerCase().includes(filter)) {
@@ -252,7 +252,7 @@ export class DesktopPage implements Page {
             a.addEventListener("click", async (e: MouseEvent) => {
                 e.preventDefault();
                 pageContext.pageType = "PASSWORD_ITEM_DETAIL";
-                pageContext.setPasswordItem(item);
+                pageContext.passwordItem.result = item;
                 await pageContext.renderAsync();
             });
         });
