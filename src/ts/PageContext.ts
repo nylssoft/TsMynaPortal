@@ -6,6 +6,7 @@ import { ContactResult, DesktopTab, NoteResult, PageType, PasswordItemResult } f
 import { Diary } from "./models/Diary";
 import { Contact } from "./models/Contact";
 import { Desktop } from "./models/Desktop";
+import { Note } from "./models/Note";
 
 /**
  * Interface for a page that can be rendered in the application.
@@ -36,20 +37,14 @@ export class PageContext {
     // authentication
     readonly authenticationClient: AuthenticationClient = new AuthenticationClient();
     // models
-    readonly diary: Diary = new Diary();
-    readonly contact: Contact = new Contact();
     readonly desktop: Desktop = new Desktop();
+    readonly contact: Contact = new Contact();
+    readonly note: Note = new Note();
+    readonly diary: Diary = new Diary();
     // current page
     pageType: PageType = "LOGIN_USERNAME_PASSWORD";
     // all page registrations
     private pageRegistrations = new Map<PageType, Page>();
-
-    // --- notes tab in desktop page
-
-    // filter
-    private noteFilter: string = "";
-    // selected note in note detail page
-    private note: NoteResult | null = null;
 
     // --- passwords tab in desktop page
 
@@ -87,34 +82,6 @@ export class PageContext {
             await page.renderAsync(content, this);
         }
         loading.classList.add("d-none");
-    }
-
-    /**
-     * Retrieves the currently set note.
-     * If no note is set, it returns null.
-     * 
-     * @returns the currently set note or null if no note is set
-     */
-    public getNote(): NoteResult | null {
-        return this.note;
-    }
-
-    /**
-     * Sets the note to be used in the application.
-     * If the note is null, it clears the current note.
-     * 
-     * @param note the note to be set, or null to clear the current note
-     */
-    public setNote(note: NoteResult | null) {
-        this.note = note;
-    }
-
-    public getNoteFilter(): string {
-        return this.noteFilter;
-    }
-
-    public setNoteFilter(filter: string) {
-        this.noteFilter = filter;
     }
 
     public getPasswordItem(): PasswordItemResult | null {

@@ -19,7 +19,7 @@ export class NoteDetailPage implements Page {
         try {
             const token: string = pageContext.authenticationClient.getToken()!;
             const userInfo: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
-            const note: NoteResult = await NoteService.getNoteAsync(token, userInfo, pageContext.getNote()!.id);
+            const note: NoteResult = await NoteService.getNoteAsync(token, userInfo, pageContext.note.result!.id);
             const date: Date = new Date(note.lastModifiedUtc);
             const longDate: string = date.toLocaleDateString(pageContext.locale.getLanguage(), { dateStyle: "long" });
             const longTime: string = date.toLocaleTimeString(pageContext.locale.getLanguage(), { timeStyle: "long" });
@@ -42,7 +42,7 @@ export class NoteDetailPage implements Page {
             backButton.addEventListener("click", async (e: MouseEvent) => {
                 e.preventDefault();
                 pageContext.pageType = "DESKTOP";
-                pageContext.setNote(null);
+                pageContext.note.result = null;
                 await pageContext.renderAsync();
             });
         }

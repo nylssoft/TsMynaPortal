@@ -180,10 +180,10 @@ export class DesktopPage implements Page {
             const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.locale.translate("NOTES"));
             notes.sort((a, b) => a.title.localeCompare(b.title));
             if (notes.length > 0) {
-                Controls.createSearch(heading, parent, pageContext.locale.translate("SEARCH"), pageContext.getNoteFilter(), (filter: string) => this.filterNoteItemList(pageContext, filter, notes));
+                Controls.createSearch(heading, parent, pageContext.locale.translate("SEARCH"), pageContext.note.filter, (filter: string) => this.filterNoteItemList(pageContext, filter, notes));
                 const listGroup: HTMLDivElement = Controls.createDiv(parent, "list-group");
                 listGroup.id = "list-group-id";
-                this.filterNoteItemList(pageContext, pageContext.getNoteFilter(), notes);
+                this.filterNoteItemList(pageContext, pageContext.note.filter, notes);
             }
         }
         catch (error: Error | unknown) {
@@ -192,7 +192,7 @@ export class DesktopPage implements Page {
     }
 
     private filterNoteItemList(pageContext: PageContext, filter: string, items: NoteResult[]) {
-        pageContext.setNoteFilter(filter);
+        pageContext.note.filter = filter;
         const filteredItems: NoteResult[] = [];
         items.forEach(item => {
             if (filter.length == 0 || item.title.toLocaleLowerCase().includes(filter)) {
@@ -208,7 +208,7 @@ export class DesktopPage implements Page {
             a.addEventListener("click", async (e: MouseEvent) => {
                 e.preventDefault();
                 pageContext.pageType = "NOTE_DETAIL";
-                pageContext.setNote(item);
+                pageContext.note.result = item;
                 await pageContext.renderAsync();
             });
         });
