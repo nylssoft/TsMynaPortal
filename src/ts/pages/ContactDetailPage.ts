@@ -16,7 +16,7 @@ export class ContactDetailPage implements Page {
     async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         parent = Controls.createDiv(parent, "card p-4 shadow-sm");
         parent.style.maxWidth = "400px";
-        const contact: ContactResult = pageContext.getContact()!;
+        const contact: ContactResult = pageContext.contact.result!;
         const cardBody: HTMLDivElement = Controls.createDiv(parent, "card-body");
         Controls.createHeading(cardBody, 2, "card-title mb-3", contact.name);
         if (contact.phone.length > 0) {
@@ -48,7 +48,7 @@ export class ContactDetailPage implements Page {
         backButton.addEventListener("click", async (e: MouseEvent) => {
             e.preventDefault();
             pageContext.pageType = "DESKTOP";
-            pageContext.setContact(null);
+            pageContext.contact.result = null;
             await pageContext.renderAsync();
         });
     }

@@ -115,7 +115,7 @@ export class DesktopPage implements Page {
                     a.addEventListener("click", async (e: MouseEvent) => {
                         e.preventDefault();
                         pageContext.pageType = "CONTACT_DETAIL";
-                        pageContext.setContact(contact);
+                        pageContext.contact.result = contact;
                         await pageContext.renderAsync();
                     });
                 });
@@ -136,10 +136,10 @@ export class DesktopPage implements Page {
             const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.locale.translate("CONTACTS"));
             contacts.items.sort((a, b) => a.name.localeCompare(b.name));
             if (contacts.items.length > 0) {
-                Controls.createSearch(heading, parent, pageContext.locale.translate("SEARCH"), pageContext.getContactsFilter(), (filter: string) => this.filterContactItemList(pageContext, filter, contacts.items));
+                Controls.createSearch(heading, parent, pageContext.locale.translate("SEARCH"), pageContext.contact.filter, (filter: string) => this.filterContactItemList(pageContext, filter, contacts.items));
                 const listGroup: HTMLDivElement = Controls.createDiv(parent, "list-group");
                 listGroup.id = "list-group-id";
-                this.filterContactItemList(pageContext, pageContext.getContactsFilter(), contacts.items);
+                this.filterContactItemList(pageContext, pageContext.contact.filter, contacts.items);
             }
         }
         catch (error: Error | unknown) {
@@ -148,7 +148,7 @@ export class DesktopPage implements Page {
     }
 
     private filterContactItemList(pageContext: PageContext, filter: string, items: ContactResult[]) {
-        pageContext.setContactsFilter(filter);
+        pageContext.contact.filter = filter;
         const filteredItems: ContactResult[] = [];
         items.forEach(item => {
             if (filter.length == 0 || item.name.toLocaleLowerCase().includes(filter)) {
@@ -164,7 +164,7 @@ export class DesktopPage implements Page {
             a.addEventListener("click", async (e: MouseEvent) => {
                 e.preventDefault();
                 pageContext.pageType = "CONTACT_DETAIL";
-                pageContext.setContact(item);
+                pageContext.contact.result = item;
                 await pageContext.renderAsync();
             });
         });

@@ -4,6 +4,7 @@ import { AuthenticationClient } from "./AuthenticationClient";
 import { Controls } from "./utils/Controls";
 import { ContactResult, DesktopTab, NoteResult, PageType, PasswordItemResult } from "./TypeDefinitions";
 import { Diary } from "./models/Diary";
+import { Contact } from "./models/Contact";
 
 /**
  * Interface for a page that can be rendered in the application.
@@ -35,6 +36,8 @@ export class PageContext {
     readonly authenticationClient: AuthenticationClient = new AuthenticationClient();
     // diary model
     readonly diary: Diary = new Diary();
+    // contact model
+    readonly contact: Contact = new Contact();
     // current page
     pageType: PageType = "LOGIN_USERNAME_PASSWORD";
     // page registrations
@@ -46,13 +49,6 @@ export class PageContext {
     private welcomeClosed: boolean = false;
     // selected tab in desktop page
     private desktopTab: DesktopTab = "BIRTHDAYS";
-
-    // --- contacts tab in desktop page
-
-    // filter
-    private contactsFilter: string = "";
-    // selected contact in contact detail page
-    private contact: ContactResult | null = null;
 
     // --- notes tab in desktop page
 
@@ -113,34 +109,6 @@ export class PageContext {
 
     public setWelcomeClosed(closed: boolean) {
         this.welcomeClosed = closed;
-    }
-
-    /**
-     * Retrieves the currently set contact.
-     * If no contact is set, it returns null.
-     * 
-     * @returns the currently set contact or null if no contact is set
-     */
-    public getContact(): ContactResult | null {
-        return this.contact;
-    }
-
-    /**
-     * Sets the contact to be used in the application.
-     * If the contact is null, it clears the current contact.
-     * 
-     * @param contact the contact to be set, or null to clear the current contact
-     */
-    public setContact(contact: ContactResult | null) {
-        this.contact = contact;
-    }
-
-    public getContactsFilter(): string {
-        return this.contactsFilter;
-    }
-
-    public setContactsFilter(filter: string) {
-        this.contactsFilter = filter;
     }
 
     /**
