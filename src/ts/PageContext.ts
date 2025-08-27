@@ -46,7 +46,7 @@ export class PageContext {
     // current page
     pageType: PageType = "LOGIN_USERNAME_PASSWORD";
     // all page registrations
-    private pageRegistrations = new Map<PageType, Page>();
+    private readonly pageRegistrations = new Map<PageType, Page>();
 
     /**
      * Registers a page implementation.
