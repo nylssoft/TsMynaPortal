@@ -18,7 +18,7 @@ export class DiaryService {
         const datestr: string = date.toISOString();
         const resp: Response = await FetchHelper.fetchAsync(`/api/diary/entry?date=${datestr}`, { headers: { 'token': token } });
         const diaryEntry: DiaryEntryResult | null = await resp.json() as DiaryEntryResult | null;
-        if (diaryEntry == null) return null;
+        if (diaryEntry == null || diaryEntry.entry.length == 0) return null;
         try {
             const cryptoKey: CryptoKey = await Security.createCryptoKeyAsync(encryptionKey!, user.passwordManagerSalt)
             return await Security.decodeMessageAsync(cryptoKey, diaryEntry.entry);
@@ -34,13 +34,15 @@ export class DiaryService {
             throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
         }
         const datestr: string = date.toISOString();
-        let encodedText: string;
-        try {
-            const cryptoKey: CryptoKey = await Security.createCryptoKeyAsync(encryptionKey!, user.passwordManagerSalt)
-            encodedText = await Security.encodeMessageAsync(cryptoKey, text);
-        } catch (e: Error | unknown) {
-            console.error("Error encoding diary entry:", e);
-            throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
+        let encodedText: string = "";
+        if (text.length > 0) {
+            try {
+                const cryptoKey: CryptoKey = await Security.createCryptoKeyAsync(encryptionKey!, user.passwordManagerSalt)
+                encodedText = await Security.encodeMessageAsync(cryptoKey, text);
+            } catch (e: Error | unknown) {
+                console.error("Error encoding diary entry:", e);
+                throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
+            }
         }
         const diaryEntry: DiaryEntryResult = { "date": datestr, "entry": encodedText };
         await FetchHelper.fetchAsync(`/api/diary/entry?date=${datestr}`, {
