@@ -23,26 +23,23 @@ export class NoteDetailPage implements Page {
     }
 
     private async renderViewAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
-        const alertDiv: HTMLDivElement = Controls.createDiv(parent);
+        const card: HTMLDivElement = Controls.createDiv(parent, "card p-1 shadow-sm");
+        card.style.maxWidth = "600px";
+        const cardBody: HTMLDivElement = Controls.createDiv(card, "card-body");
+        const headingActions: HTMLHeadingElement = Controls.createHeading(cardBody, 4);
+        const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
+        iBack.setAttribute("role", "button");
+        iBack.addEventListener("click", async (e: MouseEvent) => {
+            e.preventDefault();
+            pageContext.pageType = "DESKTOP";
+            pageContext.note.result = null;
+            await pageContext.renderAsync();
+        });
         try {
             const token: string = pageContext.authenticationClient.getToken()!;
             const userInfo: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
             const note: NoteResult = await NoteService.getNoteAsync(token, userInfo, pageContext.note.result!.id!);
-            const card: HTMLDivElement = Controls.createDiv(parent, "card p-1 shadow-sm");
-            card.style.maxWidth = "600px";
-            const cardBody: HTMLDivElement = Controls.createDiv(card, "card-body");
             const date: Date = new Date(note.lastModifiedUtc!);
-            const longDate: string = date.toLocaleDateString(pageContext.locale.getLanguage(), { dateStyle: "long" });
-            const longTime: string = date.toLocaleTimeString(pageContext.locale.getLanguage(), { timeStyle: "long" });
-            const headingActions: HTMLHeadingElement = Controls.createHeading(cardBody, 4);
-            const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
-            iBack.setAttribute("role", "button");
-            iBack.addEventListener("click", async (e: MouseEvent) => {
-                e.preventDefault();
-                pageContext.pageType = "DESKTOP";
-                pageContext.note.result = null;
-                await pageContext.renderAsync();
-            });
             const iEdit: HTMLElement = Controls.createElement(headingActions, "i", "ms-4 bi bi-pencil-square", undefined, "editbutton-id");
             iEdit.setAttribute("role", "button");
             iEdit.addEventListener("click", async (e: MouseEvent) => {
@@ -57,6 +54,8 @@ export class NoteDetailPage implements Page {
             Controls.createHeading(cardBody, 2, "card-title", note.title!);
             const cardTextDate: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
             Controls.createSpan(cardTextDate, "bi bi-calendar");
+            const longDate: string = date.toLocaleDateString(pageContext.locale.getLanguage(), { dateStyle: "long" });
+            const longTime: string = date.toLocaleTimeString(pageContext.locale.getLanguage(), { timeStyle: "long" });
             Controls.createSpan(cardTextDate, "ms-2", `${longDate} ${longTime}`);
             if (note.content!.length > 0) {
                 const divFormFloating: HTMLDivElement = Controls.createDiv(cardBody, "form-floating mb-4");
@@ -79,12 +78,28 @@ export class NoteDetailPage implements Page {
             });
         }
         catch (error: Error | unknown) {
-            Controls.createAlert(alertDiv, pageContext.locale.translateError(error));
+            Controls.createAlert(Controls.createDiv(cardBody), pageContext.locale.translateError(error));
         }
     }
 
     private async renderEditAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
-        const alertDiv: HTMLDivElement = Controls.createDiv(parent);
+        const card: HTMLDivElement = Controls.createDiv(parent, "card p-1 shadow-sm");
+        card.style.maxWidth = "600px";
+        const cardBody: HTMLDivElement = Controls.createDiv(card, "card-body");
+        const headingActions: HTMLHeadingElement = Controls.createHeading(cardBody, 4);
+        const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
+        iBack.setAttribute("role", "button");
+        iBack.setAttribute("data-bs-target", "#confirmationdialog-id");
+        iBack.addEventListener("click", async (e: MouseEvent) => {
+            e.preventDefault();
+            if (!pageContext.note.changed) {
+                pageContext.note.edit = false;
+                if (pageContext.note.result == null) {
+                    pageContext.pageType = "DESKTOP";
+                }
+                await pageContext.renderAsync();
+            }
+        });
         try {
             const token: string = pageContext.authenticationClient.getToken()!;
             const userInfo: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
@@ -92,23 +107,6 @@ export class NoteDetailPage implements Page {
             if (pageContext.note.result != null) {
                 note = await NoteService.getNoteAsync(token, userInfo, pageContext.note.result.id!);
             }
-            const card: HTMLDivElement = Controls.createDiv(parent, "card p-1 shadow-sm");
-            card.style.maxWidth = "600px";
-            const cardBody: HTMLDivElement = Controls.createDiv(card, "card-body");
-            const headingActions: HTMLHeadingElement = Controls.createHeading(cardBody, 4);
-            const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
-            iBack.setAttribute("role", "button");
-            iBack.setAttribute("data-bs-target", "#confirmationdialog-id");
-            iBack.addEventListener("click", async (e: MouseEvent) => {
-                e.preventDefault();
-                if (!pageContext.note.changed) {
-                    pageContext.note.edit = false;
-                    if (pageContext.note.result == null) {
-                        pageContext.pageType = "DESKTOP";
-                    }
-                    await pageContext.renderAsync();
-                }
-            });
             const formElement: HTMLFormElement = Controls.createForm(cardBody, "align-items-center");
             const divRows: HTMLDivElement = Controls.createDiv(formElement, "row align-items-center");
             const divTitle: HTMLDivElement = Controls.createDiv(divRows, "mb-3");
@@ -141,15 +139,10 @@ export class NoteDetailPage implements Page {
             const saveButton: HTMLButtonElement = Controls.createButton(divRows, "submit", pageContext.locale.translate("BUTTON_SAVE"), "btn btn-primary", "savebutton-id");
             saveButton.addEventListener("click", async (e: MouseEvent) => {
                 e.preventDefault();
-                try {
-                    await NoteService.saveNoteAsync(token, userInfo, inputTitle.value, textarea.value, pageContext.note.result?.id);
-                    pageContext.note.changed = false;
-                    document.getElementById("backbutton-id")!.removeAttribute("data-bs-toggle");
-                    document.getElementById("backbutton-id")!.click();
-                }
-                catch (error: Error | unknown) {
-                    Controls.createAlert(alertDiv, pageContext.locale.translateError(error));
-                }
+                await NoteService.saveNoteAsync(token, userInfo, inputTitle.value, textarea.value, pageContext.note.result?.id);
+                pageContext.note.changed = false;
+                document.getElementById("backbutton-id")!.removeAttribute("data-bs-toggle");
+                document.getElementById("backbutton-id")!.click();
             });
             Controls.createConfirmationDialog(
                 parent,
@@ -164,7 +157,7 @@ export class NoteDetailPage implements Page {
             });
         }
         catch (error: Error | unknown) {
-            Controls.createAlert(alertDiv, pageContext.locale.translateError(error));
+            Controls.createAlert(Controls.createDiv(cardBody), pageContext.locale.translateError(error));
         }
     }
 }

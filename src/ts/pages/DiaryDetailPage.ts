@@ -18,24 +18,23 @@ export class DiaryDetailPage implements Page {
     }
 
     async renderViewAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
-        const alertDiv: HTMLDivElement = Controls.createDiv(parent);
+        const card: HTMLDivElement = Controls.createDiv(parent, "card p-1 shadow-sm");
+        card.style.maxWidth = "600px";
+        const cardBody: HTMLDivElement = Controls.createDiv(card, "card-body");
+        const headingActions: HTMLHeadingElement = Controls.createHeading(cardBody, 4);
+        const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
+        iBack.setAttribute("role", "button");
+        iBack.addEventListener("click", async (e: MouseEvent) => {
+            e.preventDefault();
+            pageContext.pageType = "DESKTOP";
+            pageContext.diary.day = null;
+            await pageContext.renderAsync();
+        });
         try {
             const token: string = pageContext.authenticationClient.getToken()!;
             const userInfo: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
             const date: Date = pageContext.diary.getDate();
             const entry: string | null = await DiaryService.getEntryAsync(token, userInfo, date);
-            const card: HTMLDivElement = Controls.createDiv(parent, "card p-1 shadow-sm");
-            card.style.maxWidth = "600px";
-            const cardBody: HTMLDivElement = Controls.createDiv(card, "card-body");
-            const headingActions: HTMLHeadingElement = Controls.createHeading(cardBody, 4);
-            const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
-            iBack.setAttribute("role", "button");
-            iBack.addEventListener("click", async (e: MouseEvent) => {
-                e.preventDefault();
-                pageContext.pageType = "DESKTOP";
-                pageContext.diary.day = null;
-                await pageContext.renderAsync();
-            });
             const iEdit: HTMLElement = Controls.createElement(headingActions, "i", "ms-4 bi bi-pencil-square", undefined, "editbutton-id");
             iEdit.setAttribute("role", "button");
             iEdit.addEventListener("click", async (e: MouseEvent) => {
@@ -70,31 +69,30 @@ export class DiaryDetailPage implements Page {
             textarea.setAttribute("autocomplete", "off");
         }
         catch (error: Error | unknown) {
-            Controls.createAlert(alertDiv, pageContext.locale.translateError(error));
+            Controls.createAlert(Controls.createDiv(cardBody), pageContext.locale.translateError(error));
         }
     }
 
     async renderEditAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
-        const alertDiv: HTMLDivElement = Controls.createDiv(parent);
+        const card: HTMLDivElement = Controls.createDiv(parent, "card p-1 shadow-sm");
+        card.style.maxWidth = "600px";
+        const cardBody: HTMLDivElement = Controls.createDiv(card, "card-body");
+        const headingActions: HTMLHeadingElement = Controls.createHeading(cardBody, 4);
+        const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
+        iBack.setAttribute("role", "button");
+        iBack.setAttribute("data-bs-target", "#confirmationdialog-id");
+        iBack.addEventListener("click", async (e: MouseEvent) => {
+            e.preventDefault();
+            if (!pageContext.diary.changed) {
+                pageContext.diary.edit = false;
+                await pageContext.renderAsync();
+            }
+        });
         try {
             const token: string = pageContext.authenticationClient.getToken()!;
             const userInfo: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
             const date: Date = pageContext.diary.getDate();
             const entry: string | null = await DiaryService.getEntryAsync(token, userInfo, date);
-            const card: HTMLDivElement = Controls.createDiv(parent, "card p-1 shadow-sm");
-            card.style.maxWidth = "600px";
-            const cardBody: HTMLDivElement = Controls.createDiv(card, "card-body");
-            const headingActions: HTMLHeadingElement = Controls.createHeading(cardBody, 4);
-            const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
-            iBack.setAttribute("role", "button");
-            iBack.setAttribute("data-bs-target", "#confirmationdialog-id");
-            iBack.addEventListener("click", async (e: MouseEvent) => {
-                e.preventDefault();
-                if (!pageContext.diary.changed) {
-                    pageContext.diary.edit = false;
-                    await pageContext.renderAsync();
-                }
-            });
             const longDate: string = date.toLocaleDateString(pageContext.locale.getLanguage(), { dateStyle: "long" });
             Controls.createHeading(cardBody, 2, "card-title", longDate);
             const formElement: HTMLFormElement = Controls.createForm(cardBody, "align-items-center");
@@ -113,19 +111,13 @@ export class DiaryDetailPage implements Page {
                 }
             });
             textarea.focus();
-            const buttonDiv: HTMLDivElement = Controls.createDiv(divRows);
-            const saveButton: HTMLButtonElement = Controls.createButton(buttonDiv, "submit", pageContext.locale.translate("BUTTON_SAVE"), "btn btn-primary", "savebutton-id");
+            const saveButton: HTMLButtonElement = Controls.createButton(divRows, "submit", pageContext.locale.translate("BUTTON_SAVE"), "btn btn-primary", "savebutton-id");
             saveButton.addEventListener("click", async (e: MouseEvent) => {
                 e.preventDefault();
-                try {
-                    await DiaryService.saveEntryAsync(token, userInfo, textarea.value, date);
-                    pageContext.diary.changed = false;
-                    document.getElementById("backbutton-id")!.removeAttribute("data-bs-toggle");
-                    document.getElementById("backbutton-id")!.click();
-                }
-                catch (error: Error | unknown) {
-                    Controls.createAlert(alertDiv, pageContext.locale.translateError(error));
-                }
+                await DiaryService.saveEntryAsync(token, userInfo, textarea.value, date);
+                pageContext.diary.changed = false;
+                document.getElementById("backbutton-id")!.removeAttribute("data-bs-toggle");
+                document.getElementById("backbutton-id")!.click();
             });
             Controls.createConfirmationDialog(
                 parent,
@@ -140,7 +132,7 @@ export class DiaryDetailPage implements Page {
             });
         }
         catch (error: Error | unknown) {
-            Controls.createAlert(alertDiv, pageContext.locale.translateError(error));
+            Controls.createAlert(Controls.createDiv(cardBody), pageContext.locale.translateError(error));
         }
     }
 }
