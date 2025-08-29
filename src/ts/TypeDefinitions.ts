@@ -97,10 +97,10 @@ export type ContactResult = {
  * This type is used to manage individual note data in the application.
  */
 export type NoteResult = {
-  id: number,
+  id?: number,
   title: string,
-  lastModifiedUtc: string,
-  content: string | null
+  content: string | null,
+  lastModifiedUtc?: string,
 }
 
 /**
@@ -145,4 +145,4 @@ export type PageType = "LOGIN_USERNAME_PASSWORD" | "LOGIN_PIN" | "LOGIN_PASS2" |
 
 export type DesktopTab = "BIRTHDAYS" | "CONTACTS" | "NOTES" | "PASSWORD_MANAGER" | "DIARY";
 
-export const Version: string = "1.0.9";
+export const Version: string = "1.0.10";

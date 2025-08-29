@@ -76,4 +76,36 @@ export class NoteService {
             throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
         }
     }
+
+    static async deleteNoteAsync(token: string, noteId: number): Promise<void> {
+        await FetchHelper.fetchAsync(`/api/notes/note/${noteId}`, { method: "DELETE", headers: { "token": token } });
+    }
+
+    static async saveNoteAsync(token: string, user: UserInfoResult, title: string, content: string, id?: number): Promise<void> {
+        const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
+        if (encryptionKey == null || encryptionKey.length === 0) {
+            throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
+        }
+        let encodedTitle: string;
+        let encodedContent: string;
+        try {
+            const cryptoKey: CryptoKey = await Security.createCryptoKeyAsync(encryptionKey!, user.passwordManagerSalt)
+            encodedTitle = await Security.encodeMessageAsync(cryptoKey, title);
+            encodedContent = await Security.encodeMessageAsync(cryptoKey, content);
+        } catch (e: Error | unknown) {
+            console.error("Error encoding note:", e);
+            throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
+        }
+        const note: NoteResult = { "title": encodedTitle, "content": encodedContent };
+        let method: string = "POST";
+        if (id) {
+            note.id = id;
+            method = "PUT";
+        }
+        await FetchHelper.fetchAsync("/api/notes/note", {
+            method: method,
+            headers: { 'token': token, 'Accept': 'application/json', 'Content-Type': 'application/json' },
+            body: JSON.stringify(note)
+        });
+    }
 }

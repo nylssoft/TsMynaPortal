@@ -22,6 +22,14 @@ export class NoteTab implements Tab {
                 listGroup.id = "list-group-id";
                 this.filterNoteItemList(pageContext, pageContext.note.filter, notes);
             }
+            const iAdd: HTMLElement = Controls.createElement(heading, "i", "ms-4 bi bi-plus-circle");
+            iAdd.setAttribute("role", "button");
+            iAdd.addEventListener("click", async (e: MouseEvent) => {
+                e.preventDefault();
+                pageContext.note.edit = true;
+                pageContext.pageType = "NOTE_DETAIL";
+                await pageContext.renderAsync();
+            });
         }
         catch (error: Error | unknown) {
             Controls.createAlert(alertDiv, pageContext.locale.translateError(error));

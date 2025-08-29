@@ -63,6 +63,7 @@ export class DiaryDetailPage implements Page {
             const backButton: HTMLButtonElement = Controls.createButton(cardBody, "button", pageContext.locale.translate("BUTTON_BACK"), "btn btn-primary", "backbutton-id");
             backButton.setAttribute("data-bs-target", "#confirmationdialog-id");
             backButton.addEventListener("click", async (e: MouseEvent) => {
+                e.preventDefault();
                 if (!pageContext.diary.changed) {
                     pageContext.pageType = "DESKTOP";
                     pageContext.diary.day = null;
