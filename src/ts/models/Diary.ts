@@ -8,8 +8,8 @@ export class Diary {
     day: number | null = null;
     // flag whether the diary entry has been changed but not saved
     changed: boolean = false;
-    // ID of the HTML element that triggered the confirmation dialog
-    confirmationTargetId: string = "";
+    // edit mode
+    edit: boolean = false;
 
     constructor() {
         const now: Date = new Date(Date.now());

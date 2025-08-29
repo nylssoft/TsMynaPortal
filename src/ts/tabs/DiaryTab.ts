@@ -28,10 +28,10 @@ export class DiaryTab implements Tab {
     private renderCalendar(pageContext: PageContext, parent: HTMLElement, days: number[], datestr: string) {
         Controls.removeAllChildren(parent);
         const heading: HTMLHeadingElement = Controls.createHeading(parent, 5, "d-flex justify-content-between align-items-center");
-        const iLeft: HTMLElement = Controls.createElement(heading, "i", "ms-4 bi bi-arrow-left");
+        const iLeft: HTMLElement = Controls.createElement(heading, "i", "ms-4 bi bi-chevron-left");
         iLeft.setAttribute("role", "button");
         Controls.createSpan(heading, "mx-auto", datestr);
-        const iRight: HTMLElement = Controls.createElement(heading, "i", "me-4 bi bi-arrow-right")
+        const iRight: HTMLElement = Controls.createElement(heading, "i", "me-4 bi bi-chevron-right")
         iRight.setAttribute("role", "button");
         iLeft.addEventListener("click", async (e: MouseEvent) => {
             e.preventDefault();
@@ -77,7 +77,6 @@ export class DiaryTab implements Tab {
                         e.preventDefault();
                         pageContext.diary.day = constDay;
                         pageContext.diary.changed = false;
-                        pageContext.diary.confirmationTargetId = "";
                         pageContext.pageType = "DIARY_DETAIL";
                         await pageContext.renderAsync();
                     });
