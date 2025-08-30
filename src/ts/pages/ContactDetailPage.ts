@@ -1,6 +1,7 @@
 import { Controls } from "../utils/Controls";
 import { PageContext, Page } from "../PageContext";
-import { ContactResult, PageType } from "../TypeDefinitions";
+import { ContactResult, PageType, UserInfoResult } from "../TypeDefinitions";
+import { ContactService } from "../services/ContactService";
 
 /**
  * Page implementation for the Contact Detail page.
@@ -14,10 +15,31 @@ export class ContactDetailPage implements Page {
     pageType: PageType = "CONTACT_DETAIL";
 
     async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
-        parent = Controls.createDiv(parent, "card p-4 shadow-sm");
-        parent.style.maxWidth = "400px";
+        if (pageContext.contact.edit) {
+            await this.renderEditAsync(parent, pageContext);
+        } else {
+            await this.renderViewAsync(parent, pageContext);
+        }
+    }
+
+    private async renderViewAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
+        const card: HTMLDivElement = Controls.createDiv(parent, "card p-4 shadow-sm");
+        card.style.maxWidth = "600px";
+        const cardBody: HTMLDivElement = Controls.createDiv(card, "card-body");
+        // render actions back, edit and delete
+        const headingActions: HTMLHeadingElement = Controls.createHeading(cardBody, 4);
+        const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
+        iBack.setAttribute("role", "button");
+        iBack.addEventListener("click", async (e: MouseEvent) => await this.onBackAsync(e, pageContext));
+        const iEdit: HTMLElement = Controls.createElement(headingActions, "i", "ms-4 bi bi-pencil-square", undefined, "editbutton-id");
+        iEdit.setAttribute("role", "button");
+        iEdit.addEventListener("click", async (e: MouseEvent) => await this.onEditAsync(e, pageContext));
+        const iDelete: HTMLElement = Controls.createElement(headingActions, "i", "ms-4 bi bi-trash", undefined, "deletebutton-id");
+        iDelete.setAttribute("role", "button");
+        iDelete.setAttribute("data-bs-target", "#confirmationdialog-id");
+        iDelete.setAttribute("data-bs-toggle", "modal");
+        // render view data
         const contact: ContactResult = pageContext.contact.result!;
-        const cardBody: HTMLDivElement = Controls.createDiv(parent, "card-body");
         Controls.createHeading(cardBody, 2, "card-title mb-3", contact.name);
         if (contact.phone.length > 0) {
             const cardTextPhone: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
@@ -40,16 +62,148 @@ export class ContactDetailPage implements Page {
             Controls.createSpan(cardTextBirthday, "ms-2", contact.birthday);
         }
         if (contact.note.length > 0) {
-            const cardTextNotes: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
+            const cardTextNotes: HTMLDivElement = Controls.createDiv(cardBody, "card-text");
             Controls.createSpan(cardTextNotes, "bi bi-journal");
-            Controls.createSpan(cardTextNotes, "ms-2", contact.note);
+            const textarea: HTMLTextAreaElement = Controls.createElement(cardTextNotes, "textarea", "form-control-plaintext", contact.note) as HTMLTextAreaElement;
+            textarea.style.height = "100px";
+            textarea.setAttribute("readonly", "true");
         }
-        const backButton: HTMLButtonElement = Controls.createButton(cardBody, "button", pageContext.locale.translate("BUTTON_BACK"), "btn btn-primary");
-        backButton.addEventListener("click", async (e: MouseEvent) => {
-            e.preventDefault();
-            pageContext.pageType = "DESKTOP";
-            pageContext.contact.result = null;
+        // delete confirmation dialog
+        Controls.createConfirmationDialog(
+            parent,
+            pageContext.locale.translate("HEADER_CONTACTS"),
+            pageContext.locale.translate("INFO_REALLY_DELETE_CONTACT"),
+            pageContext.locale.translate("BUTTON_YES"),
+            pageContext.locale.translate("BUTTON_NO"));
+        document.getElementById("confirmationyesbutton-id")!.addEventListener("click", async (e: Event) => await this.onDeleteConfirmationAsync(e, pageContext));
+    }
+
+    private async renderEditAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
+        const card: HTMLDivElement = Controls.createDiv(parent, "card p-4 shadow-sm");
+        card.style.maxWidth = "600px";
+        const cardBody: HTMLDivElement = Controls.createDiv(card, "card-body");
+        // render actions back
+        const headingActions: HTMLHeadingElement = Controls.createHeading(cardBody, 4);
+        const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
+        iBack.setAttribute("role", "button");
+        iBack.setAttribute("data-bs-target", "#confirmationdialog-id");
+        iBack.addEventListener("click", async (e: Event) => await this.onEditBackAsync(e, pageContext));
+        // render edit data
+        const contact: ContactResult | null = pageContext.contact.result;
+        const formElement: HTMLFormElement = Controls.createForm(cardBody, "align-items-center");
+        const divRows: HTMLDivElement = Controls.createDiv(formElement, "row align-items-center");
+        const inputName: HTMLInputElement = this.createInput(divRows, pageContext, "LABEL_NAME", "name-id", contact?.name);
+        this.createInput(divRows, pageContext, "LABEL_PHONE", "phone-id", contact?.phone);
+        this.createInput(divRows, pageContext, "LABEL_ADDRESS", "address-id", contact?.address);
+        this.createInput(divRows, pageContext, "LABEL_EMAIL_ADDRESS", "email-id", contact?.email);
+        this.createInput(divRows, pageContext, "LABEL_BIRTHDAY", "birthday-id", contact?.birthday);
+        this.createTextarea(divRows, pageContext, "LABEL_NOTE", "note-id", "100px", contact?.note);
+        inputName.focus();
+        // save button
+        const saveButton: HTMLButtonElement = Controls.createButton(divRows, "submit", pageContext.locale.translate("BUTTON_SAVE"), "btn btn-primary", "savebutton-id");
+        saveButton.addEventListener("click", async (e: Event) => await this.onSaveAsync(e, pageContext));
+        // back confirmation dialog
+        Controls.createConfirmationDialog(
+            parent,
+            pageContext.locale.translate("HEADER_CONTACTS"),
+            pageContext.locale.translate("CONFIRMATION_SAVE"),
+            pageContext.locale.translate("BUTTON_YES"),
+            pageContext.locale.translate("BUTTON_NO"));
+        document.getElementById("confirmationyesbutton-id")!.addEventListener("click", (e: Event) => this.onEditBackConfirmation(e, pageContext));
+    }
+
+    private createInput(divRows: HTMLDivElement, pageContext: PageContext, label: string, id: string, value?: string): HTMLInputElement {
+        const divInput: HTMLDivElement = Controls.createDiv(divRows, "mb-3");
+        Controls.createLabel(divInput, id, "form-label", pageContext.locale.translate(label));
+        const input: HTMLInputElement = Controls.createInput(divInput, "text", id, "form-control", value);
+        input.setAttribute("autocomplete", "off");
+        input.setAttribute("spellcheck", "false");
+        input.addEventListener("input", (e: Event) => this.onInput(e, pageContext));
+        return input;
+    }
+
+    private createTextarea(divRows: HTMLDivElement, pageContext: PageContext, label: string, id: string, height: string, value?: string): HTMLTextAreaElement {
+        const divNote: HTMLDivElement = Controls.createDiv(divRows, "mb-3");
+        Controls.createLabel(divNote, id, "form-label", pageContext.locale.translate(label));
+        const textarea: HTMLTextAreaElement = Controls.createElement(divNote, "textarea", "form-control", value, id) as HTMLTextAreaElement;
+        textarea.style.height = height;
+        textarea.setAttribute("spellcheck", "false");
+        textarea.setAttribute("autocomplete", "off");
+        textarea.addEventListener("input", (e: Event) => this.onInput(e, pageContext));
+        return textarea;
+    }
+
+    private async onBackAsync(e: Event, pageContext: PageContext): Promise<void> {
+        e.preventDefault();
+        pageContext.pageType = "DESKTOP";
+        pageContext.contact.result = null;
+        await pageContext.renderAsync();
+    }
+
+    private async onEditAsync(e: Event, pageContext: PageContext): Promise<void> {
+        e.preventDefault();
+        pageContext.contact.edit = true;
+        await pageContext.renderAsync();
+    }
+
+    private async onDeleteConfirmationAsync(e: Event, pageContext: PageContext): Promise<void> {
+        e.preventDefault();
+        const token: string = pageContext.authenticationClient.getToken()!;
+        const userInfo: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
+        await ContactService.deleteContactAsync(token, userInfo, pageContext.contact.result!.id!);
+        document.getElementById("backbutton-id")!.click();
+    }
+
+    private onInput(e: Event, pageContext: PageContext) {
+        e.preventDefault();
+        if (!pageContext.contact.changed) {
+            pageContext.contact.changed = true;
+            document.getElementById("backbutton-id")!.setAttribute("data-bs-toggle", "modal");
+        }
+    }
+
+    private async onEditBackAsync(e: Event, pageContext: PageContext): Promise<void> {
+        e.preventDefault();
+        if (!pageContext.contact.changed) {
+            pageContext.contact.edit = false;
+            if (pageContext.contact.result == null) {
+                pageContext.pageType = "DESKTOP";
+            }
             await pageContext.renderAsync();
-        });
+        }
+    }
+
+    private onEditBackConfirmation(e: Event, pageContext: PageContext) {
+        e.preventDefault();
+        pageContext.contact.changed = false;
+        document.getElementById("backbutton-id")!.click();
+    }
+
+    private async onSaveAsync(e: Event, pageContext: PageContext): Promise<void> {
+        e.preventDefault();
+        const token: string = pageContext.authenticationClient.getToken()!;
+        const userInfo: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
+        const name: string = (document.getElementById("name-id")! as HTMLInputElement).value;
+        const phone: string = (document.getElementById("phone-id")! as HTMLInputElement).value;
+        const address: string = (document.getElementById("address-id")! as HTMLInputElement).value;
+        const email: string = (document.getElementById("email-id")! as HTMLInputElement).value;
+        const birthday: string = (document.getElementById("birthday-id")! as HTMLInputElement).value;
+        const note: string = (document.getElementById("note-id")! as HTMLTextAreaElement).value;
+        let contact: ContactResult = {
+            name: name,
+            phone: phone,
+            address: address,
+            email: email,
+            birthday: birthday,
+            note: note
+        };
+        if (pageContext.contact.result != null) {
+            contact.id = pageContext.contact.result.id;
+            pageContext.contact.result = contact;
+        }
+        await ContactService.saveContactAsync(token, userInfo, contact);
+        pageContext.contact.changed = false;
+        document.getElementById("backbutton-id")!.removeAttribute("data-bs-toggle");
+        document.getElementById("backbutton-id")!.click();
     }
 }

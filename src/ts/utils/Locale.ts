@@ -33,6 +33,7 @@ export class Locale {
         "WEBSITE_INFO": "Dies ist eine private Website. Sie wird ausschließlich für persönliche oder familiäre Zwecke verwendet.",
         "CONFIRMATION_SAVE": "Die Änderungen wurden nicht gespeichert. Willst du die Seite wirklich verlassen?",
         "LABEL_DIARY_ENTRY": "Tagebucheintrag:",
+        "INFO_REALLY_DELETE_CONTACT": "Willst du den Kontakt wirklich löschen?",
 
         "ERROR_WRONG_DATA_PROTECTION_KEY": "Der Schlüssel zum Entschlüsseln der Daten ist ungültig oder fehlt. Bitte überprüfe deinen Schlüssel auf der Seite 'Datenschutz'.",
     }
@@ -63,6 +64,7 @@ export class Locale {
         "WEBSITE_INFO": "This is a private website. It is intended for personal or family use only.",
         "CONFIRMATION_SAVE": "The changes were not saved. Are you sure you want to leave the page?",
         "LABEL_DIARY_ENTRY": "Diary entry:",
+        "INFO_REALLY_DELETE_CONTACT": "Do you really want to delete the contact?",
 
         "ERROR_WRONG_DATA_PROTECTION_KEY": "The key to decrypt the data is invalid or missing. Please check your key on the 'Data Protection' page.",
     }

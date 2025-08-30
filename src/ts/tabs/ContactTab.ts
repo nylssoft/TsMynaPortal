@@ -22,6 +22,15 @@ export class ContactTab implements Tab {
                 listGroup.id = "list-group-id";
                 this.filterContactItemList(pageContext, pageContext.contact.filter, contacts.items);
             }
+            const iAdd: HTMLElement = Controls.createElement(heading, "i", "ms-4 bi bi-plus-circle");
+            iAdd.setAttribute("role", "button");
+            iAdd.addEventListener("click", async (e: MouseEvent) => {
+                e.preventDefault();
+                pageContext.contact.edit = true;
+                pageContext.contact.result = null;
+                pageContext.pageType = "CONTACT_DETAIL";
+                await pageContext.renderAsync();
+            });
         }
         catch (error: Error | unknown) {
             Controls.createAlert(alertDiv, pageContext.locale.translateError(error));
