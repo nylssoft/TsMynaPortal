@@ -30,6 +30,7 @@ export class DiaryDetailPage implements Page {
             pageContext.diary.day = null;
             await pageContext.renderAsync();
         });
+        Controls.createSpan(headingActions, "ms-4", pageContext.locale.translate("HEADER_DIARY"));
         try {
             const token: string = pageContext.authenticationClient.getToken()!;
             const userInfo: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
@@ -88,6 +89,7 @@ export class DiaryDetailPage implements Page {
                 await pageContext.renderAsync();
             }
         });
+        Controls.createSpan(headingActions, "ms-4", pageContext.locale.translate("HEADER_DIARY"));
         try {
             const token: string = pageContext.authenticationClient.getToken()!;
             const userInfo: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();

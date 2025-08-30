@@ -31,6 +31,7 @@ export class ContactDetailPage implements Page {
         const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
         iBack.setAttribute("role", "button");
         iBack.addEventListener("click", async (e: MouseEvent) => await this.onBackAsync(e, pageContext));
+        Controls.createSpan(headingActions, "ms-4", pageContext.locale.translate("HEADER_CONTACTS"));
         const iEdit: HTMLElement = Controls.createElement(headingActions, "i", "ms-4 bi bi-pencil-square", undefined, "editbutton-id");
         iEdit.setAttribute("role", "button");
         iEdit.addEventListener("click", async (e: MouseEvent) => await this.onEditAsync(e, pageContext));
@@ -88,6 +89,7 @@ export class ContactDetailPage implements Page {
         iBack.setAttribute("role", "button");
         iBack.setAttribute("data-bs-target", "#confirmationdialog-id");
         iBack.addEventListener("click", async (e: Event) => await this.onEditBackAsync(e, pageContext));
+        Controls.createSpan(headingActions, "ms-4", pageContext.locale.translate("HEADER_CONTACTS"));
         // render edit data
         const contact: ContactResult | null = pageContext.contact.result;
         const formElement: HTMLFormElement = Controls.createForm(cardBody, "align-items-center");

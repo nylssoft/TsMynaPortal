@@ -35,6 +35,7 @@ export class NoteDetailPage implements Page {
             pageContext.note.result = null;
             await pageContext.renderAsync();
         });
+        Controls.createSpan(headingActions, "ms-4", pageContext.locale.translate("HEADER_NOTES"));
         try {
             const token: string = pageContext.authenticationClient.getToken()!;
             const userInfo: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
@@ -100,6 +101,7 @@ export class NoteDetailPage implements Page {
                 await pageContext.renderAsync();
             }
         });
+        Controls.createSpan(headingActions, "ms-4", pageContext.locale.translate("HEADER_NOTES"));
         try {
             const token: string = pageContext.authenticationClient.getToken()!;
             const userInfo: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
