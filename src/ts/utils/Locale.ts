@@ -34,6 +34,7 @@ export class Locale {
         "CONFIRMATION_SAVE": "Die Änderungen wurden nicht gespeichert. Willst du die Seite wirklich verlassen?",
         "LABEL_DIARY_ENTRY": "Tagebucheintrag:",
         "INFO_REALLY_DELETE_CONTACT": "Willst du den Kontakt wirklich löschen?",
+        "INFO_REALLY_DELETE_PASSWORD": "Willst du das Kennwort wirklich löschen?",
 
         "ERROR_WRONG_DATA_PROTECTION_KEY": "Der Schlüssel zum Entschlüsseln der Daten ist ungültig oder fehlt. Bitte überprüfe deinen Schlüssel auf der Seite 'Datenschutz'.",
     }
@@ -65,6 +66,7 @@ export class Locale {
         "CONFIRMATION_SAVE": "The changes were not saved. Are you sure you want to leave the page?",
         "LABEL_DIARY_ENTRY": "Diary entry:",
         "INFO_REALLY_DELETE_CONTACT": "Do you really want to delete the contact?",
+        "INFO_REALLY_DELETE_PASSWORD": "Do you really want to delete the password?",
 
         "ERROR_WRONG_DATA_PROTECTION_KEY": "The key to decrypt the data is invalid or missing. Please check your key on the 'Data Protection' page.",
     }

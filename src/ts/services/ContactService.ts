@@ -37,6 +37,7 @@ export class ContactService {
             contacts.items = contacts.items.filter(c => c.id != id);
             if (contacts.items.length == 0) {
                 await FetchHelper.fetchAsync("/api/contacts", { method: "DELETE", headers: { "token": token } });
+                user.hasContacts = false;
             } else {
                 await this.saveContactsAsync(token, user, contacts);
             }

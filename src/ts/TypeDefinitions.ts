@@ -113,7 +113,13 @@ export type AuditResult = {
   action: string
 }
 
+export type PasswordItemsResult = {
+  nextId: number,
+  items: PasswordItemResult[]
+}
+
 export type PasswordItemResult = {
+  id?: number,
   Description: string,
   Login: string,
   Name: string,
@@ -145,4 +151,4 @@ export type PageType = "LOGIN_USERNAME_PASSWORD" | "LOGIN_PIN" | "LOGIN_PASS2" |
 
 export type DesktopTab = "BIRTHDAYS" | "CONTACTS" | "NOTES" | "PASSWORD_MANAGER" | "DIARY";
 
-export const Version: string = "1.0.15";
+export const Version: string = "1.1.0";
