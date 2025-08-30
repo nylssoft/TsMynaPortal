@@ -61,8 +61,8 @@ export class DiaryDetailPage implements Page {
                 pageContext.diary.nextDay();
                 await pageContext.renderAsync();
             });
-            const divFormFloating: HTMLDivElement = Controls.createDiv(cardBody, "form-floating");
-            const textarea: HTMLTextAreaElement = Controls.createElement(divFormFloating, "textarea", "form-control", entry!) as HTMLTextAreaElement;
+            const divEntry: HTMLDivElement = Controls.createDiv(cardBody, "card-text");
+            const textarea: HTMLTextAreaElement = Controls.createElement(divEntry, "textarea", "form-control-plaintext", entry!) as HTMLTextAreaElement;
             textarea.style.height = "400px";
             textarea.setAttribute("readonly", "true");
             textarea.setAttribute("spellcheck", "false");

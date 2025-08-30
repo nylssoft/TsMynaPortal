@@ -52,19 +52,19 @@ export class NoteDetailPage implements Page {
             iDelete.setAttribute("data-bs-target", "#confirmationdialog-id");
             iDelete.setAttribute("data-bs-toggle", "modal");
             Controls.createHeading(cardBody, 2, "card-title", note.title!);
-            const cardTextDate: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
-            Controls.createSpan(cardTextDate, "bi bi-calendar");
-            const longDate: string = date.toLocaleDateString(pageContext.locale.getLanguage(), { dateStyle: "long" });
-            const longTime: string = date.toLocaleTimeString(pageContext.locale.getLanguage(), { timeStyle: "long" });
-            Controls.createSpan(cardTextDate, "ms-2", `${longDate} ${longTime}`);
             if (note.content!.length > 0) {
-                const divFormFloating: HTMLDivElement = Controls.createDiv(cardBody, "form-floating mb-4");
-                const textarea: HTMLTextAreaElement = Controls.createElement(divFormFloating, "textarea", "form-control", note.content!) as HTMLTextAreaElement;
+                const cardNote: HTMLDivElement = Controls.createDiv(cardBody, "card-text");
+                const textarea: HTMLTextAreaElement = Controls.createElement(cardNote, "textarea", "form-control-plaintext", note.content!) as HTMLTextAreaElement;
                 textarea.style.height = "400px";
                 textarea.setAttribute("readonly", "true");
                 textarea.setAttribute("spellcheck", "false");
                 textarea.setAttribute("autocomplete", "off");
             }
+            const cardTextDate: HTMLDivElement = Controls.createDiv(cardBody, "card-footer");
+            Controls.createSpan(cardTextDate, "bi bi-calendar");
+            const longDate: string = date.toLocaleDateString(pageContext.locale.getLanguage(), { dateStyle: "long" });
+            const longTime: string = date.toLocaleTimeString(pageContext.locale.getLanguage(), { timeStyle: "long" });
+            Controls.createSpan(cardTextDate, "ms-2", `${longDate} ${longTime}`);
             Controls.createConfirmationDialog(
                 parent,
                 pageContext.locale.translate("HEADER_NOTES"),
