@@ -15,19 +15,31 @@ export class ContactDetailPage implements Page {
     pageType: PageType = "CONTACT_DETAIL";
 
     async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
-        if (pageContext.contact.edit) {
-            await this.renderEditAsync(parent, pageContext);
-        } else {
-            await this.renderViewAsync(parent, pageContext);
+        try {
+            if (pageContext.contact.edit) {
+                await this.renderEditAsync(parent, pageContext);
+            } else {
+                await this.renderViewAsync(parent, pageContext);
+            }
+        }
+        catch (error: Error | unknown) {
+            this.renderError(parent, pageContext, error);
         }
     }
 
+    private renderError(parent: HTMLElement, pageContext: PageContext, error: Error | unknown) {
+        const headingActions: HTMLHeadingElement = Controls.createHeading(parent, 4);
+        const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
+        iBack.setAttribute("role", "button");
+        iBack.addEventListener("click", async (e: Event) => await this.onBackAsync(e, pageContext));
+        Controls.createSpan(headingActions, "ms-4", pageContext.locale.translate("HEADER_CONTACTS"));
+        Controls.createAlert(Controls.createDiv(parent), pageContext.locale.translateError(error));
+    }
+
     private async renderViewAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
-        const card: HTMLDivElement = Controls.createDiv(parent, "card p-4 shadow-sm");
-        card.style.maxWidth = "600px";
-        const cardBody: HTMLDivElement = Controls.createDiv(card, "card-body");
-        // render actions back, edit and delete
-        const headingActions: HTMLHeadingElement = Controls.createHeading(cardBody, 4);
+        const contact: ContactResult = pageContext.contact.result!;
+        // render action toolbar
+        const headingActions: HTMLHeadingElement = Controls.createHeading(parent, 4);
         const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
         iBack.setAttribute("role", "button");
         iBack.addEventListener("click", async (e: MouseEvent) => await this.onBackAsync(e, pageContext));
@@ -39,8 +51,10 @@ export class ContactDetailPage implements Page {
         iDelete.setAttribute("role", "button");
         iDelete.setAttribute("data-bs-target", "#confirmationdialog-id");
         iDelete.setAttribute("data-bs-toggle", "modal");
-        // render view data
-        const contact: ContactResult = pageContext.contact.result!;
+        // render card
+        const card: HTMLDivElement = Controls.createDiv(parent, "card p-4 shadow-sm");
+        card.style.maxWidth = "600px";
+        const cardBody: HTMLDivElement = Controls.createDiv(card, "card-body");
         Controls.createHeading(cardBody, 2, "card-title mb-3", contact.name);
         if (contact.phone.length > 0) {
             const cardTextPhone: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
@@ -64,12 +78,11 @@ export class ContactDetailPage implements Page {
         }
         if (contact.note.length > 0) {
             const cardTextNotes: HTMLDivElement = Controls.createDiv(cardBody, "card-text");
-            Controls.createSpan(cardTextNotes, "bi bi-journal");
             const textarea: HTMLTextAreaElement = Controls.createElement(cardTextNotes, "textarea", "form-control-plaintext", contact.note) as HTMLTextAreaElement;
             textarea.style.height = "100px";
             textarea.setAttribute("readonly", "true");
         }
-        // delete confirmation dialog
+        // render delete confirmation dialog
         Controls.createConfirmationDialog(
             parent,
             pageContext.locale.translate("HEADER_CONTACTS"),
@@ -80,17 +93,17 @@ export class ContactDetailPage implements Page {
     }
 
     private async renderEditAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
-        const card: HTMLDivElement = Controls.createDiv(parent, "card p-4 shadow-sm");
-        card.style.maxWidth = "600px";
-        const cardBody: HTMLDivElement = Controls.createDiv(card, "card-body");
-        // render actions back
-        const headingActions: HTMLHeadingElement = Controls.createHeading(cardBody, 4);
+        // render action toolbar
+        const headingActions: HTMLHeadingElement = Controls.createHeading(parent, 4);
         const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
         iBack.setAttribute("role", "button");
         iBack.setAttribute("data-bs-target", "#confirmationdialog-id");
         iBack.addEventListener("click", async (e: Event) => await this.onEditBackAsync(e, pageContext));
         Controls.createSpan(headingActions, "ms-4", pageContext.locale.translate("HEADER_CONTACTS"));
-        // render edit data
+        // render card
+        const card: HTMLDivElement = Controls.createDiv(parent, "card p-4 shadow-sm");
+        card.style.maxWidth = "600px";
+        const cardBody: HTMLDivElement = Controls.createDiv(card, "card-body");
         const contact: ContactResult | null = pageContext.contact.result;
         const formElement: HTMLFormElement = Controls.createForm(cardBody, "align-items-center");
         const divRows: HTMLDivElement = Controls.createDiv(formElement, "row align-items-center");
@@ -101,10 +114,9 @@ export class ContactDetailPage implements Page {
         this.createInput(divRows, pageContext, "LABEL_BIRTHDAY", "birthday-id", contact?.birthday);
         this.createTextarea(divRows, pageContext, "LABEL_NOTE", "note-id", "100px", contact?.note);
         inputName.focus();
-        // save button
         const saveButton: HTMLButtonElement = Controls.createButton(divRows, "submit", pageContext.locale.translate("BUTTON_SAVE"), "btn btn-primary", "savebutton-id");
         saveButton.addEventListener("click", async (e: Event) => await this.onSaveAsync(e, pageContext));
-        // back confirmation dialog
+        // render back confirmation dialog
         Controls.createConfirmationDialog(
             parent,
             pageContext.locale.translate("HEADER_CONTACTS"),
