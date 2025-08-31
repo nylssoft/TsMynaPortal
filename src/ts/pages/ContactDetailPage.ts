@@ -57,28 +57,43 @@ export class ContactDetailPage implements Page {
         const cardBody: HTMLDivElement = Controls.createDiv(card, "card-body");
         Controls.createHeading(cardBody, 2, "card-title mb-3", contact.name);
         if (contact.phone.length > 0) {
-            const cardTextPhone: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
-            Controls.createSpan(cardTextPhone, "bi bi-telephone");
-            Controls.createSpan(cardTextPhone, "ms-2", contact.phone);
+            const divRow: HTMLDivElement = Controls.createDiv(cardBody, "row card-text");
+            const divCol1: HTMLDivElement = Controls.createDiv(divRow, "col-1 mt-2");
+            Controls.createElement(divCol1, "i", "bi bi-telephone");
+            const divCol2: HTMLDivElement = Controls.createDiv(divRow, "col-11");
+            const inputPhone: HTMLInputElement = Controls.createInput(divCol2, "text", "phone-id", "form-control-plaintext", contact.phone);
+            inputPhone.setAttribute("readonly", "true");
         }
         if (contact.address.length > 0) {
-            const cardTextAddress: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
-            Controls.createSpan(cardTextAddress, "bi bi-geo-alt");
-            Controls.createSpan(cardTextAddress, "ms-2", contact.address);
+            const divRow: HTMLDivElement = Controls.createDiv(cardBody, "row card-text");
+            const divCol1: HTMLDivElement = Controls.createDiv(divRow, "col-1 mt-2");
+            Controls.createElement(divCol1, "i", "bi bi-geo-alt");
+            const divCol2: HTMLDivElement = Controls.createDiv(divRow, "col-11");
+            const inputAddress: HTMLInputElement = Controls.createInput(divCol2, "text", "address-id", "form-control-plaintext", contact.address);
+            inputAddress.setAttribute("readonly", "true");
         }
         if (contact.email.length > 0) {
-            const cardTextEmail: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
-            Controls.createSpan(cardTextEmail, "bi bi-envelope");
-            Controls.createSpan(cardTextEmail, "ms-2", contact.email);
+            const divRow: HTMLDivElement = Controls.createDiv(cardBody, "row card-text");
+            const divCol1: HTMLDivElement = Controls.createDiv(divRow, "col-1 mt-2");
+            Controls.createElement(divCol1, "i", "bi bi-envelope");
+            const divCol2: HTMLDivElement = Controls.createDiv(divRow, "col-11");
+            const inputEmail: HTMLInputElement = Controls.createInput(divCol2, "text", "email-id", "form-control-plaintext", contact.email);
+            inputEmail.setAttribute("readonly", "true");
         }
         if (contact.birthday.length > 0) {
-            const cardTextBirthday: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
-            Controls.createSpan(cardTextBirthday, "bi bi-cake");
-            Controls.createSpan(cardTextBirthday, "ms-2", contact.birthday);
+            const divRow: HTMLDivElement = Controls.createDiv(cardBody, "row card-text");
+            const divCol1: HTMLDivElement = Controls.createDiv(divRow, "col-1 mt-2");
+            Controls.createElement(divCol1, "i", "bi bi-cake");
+            const divCol2: HTMLDivElement = Controls.createDiv(divRow, "col-11");
+            const inputBirthday: HTMLInputElement = Controls.createInput(divCol2, "text", "birthday-id", "form-control-plaintext", contact.birthday);
+            inputBirthday.setAttribute("readonly", "true");
         }
         if (contact.note.length > 0) {
-            const cardTextNotes: HTMLDivElement = Controls.createDiv(cardBody, "card-text");
-            const textarea: HTMLTextAreaElement = Controls.createElement(cardTextNotes, "textarea", "form-control-plaintext", contact.note) as HTMLTextAreaElement;
+            const divRow: HTMLDivElement = Controls.createDiv(cardBody, "row card-text");
+            const divCol1: HTMLDivElement = Controls.createDiv(divRow, "col-1 mt-2");
+            Controls.createElement(divCol1, "i", "bi bi-journal");
+            const divCol2: HTMLDivElement = Controls.createDiv(divRow, "col-11");
+            const textarea: HTMLTextAreaElement = Controls.createElement(divCol2, "textarea", "form-control-plaintext", contact.note) as HTMLTextAreaElement;
             textarea.style.height = "100px";
             textarea.setAttribute("readonly", "true");
         }
