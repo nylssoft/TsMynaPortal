@@ -2,6 +2,7 @@ import { Controls } from "../utils/Controls";
 import { PageContext, Page } from "../PageContext";
 import { PasswordManagerService } from "../services/PasswordManagerService";
 import { PageType, PasswordItemResult, UserInfoResult } from "../TypeDefinitions";
+import { Security } from "../utils/Security";
 
 export class PasswordItemDetailPage implements Page {
 
@@ -60,40 +61,47 @@ export class PasswordItemDetailPage implements Page {
         const cardBody: HTMLDivElement = Controls.createDiv(card, "card-body");
         Controls.createHeading(cardBody, 2, "card-title mb-3", passwordItem.Name);
         if (passwordItem.Login.length > 0) {
-            const cardTextLogin: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
-            Controls.createSpan(cardTextLogin, "bi bi-person");
-            const inputLogin: HTMLInputElement = Controls.createInput(cardTextLogin, "text", "login-id", "ms-2 border-0", passwordItem.Login);
+            const divRow: HTMLDivElement = Controls.createDiv(cardBody, "row card-text");
+            const divCol1: HTMLDivElement = Controls.createDiv(divRow, "col-1 mt-2");
+            Controls.createElement(divCol1, "i", "bi bi-person");
+            const divCol2: HTMLDivElement = Controls.createDiv(divRow, "col-9");
+            const inputLogin: HTMLInputElement = Controls.createInput(divCol2, "text", "login-id", "form-control-plaintext", passwordItem.Login);
             inputLogin.setAttribute("readonly", "true");
-            inputLogin.setAttribute("autocomplete", "off");
-            inputLogin.setAttribute("spellcheck", "false");
-            const iconCopy: HTMLElement = Controls.createElement(cardTextLogin, "i", "ms-2 bi bi-clipboard");
-            iconCopy.setAttribute("style", "cursor:pointer;");
+            const divCol3: HTMLDivElement = Controls.createDiv(divRow, "col-1 mt-2");
+            const iconCopy: HTMLElement = Controls.createElement(divCol3, "i", "bi bi-clipboard");
+            iconCopy.setAttribute("role", "button");
             iconCopy.addEventListener("click", async (e: MouseEvent) => await this.copyToClipboardAsync(pageContext, passwordItem.Login));
         }
         if (pwd.length > 0) {
-            const cardTextPassword: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
-            Controls.createSpan(cardTextPassword, "bi bi-shield-lock");
-            const inputPassword: HTMLInputElement = Controls.createInput(cardTextPassword, "password", "password-id", "ms-2 border-0", pwd);
+            const divRow: HTMLDivElement = Controls.createDiv(cardBody, "row card-text");
+            const divCol1: HTMLDivElement = Controls.createDiv(divRow, "col-1 mt-2");
+            Controls.createElement(divCol1, "i", "bi bi-shield-lock");
+            const divCol2: HTMLDivElement = Controls.createDiv(divRow, "col-9");
+            const inputPassword: HTMLInputElement = Controls.createInput(divCol2, "password", "password-id", "form-control-plaintext", pwd);
             inputPassword.setAttribute("readonly", "true");
-            inputPassword.setAttribute("autocomplete", "off");
-            inputPassword.setAttribute("spellcheck", "false");
-            const iconCopy: HTMLElement = Controls.createElement(cardTextPassword, "i", "ms-2 bi bi-clipboard");
-            iconCopy.setAttribute("style", "cursor:pointer;");
+            const divCol3: HTMLDivElement = Controls.createDiv(divRow, "col-1 mt-2");
+            const iconCopy: HTMLElement = Controls.createElement(divCol3, "i", "bi bi-clipboard");
+            iconCopy.setAttribute("role", "button");
             iconCopy.addEventListener("click", async (e: MouseEvent) => await this.copyToClipboardAsync(pageContext, pwd));
-            const iconToggle: HTMLElement = Controls.createElement(cardTextPassword, "i", "ms-2 bi bi-eye-slash");
-            iconToggle.setAttribute("style", "cursor:pointer;");
-            iconToggle.id = "toggle-password-id";
+            const divCol4: HTMLDivElement = Controls.createDiv(divRow, "col-1 mt-2");
+            const iconToggle: HTMLElement = Controls.createElement(divCol4, "i", "bi bi-eye-slash", undefined, "toggle-password-id");
+            iconToggle.setAttribute("role", "button");
             iconToggle.addEventListener("click", (e: MouseEvent) => this.onTogglePassword(e, inputPassword, iconToggle));
         }
         if (passwordItem.Url.length > 0) {
-            const cardTextUrl: HTMLParagraphElement = Controls.createParagraph(cardBody, "card-text");
-            Controls.createSpan(cardTextUrl, "bi bi-link-45deg");
-            const aUrl = Controls.createAnchor(cardTextUrl, this.getUrl(passwordItem), passwordItem.Url, "ms-2");
+            const divRow: HTMLDivElement = Controls.createDiv(cardBody, "row card-text");
+            const divCol1: HTMLDivElement = Controls.createDiv(divRow, "col-1");
+            Controls.createElement(divCol1, "i", "bi bi-link-45deg");
+            const divCol2: HTMLDivElement = Controls.createDiv(divRow, "col-9");
+            const aUrl = Controls.createAnchor(divCol2, this.getUrl(passwordItem), passwordItem.Url);
             aUrl.setAttribute("target", "_blank");
         }
         if (passwordItem.Description.length > 0) {
-            const cardTextDesciption: HTMLDivElement = Controls.createDiv(cardBody, "card-text");
-            const textarea: HTMLTextAreaElement = Controls.createElement(cardTextDesciption, "textarea", "form-control-plaintext", passwordItem.Description) as HTMLTextAreaElement;
+            const divRow: HTMLDivElement = Controls.createDiv(cardBody, "row card-text");
+            const divCol1: HTMLDivElement = Controls.createDiv(divRow, "col-1 mt-2");
+            Controls.createElement(divCol1, "i", "bi bi-journal");
+            const divCol2: HTMLDivElement = Controls.createDiv(divRow, "col-11");
+            const textarea: HTMLTextAreaElement = Controls.createElement(divCol2, "textarea", "form-control-plaintext", passwordItem.Description) as HTMLTextAreaElement;
             textarea.style.height = "100px";
             textarea.setAttribute("readonly", "true");
         }
@@ -147,25 +155,30 @@ export class PasswordItemDetailPage implements Page {
     }
 
     private createInput(divRows: HTMLDivElement, pageContext: PageContext, label: string, id: string, value?: string): HTMLInputElement {
-        return this.createInputControl(divRows, pageContext, "text", label, id, value);
+        const divInput: HTMLDivElement = Controls.createDiv(divRows, "mb-3");
+        const labelInput: HTMLLabelElement = Controls.createLabel(divInput, id, "form-label", pageContext.locale.translate(label));
+        const input: HTMLInputElement = Controls.createInput(divInput, "text", id, "form-control", value);
+        input.setAttribute("autocomplete", "off");
+        input.setAttribute("spellcheck", "false");
+        input.addEventListener("input", (e: Event) => this.onInputChange(e, pageContext));
+        return input;
     }
 
     private createPassword(divRows: HTMLDivElement, pageContext: PageContext, label: string, id: string, value?: string): HTMLInputElement {
-        return this.createInputControl(divRows, pageContext, "password", label, id, value);
-    }
-
-    private createInputControl(divRows: HTMLDivElement, pageContext: PageContext, type: string, label: string, id: string, value?: string): HTMLInputElement {
         const divInput: HTMLDivElement = Controls.createDiv(divRows, "mb-3");
         const labelInput: HTMLLabelElement = Controls.createLabel(divInput, id, "form-label", pageContext.locale.translate(label));
-        const input: HTMLInputElement = Controls.createInput(divInput, type, id, "form-control", value);
+        const input: HTMLInputElement = Controls.createInput(divInput, "password", id, "form-control", value);
         input.setAttribute("autocomplete", "off");
         input.setAttribute("spellcheck", "false");
-        input.addEventListener("input", (e: Event) => this.onInput(e, pageContext));
-        if (type == "password") {
-            const iconToggle: HTMLElement = Controls.createElement(labelInput, "i", "ms-2 bi bi-eye-slash");
-            iconToggle.setAttribute("style", "cursor:pointer;");
-            iconToggle.id = "toggle-password-id";
-            iconToggle.addEventListener("click", (e: MouseEvent) => this.onTogglePassword(e, input, iconToggle));
+        input.addEventListener("input", (e: Event) => this.onPasswordChange(e, pageContext));
+        const iconToggle: HTMLElement = Controls.createElement(labelInput, "i", "ms-4 bi bi-eye-slash", undefined, "toggle-password-id");
+        iconToggle.setAttribute("role", "button");
+        iconToggle.addEventListener("click", (e: Event) => this.onTogglePassword(e, input, iconToggle));
+        const iconGenerate: HTMLElement = Controls.createElement(labelInput, "i", "ms-4 bi bi-stars", undefined, "generate-password-id");
+        iconGenerate.setAttribute("role", "button");
+        iconGenerate.addEventListener("click", (e: Event) => this.onGeneratePassword(e, input, iconGenerate));
+        if (input.value.length > 0) {
+            iconGenerate.classList.add("d-none");
         }
         return input;
     }
@@ -177,7 +190,7 @@ export class PasswordItemDetailPage implements Page {
         textarea.style.height = height;
         textarea.setAttribute("spellcheck", "false");
         textarea.setAttribute("autocomplete", "off");
-        textarea.addEventListener("input", (e: Event) => this.onInput(e, pageContext));
+        textarea.addEventListener("input", (e: Event) => this.onInputChange(e, pageContext));
         return textarea;
     }
 
@@ -225,11 +238,26 @@ export class PasswordItemDetailPage implements Page {
         document.getElementById("backbutton-id")!.click();
     }
 
-    private onInput(e: Event, pageContext: PageContext) {
+    private onInputChange(e: Event, pageContext: PageContext) {
         e.preventDefault();
         if (!pageContext.passwordItem.changed) {
             pageContext.passwordItem.changed = true;
             document.getElementById("backbutton-id")!.setAttribute("data-bs-toggle", "modal");
+        }
+    }
+
+    private onPasswordChange(e: Event, pageContext: PageContext) {
+        e.preventDefault();
+        if (!pageContext.passwordItem.changed) {
+            pageContext.passwordItem.changed = true;
+            document.getElementById("backbutton-id")!.setAttribute("data-bs-toggle", "modal");
+        }
+        const input: HTMLInputElement = document.getElementById("password-id") as HTMLInputElement;
+        const icon: HTMLElement = document.getElementById("generate-password-id") as HTMLElement;
+        if (icon.classList.contains("d-none") && input.value.length == 0) {
+            icon.classList.remove("d-none");
+        } else if (!icon.classList.contains("d-none")) {
+            icon.classList.add("d-none");
         }
     }
 
@@ -254,7 +282,7 @@ export class PasswordItemDetailPage implements Page {
         document.getElementById("backbutton-id")!.click();
     }
 
-    private onTogglePassword(e: MouseEvent, inputPwd: HTMLInputElement, icon: HTMLElement) {
+    private onTogglePassword(e: Event, inputPwd: HTMLInputElement, icon: HTMLElement) {
         e.preventDefault();
         if (inputPwd.type == "password") {
             inputPwd.type = "text";
@@ -265,6 +293,11 @@ export class PasswordItemDetailPage implements Page {
             icon.classList.remove("bi-eye");
             icon.classList.add("bi-eye-slash");
         }
+    }
+
+    private onGeneratePassword(e: Event, inputPwd: HTMLInputElement, icon: HTMLElement) {
+        e.preventDefault();
+        inputPwd.value = Security.generateEncryptionKey();
     }
 
     private async copyToClipboardAsync(pageContext: PageContext, text: string): Promise<void> {
