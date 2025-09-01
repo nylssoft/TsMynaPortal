@@ -8,6 +8,7 @@ import { Contact } from "./models/Contact";
 import { Desktop } from "./models/Desktop";
 import { Note } from "./models/Note";
 import { PasswordItem } from "./models/PasswordItem";
+import { DocumentItem } from "./models/DocumentItem";
 
 /**
  * Interface for a page that can be rendered in the application.
@@ -43,6 +44,8 @@ export class PageContext {
     readonly note: Note = new Note();
     readonly passwordItem: PasswordItem = new PasswordItem();
     readonly diary: Diary = new Diary();
+    readonly documentItem: DocumentItem = new DocumentItem();
+
     // current page
     pageType: PageType = "LOGIN_USERNAME_PASSWORD";
     // all page registrations

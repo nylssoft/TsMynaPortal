@@ -142,13 +142,23 @@ export type MonthAndYear = {
   year: number
 }
 
+export type DocumentItemResult = {
+  accessRole: string | null,
+  children: number,
+  id: number,
+  name: string,
+  parentId: number | null,
+  size: number,
+  type: string
+}
+
 /**
  * Type representing the different pages in the application.
  */
 export type PageType = "LOGIN_USERNAME_PASSWORD" | "LOGIN_PIN" | "LOGIN_PASS2" | "ABOUT" | "DESKTOP"
   | "DATA_PROTECTION" | "NAVIGATION_BAR" | "CONTACT_DETAIL" | "NOTE_DETAIL" | "PASSWORD_ITEM_DETAIL"
-  | "DIARY_DETAIL";
+  | "DIARY_DETAIL" | "DOCUMENT_DETAIL";
 
-export type DesktopTab = "BIRTHDAYS" | "CONTACTS" | "NOTES" | "PASSWORD_MANAGER" | "DIARY";
+export type DesktopTab = "BIRTHDAYS" | "CONTACTS" | "NOTES" | "PASSWORD_MANAGER" | "DIARY" | "DOCUMENTS";
 
-export const Version: string = "1.1.2";
+export const Version: string = "1.1.3";

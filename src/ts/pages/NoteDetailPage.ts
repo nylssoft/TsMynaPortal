@@ -118,7 +118,7 @@ export class NoteDetailPage implements Page {
         textarea.addEventListener("input", (e: Event) => this.onInput(e, pageContext));
         const saveButton: HTMLButtonElement = Controls.createButton(divRows, "submit", pageContext.locale.translate("BUTTON_SAVE"), "btn btn-primary", "savebutton-id");
         saveButton.addEventListener("click", async (e: Event) => await this.onSaveAsync(e, pageContext));
-        // render delete confirmation dialog
+        // render back confirmation dialog
         Controls.createConfirmationDialog(
             parent,
             pageContext.locale.translate("HEADER_NOTES"),

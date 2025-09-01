@@ -7,6 +7,7 @@ import { NoteTab } from "../tabs/NoteTab";
 import { PasswordTab } from "../tabs/PasswordTab";
 import { DiaryTab } from "../tabs/DiaryTab";
 import { TabRenderer } from "../tabs/TabRenderer";
+import { DocumentTab } from "../tabs/DocumentTab";
 
 /**
  * Page implementation for the Desktop page.
@@ -23,8 +24,9 @@ export class DesktopPage implements Page {
         this.tabRenderer.registerTab(new NoteTab());
         this.tabRenderer.registerTab(new PasswordTab());
         this.tabRenderer.registerTab(new DiaryTab());
+        this.tabRenderer.registerTab(new DocumentTab())
     }
-    
+
     async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
         try {
