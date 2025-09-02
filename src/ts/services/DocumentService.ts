@@ -79,6 +79,6 @@ export class DocumentService {
             console.error("Error encoding file data:", e);
             throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
         }
-        await FetchHelper.fetchAsync(`api/document/upload/${parentId}`, { method: "POST", headers: { "token": token }, body: formData });
+        await FetchHelper.fetchAsync(`/api/document/upload/${parentId}`, { method: "POST", headers: { "token": token }, body: formData });
     }
 }
