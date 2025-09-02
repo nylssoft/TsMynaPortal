@@ -31,6 +31,7 @@ export class DocumentTab implements Tab {
             }
             const iAddFile: HTMLElement = Controls.createElement(heading, "i", "ms-4 bi bi-file-plus", undefined, "action-add-file-id");
             iAddFile.setAttribute("role", "button");
+            iAddFile.addEventListener("click", (e: Event) => this.onAddFile(e));
             const iAddFolder: HTMLElement = Controls.createElement(heading, "i", "ms-4 bi bi-folder-plus", undefined, "action-add-folder-id");
             iAddFolder.setAttribute("role", "button");
             iAddFolder.addEventListener("click", async (e: Event) => await this.onAddFolderAsync(e, pageContext));
@@ -49,10 +50,70 @@ export class DocumentTab implements Tab {
                 pageContext.locale.translate("BUTTON_YES"),
                 pageContext.locale.translate("BUTTON_NO"));
             document.getElementById("confirmationyesbutton-id")!.addEventListener("click", async (e: Event) => await this.onDeleteAsync(e, pageContext));
+            // upload form
+            const form: HTMLFormElement = Controls.createForm(parent, "d-none");
+            form.id = "uploadform-id";
+            form.method = "post";
+            form.enctype = "multipart/formdata";
+            const inputFile: HTMLInputElement = Controls.createElement(form, "input", "d-none") as HTMLInputElement;
+            inputFile.type = "file";
+            inputFile.name = "file-input";
+            inputFile.id = "file-input-id";
+            inputFile.multiple = true;
+            inputFile.addEventListener("change", async (e: Event) => await this.onAddDocumentAsync(e, pageContext));
+
         }
         catch (error: Error | unknown) {
             Controls.createAlert(alertDiv, pageContext.locale.translateError(error));
         }
+    }
+
+    private onAddFile(e: Event) {
+        e.preventDefault();
+        const inputFile: HTMLInputElement = document.getElementById("file-input-id") as HTMLInputElement;
+        inputFile.click();
+    }
+
+    private async onAddDocumentAsync(e: Event, pageContext: PageContext): Promise<void> {
+        e.preventDefault();
+        const inputFile: HTMLInputElement = document.getElementById("file-input-id") as HTMLInputElement;
+        if (inputFile.files != null) {
+            const curFiles: File[] = [];
+            for (let i: number = 0; i < inputFile.files.length; i++) {
+                curFiles.push(inputFile.files[i]);
+            }
+            await this.uploadFilesAsync(pageContext, curFiles);
+        }
+    }
+
+    private async uploadFilesAsync(pageContext: PageContext, curFiles: File[]): Promise<void> {
+        if (curFiles.length == 0) {
+            await pageContext.renderAsync();
+            return;
+        }
+        const curFile: File = curFiles[0];
+        curFiles.shift();
+        if (curFile.size < 20 * 1024 * 1024) {
+            const fileReader: FileReader = new FileReader();
+            fileReader.onload = async (e: ProgressEvent<FileReader>) => {
+                if (e.target?.result instanceof ArrayBuffer) {
+                    await this.onUploadAsync(pageContext, e.target.result, curFile, curFiles);
+                }
+            };
+            fileReader.readAsArrayBuffer(curFile);
+        }
+        else {
+            // TODO: check file size before upload and show alert
+            console.log("File too large. Skipped.");
+            await this.uploadFilesAsync(pageContext, curFiles);
+        }
+    }
+
+    private async onUploadAsync(pageContext: PageContext, data: ArrayBuffer, curFile: File, curFiles: File[]): Promise<void> {
+        const token: string = pageContext.authenticationClient.getToken()!;
+        const user: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
+        await DocumentService.uploadFileAsync(token, user, pageContext.documentItem.containerId!, curFile.name, data);
+        await this.uploadFilesAsync(pageContext, curFiles);
     }
 
     private async onEditAsync(e: Event, pageContext: PageContext): Promise<void> {
@@ -140,9 +201,9 @@ export class DocumentTab implements Tab {
                 Controls.createSpan(li, "badge text-bg-secondary", `${item.children}`);
             }
             nameElem.setAttribute("role", "button");
-            nameElem.addEventListener("click", async (e: Event) => this.onClickItemAsync(e, pageContext, type, id));
+            nameElem.addEventListener("click", async (e: Event) => await this.onClickItemAsync(e, pageContext, type, id));
             iconElem.setAttribute("role", "button");
-            iconElem.addEventListener("click", async (e: Event) => this.onClickItemAsync(e, pageContext, type, id));
+            iconElem.addEventListener("click", async (e: Event) => await this.onClickItemAsync(e, pageContext, type, id));
         });
     }
 
@@ -158,10 +219,6 @@ export class DocumentTab implements Tab {
 
     private isContainer(item: DocumentItemResult): boolean {
         return item.type === "Folder" || item.type === "Volume";
-    }
-
-    private isDocument(item: DocumentItemResult): boolean {
-        return item.type === "Document";
     }
 
     private getPath(id: number | null, docItems: DocumentItemResult[]): DocumentItemResult[] {
@@ -256,6 +313,7 @@ export class DocumentTab implements Tab {
     }
 
     private onSelectAll(e: Event, docItems: DocumentItemResult[]) {
+        e.preventDefault();
         const input: HTMLInputElement = e.target as HTMLInputElement;
         this.updateAllSelections(input.checked);
         this.updateActions(docItems);

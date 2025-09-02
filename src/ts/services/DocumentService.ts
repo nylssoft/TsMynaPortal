@@ -63,4 +63,22 @@ export class DocumentService {
             throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
         }
     }
+
+    static async uploadFileAsync(token: string, user: UserInfoResult, parentId: number, filename: string, fileData: ArrayBuffer): Promise<void> {
+        const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
+        if (encryptionKey == null || encryptionKey.length === 0) {
+            throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
+        }
+        const formData: FormData = new FormData();
+        try {
+            const cryptoKey: CryptoKey = await Security.createCryptoKeyAsync(encryptionKey, user.passwordManagerSalt)
+            const file: File = await Security.encodeFileAsync(cryptoKey, filename, fileData);
+            formData.append("document-file", file);
+            formData.append("overwrite", "false");
+        } catch (e: Error | unknown) {
+            console.error("Error encoding file data:", e);
+            throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
+        }
+        await FetchHelper.fetchAsync(`api/document/upload/${parentId}`, { method: "POST", headers: { "token": token }, body: formData });
+    }
 }

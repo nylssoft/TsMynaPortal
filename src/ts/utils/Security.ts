@@ -63,6 +63,17 @@ export class Security {
         return new TextDecoder().decode(decrypted);
     }
 
+    static async encodeFileAsync(cryptoKey: CryptoKey, filename: string, fileData: ArrayBuffer): Promise<File> {
+        const iv: Uint8Array<ArrayBuffer> = window.crypto.getRandomValues(new Uint8Array(12));
+        const options: AesGcmParams = { name: "AES-GCM", iv: iv };
+        const encrypted: ArrayBuffer = await window.crypto.subtle.encrypt(options, cryptoKey, fileData);
+        const view: Uint8Array<ArrayBuffer> = new Uint8Array(encrypted);
+        const data: Uint8Array<ArrayBuffer> = new Uint8Array(encrypted.byteLength + 12);
+        data.set(iv, 0);
+        data.set(view, 12);
+        return new File([data.buffer], filename, { type: "application/octet-stream" });
+    }
+
     static async decodeBlobAsync(cryptoKey: CryptoKey, blob: Blob): Promise<Blob> {
         const iv: Uint8Array<ArrayBuffer> = new Uint8Array(12);
         const data: Uint8Array<ArrayBuffer> = new Uint8Array(blob.size - 12);
