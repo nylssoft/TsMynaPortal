@@ -1,4 +1,4 @@
-import { Page, PageContext } from "../PageContext";
+import { PageContext } from "../PageContext";
 import { DocumentService } from "../services/DocumentService";
 import { DesktopTab, DocumentItemResult, UserInfoResult } from "../TypeDefinitions";
 import { Controls } from "../utils/Controls";
@@ -126,6 +126,7 @@ export class DocumentTab implements Tab {
         const checkBoxSelectAll: HTMLInputElement = Controls.createInput(li, "checkbox", "selectall-id", "form-check-inout me-4 mt-2");
         checkBoxSelectAll.addEventListener("click", (e: Event) => this.onSelectAll(e, filteredItems));
         filteredItems.forEach(item => {
+            const id: number = item.id;
             const type: string = item.type;
             const li: HTMLElement = Controls.createElement(listGroup, "li", "list-group-item d-flex justify-content-between align-items-start");
             const checkBoxSelectItem: HTMLInputElement = Controls.createInput(li, "checkbox", `item-select-id-${item.id}`, "form-check-inout me-2 mt-1 item-select");
@@ -138,21 +139,10 @@ export class DocumentTab implements Tab {
             } else {
                 Controls.createSpan(li, "badge text-bg-secondary", `${item.children}`);
             }
-            if (type == "Folder") {
-                const id: number = item.id;
-                nameElem.setAttribute("role", "button");
-                nameElem.addEventListener("click", async (e: Event) => {
-                    e.preventDefault();
-                    pageContext.documentItem.containerId = id;
-                    await pageContext.renderAsync();
-                });
-                iconElem.setAttribute("role", "button");
-                iconElem.addEventListener("click", async (e: Event) => {
-                    e.preventDefault();
-                    pageContext.documentItem.containerId = id;
-                    await pageContext.renderAsync();
-                });
-            }
+            nameElem.setAttribute("role", "button");
+            nameElem.addEventListener("click", async (e: Event) => this.onClickItemAsync(e, pageContext, type, id));
+            iconElem.setAttribute("role", "button");
+            iconElem.addEventListener("click", async (e: Event) => this.onClickItemAsync(e, pageContext, type, id));
         });
     }
 
@@ -189,7 +179,7 @@ export class DocumentTab implements Tab {
     private getItems(parentId: number, docItems: DocumentItemResult[]): DocumentItemResult[] {
         const items: DocumentItemResult[] = [];
         docItems.forEach(item => {
-            if (item.parentId === parentId) {
+            if (item.parentId === parentId && item.accessRole == null) {
                 items.push(item);
             }
         });
@@ -238,6 +228,31 @@ export class DocumentTab implements Tab {
             return `${Math.floor(cnt / 1024)} KB`;
         }
         return `${cnt} B`;
+    }
+
+    private async onClickItemAsync(e: Event, pageContext: PageContext, type: string, id: number): Promise<void> {
+        e.preventDefault();
+        if (type == "Folder") {
+            pageContext.documentItem.containerId = id;
+            await pageContext.renderAsync();
+        } else {
+            await this.onDownloadDocumentAsync(id, pageContext);
+        }
+    }
+
+    private async onDownloadDocumentAsync(id: number, pageContext: PageContext): Promise<void> {
+        const item = this.getItem(id, pageContext.documentItem.docItems);
+        if (item != null && item.id != null && item.name != null) {
+            const token: string = pageContext.authenticationClient.getToken()!;
+            const user: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
+            const blob: Blob = await DocumentService.downloadBlobAsync(token, user, item.id);
+            const obj_url: string = URL.createObjectURL(blob);
+            const a: HTMLAnchorElement = document.createElement("a");
+            a.href = obj_url;
+            a.setAttribute("download", item.name);
+            a.click();
+            URL.revokeObjectURL(obj_url);
+        }
     }
 
     private onSelectAll(e: Event, docItems: DocumentItemResult[]) {

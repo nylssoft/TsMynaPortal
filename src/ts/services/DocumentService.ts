@@ -1,5 +1,6 @@
 import { DocumentItemResult, UserInfoResult } from "../TypeDefinitions";
 import { FetchHelper } from "../utils/FetchHelper";
+import { Security } from "../utils/Security";
 
 export class DocumentService {
 
@@ -45,5 +46,21 @@ export class DocumentService {
             body: JSON.stringify(name)
         });
         return await resp.json() as DocumentItemResult;
+    }
+
+    static async downloadBlobAsync(token: string, user: UserInfoResult, id: number): Promise<Blob> {
+        const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
+        if (encryptionKey == null || encryptionKey.length === 0) {
+            throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
+        }
+        const resp: Response = await FetchHelper.fetchAsync(`/api/document/download/${id}`, { headers: { "token": token } });
+        const blob: Blob = await resp.blob();
+        try {
+            const cryptoKey: CryptoKey = await Security.createCryptoKeyAsync(encryptionKey, user.passwordManagerSalt)
+            return await Security.decodeBlobAsync(cryptoKey, blob);
+        } catch (e: Error | unknown) {
+            console.error("Error decoding blob:", e);
+            throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
+        }
     }
 }

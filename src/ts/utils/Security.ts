@@ -63,6 +63,28 @@ export class Security {
         return new TextDecoder().decode(decrypted);
     }
 
+    static async decodeBlobAsync(cryptoKey: CryptoKey, blob: Blob): Promise<Blob> {
+        const iv: Uint8Array<ArrayBuffer> = new Uint8Array(12);
+        const data: Uint8Array<ArrayBuffer> = new Uint8Array(blob.size - 12);
+        const reader: ReadableStreamDefaultReader<Uint8Array<ArrayBuffer>> = blob.stream().getReader();
+        let idx: number = 0;
+        while (true) {
+            const readResponse: ReadableStreamReadResult<Uint8Array<ArrayBuffer>> = await reader.read();
+            if (readResponse.done) break;
+            readResponse.value.forEach(val => {
+                if (idx < 12) {
+                    iv[idx] = val;
+                } else {
+                    data[idx - 12] = val;
+                }
+                idx++;
+            });
+        }
+        const options: AesGcmParams = { name: "AES-GCM", iv: iv };
+        const decoded: ArrayBuffer = await crypto.subtle.decrypt(options, cryptoKey, data);
+        return new Blob([decoded]);
+    }
+
     /**
      * Retrieves the encryption key for a user from session storage or secure local storage.
      * If the key is not found in session storage, it attempts to retrieve it from secure local storage.
