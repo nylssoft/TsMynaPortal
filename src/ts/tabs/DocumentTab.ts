@@ -195,15 +195,18 @@ export class DocumentTab implements Tab {
             const iconType: string = type == "Document" ? "bi-file" : "bi-folder";
             const iconElem: HTMLElement = Controls.createSpan(li, `bi ${iconType}`);
             const nameElem: HTMLElement = Controls.createSpan(li, "ms-2 me-auto", item.name);
+            let iconBadge: HTMLElement;
             if (item.size > 0) {
-                Controls.createSpan(li, "badge text-bg-primary rounded-pill", `${this.formatSize(item.size)}`);
+                iconBadge = Controls.createSpan(li, "badge text-bg-primary rounded-pill", `${this.formatSize(item.size)}`);
             } else {
-                Controls.createSpan(li, "badge text-bg-secondary", `${item.children}`);
+                iconBadge = Controls.createSpan(li, "badge text-bg-secondary", `${item.children}`);
             }
             nameElem.setAttribute("role", "button");
             nameElem.addEventListener("click", async (e: Event) => await this.onClickItemAsync(e, pageContext, type, id));
             iconElem.setAttribute("role", "button");
             iconElem.addEventListener("click", async (e: Event) => await this.onClickItemAsync(e, pageContext, type, id));
+            iconBadge.setAttribute("role", "button");
+            iconBadge.addEventListener("click", async (e: Event) => await this.onClickItemAsync(e, pageContext, type, id));
         });
     }
 
