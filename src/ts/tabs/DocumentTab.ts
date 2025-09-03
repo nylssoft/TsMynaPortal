@@ -184,13 +184,13 @@ export class DocumentTab implements Tab {
         const listGroup: HTMLElement = document.getElementById("list-group-id")!;
         Controls.removeAllChildren(listGroup);
         const li: HTMLElement = Controls.createElement(listGroup, "li", "list-group-item");
-        const checkBoxSelectAll: HTMLInputElement = Controls.createInput(li, "checkbox", "selectall-id", "form-check-inout me-4 mt-2");
+        const checkBoxSelectAll: HTMLInputElement = Controls.createInput(li, "checkbox", "selectall-id", "form-check-input me-4 mt-2");
         checkBoxSelectAll.addEventListener("click", (e: Event) => this.onSelectAll(e, filteredItems));
         filteredItems.forEach(item => {
             const id: number = item.id;
             const type: string = item.type;
             const li: HTMLElement = Controls.createElement(listGroup, "li", "list-group-item d-flex justify-content-between align-items-start");
-            const checkBoxSelectItem: HTMLInputElement = Controls.createInput(li, "checkbox", `item-select-id-${item.id}`, "form-check-inout me-2 mt-1 item-select");
+            const checkBoxSelectItem: HTMLInputElement = Controls.createInput(li, "checkbox", `item-select-id-${item.id}`, "form-check-input me-2 mt-1 item-select");
             checkBoxSelectItem.addEventListener("click", _ => this.updateActions(filteredItems));
             const iconType: string = type == "Document" ? "bi-file" : "bi-folder";
             const iconElem: HTMLElement = Controls.createSpan(li, `bi ${iconType}`);
@@ -313,7 +313,6 @@ export class DocumentTab implements Tab {
     }
 
     private onSelectAll(e: Event, docItems: DocumentItemResult[]) {
-        e.preventDefault();
         const input: HTMLInputElement = e.target as HTMLInputElement;
         this.updateAllSelections(input.checked);
         this.updateActions(docItems);
