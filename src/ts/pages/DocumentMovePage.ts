@@ -1,6 +1,6 @@
 import { Page, PageContext } from "../PageContext";
 import { DocumentService } from "../services/DocumentService";
-import { DocumentItemResult, PageType, UserInfoResult } from "../TypeDefinitions";
+import { DocumentItemResult, PageType } from "../TypeDefinitions";
 import { Controls } from "../utils/Controls";
 
 export class DocumentMovePage implements Page {
@@ -8,6 +8,17 @@ export class DocumentMovePage implements Page {
     pageType: PageType = "DOCUMENT_MOVE";
 
     async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
+        const alertDiv: HTMLDivElement = Controls.createDiv(parent);
+        alertDiv.id = "alertdiv-id";
+        try {
+            await this.renderMoveAsync(parent, pageContext);
+        }
+        catch (error: Error | unknown) {
+            this.handleError(error, pageContext);
+        }
+    }
+
+    private async renderMoveAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         // render action toolbar
         const headingActions: HTMLHeadingElement = Controls.createHeading(parent, 4);
         const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
@@ -41,25 +52,9 @@ export class DocumentMovePage implements Page {
             });
     }
 
-    private async onMoveItemsAsync(e: Event, pageContext: PageContext): Promise<void> {
-        e.preventDefault();
-        const token: string = pageContext.authenticationClient.getToken()!;
-        const ids: number[] = pageContext.documentItem.moved.map(item => item.id);
-        await DocumentService.moveItemsAsync(token, pageContext.documentItem.containerId!, ids);
-        pageContext.pageType = "DESKTOP";
-        await pageContext.renderAsync();
-    }
-
-    private async onClickItemAsync(e: Event, pageContext: PageContext, type: string, id: number): Promise<void> {
-        e.preventDefault();
-        pageContext.documentItem.containerId = id;
-        await pageContext.renderAsync();
-    }
-
-    private async onBackAsync(e: Event, pageContext: PageContext): Promise<void> {
-        e.preventDefault();
-        pageContext.pageType = "DESKTOP";
-        await pageContext.renderAsync();
+    private handleError(error: Error | unknown, pageContext: PageContext) {
+        const alertDiv: HTMLDivElement = document.getElementById("alertdiv-id") as HTMLDivElement;
+        Controls.createAlert(alertDiv, pageContext.locale.translateError(error));
     }
 
     private renderDestinationFolder(parent: HTMLElement, pageContext: PageContext, path: DocumentItemResult[]) {
@@ -88,5 +83,33 @@ export class DocumentMovePage implements Page {
                 await pageContext.renderAsync();
             });
         });
+    }
+
+    // event callbacks
+
+    private async onMoveItemsAsync(e: Event, pageContext: PageContext): Promise<void> {
+        e.preventDefault();
+        try {
+            const token: string = pageContext.authenticationClient.getToken()!;
+            const ids: number[] = pageContext.documentItem.moved.map(item => item.id);
+            await DocumentService.moveItemsAsync(token, pageContext.documentItem.containerId!, ids);
+            pageContext.pageType = "DESKTOP";
+            await pageContext.renderAsync();
+        }
+        catch (error: Error | unknown) {
+            this.handleError(error, pageContext);
+        }
+    }
+
+    private async onClickItemAsync(e: Event, pageContext: PageContext, type: string, id: number): Promise<void> {
+        e.preventDefault();
+        pageContext.documentItem.containerId = id;
+        await pageContext.renderAsync();
+    }
+
+    private async onBackAsync(e: Event, pageContext: PageContext): Promise<void> {
+        e.preventDefault();
+        pageContext.pageType = "DESKTOP";
+        await pageContext.renderAsync();
     }
 }

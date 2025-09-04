@@ -67,8 +67,13 @@ export class DocumentTab implements Tab {
 
         }
         catch (error: Error | unknown) {
-            Controls.createAlert(alertDiv, pageContext.locale.translateError(error));
+            this.handleError(error, pageContext);
         }
+    }
+
+    private handleError(error: Error | unknown, pageContext: PageContext) {
+        const alertDiv: HTMLDivElement = document.getElementById("alertdiv-id") as HTMLDivElement;
+        Controls.createAlert(alertDiv, pageContext.locale.translateError(error));
     }
 
     private renderBreadcrump(parent: HTMLElement, pageContext: PageContext, path: DocumentItemResult[]) {
@@ -175,21 +180,18 @@ export class DocumentTab implements Tab {
             });
     }
 
-    private onAddFile(e: Event) {
-        e.preventDefault();
-        const inputFile: HTMLInputElement = document.getElementById("file-input-id") as HTMLInputElement;
-        inputFile.click();
-    }
-
-    private async onAddDocumentAsync(e: Event, pageContext: PageContext): Promise<void> {
-        e.preventDefault();
-        const inputFile: HTMLInputElement = document.getElementById("file-input-id") as HTMLInputElement;
-        if (inputFile.files != null) {
-            const curFiles: File[] = [];
-            for (let i: number = 0; i < inputFile.files.length; i++) {
-                curFiles.push(inputFile.files[i]);
-            }
-            await this.uploadFilesAsync(pageContext, curFiles);
+    private async downloadFileAsync(id: number, pageContext: PageContext): Promise<void> {
+        const item: DocumentItemResult | null = DocumentService.getItem(id, pageContext.documentItem.filtered);
+        if (item != null && item.id != null && item.name != null) {
+            const token: string = pageContext.authenticationClient.getToken()!;
+            const user: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
+            const blob: Blob = await DocumentService.downloadBlobAsync(token, user, item.id);
+            const obj_url: string = URL.createObjectURL(blob);
+            const a: HTMLAnchorElement = document.createElement("a");
+            a.href = obj_url;
+            a.setAttribute("download", item.name);
+            a.click();
+            URL.revokeObjectURL(obj_url);
         }
     }
 
@@ -200,27 +202,49 @@ export class DocumentTab implements Tab {
         }
         const curFile: File = curFiles[0];
         curFiles.shift();
-        if (curFile.size < 20 * 1024 * 1024) {
-            const fileReader: FileReader = new FileReader();
-            fileReader.onload = async (e: ProgressEvent<FileReader>) => {
-                if (e.target?.result instanceof ArrayBuffer) {
-                    await this.onUploadAsync(pageContext, e.target.result, curFile, curFiles);
-                }
-            };
-            fileReader.readAsArrayBuffer(curFile);
-        }
-        else {
-            // TODO: check file size before upload and show alert
-            console.log("File too large. Skipped.");
-            await this.uploadFilesAsync(pageContext, curFiles);
-        }
+        const fileReader: FileReader = new FileReader();
+        fileReader.onload = async (e: ProgressEvent<FileReader>) => {
+            if (e.target?.result instanceof ArrayBuffer) {
+                await this.uploadFileAsync(pageContext, e.target.result, curFile, curFiles);
+            }
+        };
+        fileReader.readAsArrayBuffer(curFile);
     }
 
-    private async onUploadAsync(pageContext: PageContext, data: ArrayBuffer, curFile: File, curFiles: File[]): Promise<void> {
+    private async uploadFileAsync(pageContext: PageContext, data: ArrayBuffer, curFile: File, curFiles: File[]): Promise<void> {
         const token: string = pageContext.authenticationClient.getToken()!;
         const user: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
         await DocumentService.uploadFileAsync(token, user, pageContext.documentItem.containerId!, curFile.name, data);
         await this.uploadFilesAsync(pageContext, curFiles);
+    }
+
+    // event callbacks    
+
+    private onAddFile(e: Event) {
+        e.preventDefault();
+        const inputFile: HTMLInputElement = document.getElementById("file-input-id") as HTMLInputElement;
+        inputFile.click();
+    }
+
+    private async onAddDocumentAsync(e: Event, pageContext: PageContext): Promise<void> {
+        e.preventDefault();
+        const inputFile: HTMLInputElement = document.getElementById("file-input-id") as HTMLInputElement;
+        if (inputFile.files != null) {
+            try {
+                const curFiles: File[] = [];
+                for (let i: number = 0; i < inputFile.files.length; i++) {
+                    const curFile: File = inputFile.files[i];
+                    if (curFile.size > 20 * 1024 * 1024) {
+                        throw new Error(pageContext.locale.translateWithArgs("ERROR_FILE_TOO_LARGE_1_2", [curFile.name, DocumentService.formatSize(curFile.size)]));
+                    }
+                    curFiles.push(curFile);
+                }
+                await this.uploadFilesAsync(pageContext, curFiles);
+            }
+            catch (error: Error | unknown) {
+                this.handleError(error, pageContext);
+            }
+        }
     }
 
     private async onEditAsync(e: Event, pageContext: PageContext): Promise<void> {
@@ -247,10 +271,15 @@ export class DocumentTab implements Tab {
         e.preventDefault();
         const selected: DocumentItemResult[] = this.getSelected(pageContext);
         if (selected.length > 0) {
-            const token: string = pageContext.authenticationClient.getToken()!;
-            const ids: number[] = selected.map(item => item.id);
-            await DocumentService.deleteItemsAsync(token, pageContext.documentItem.containerId!, ids);
-            await pageContext.renderAsync();
+            try {
+                const token: string = pageContext.authenticationClient.getToken()!;
+                const ids: number[] = selected.map(item => item.id);
+                await DocumentService.deleteItemsAsync(token, pageContext.documentItem.containerId!, ids);
+                await pageContext.renderAsync();
+            }
+            catch (error: Error | unknown) {
+                this.handleError(error, pageContext);
+            }
         }
     }
 
@@ -265,23 +294,13 @@ export class DocumentTab implements Tab {
         if (type == "Folder") {
             pageContext.documentItem.containerId = id;
             await pageContext.renderAsync();
-        } else {
-            await this.onDownloadDocumentAsync(id, pageContext);
+            return;
         }
-    }
-
-    private async onDownloadDocumentAsync(id: number, pageContext: PageContext): Promise<void> {
-        const item: DocumentItemResult | null = DocumentService.getItem(id, pageContext.documentItem.filtered);
-        if (item != null && item.id != null && item.name != null) {
-            const token: string = pageContext.authenticationClient.getToken()!;
-            const user: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
-            const blob: Blob = await DocumentService.downloadBlobAsync(token, user, item.id);
-            const obj_url: string = URL.createObjectURL(blob);
-            const a: HTMLAnchorElement = document.createElement("a");
-            a.href = obj_url;
-            a.setAttribute("download", item.name);
-            a.click();
-            URL.revokeObjectURL(obj_url);
+        try {
+            await this.downloadFileAsync(id, pageContext);
+        }
+        catch (error: Error | unknown) {
+            this.handleError(error, pageContext);
         }
     }
 

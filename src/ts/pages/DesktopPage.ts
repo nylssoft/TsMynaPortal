@@ -29,6 +29,7 @@ export class DesktopPage implements Page {
 
     async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
+        alertDiv.id = "alertdiv-id";
         try {
             if (!pageContext.desktop.welcomeClosed) {
                 await this.renderWelcomeMessageAsync(parent, pageContext);

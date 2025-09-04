@@ -8,6 +8,17 @@ export class DocumentEditPage implements Page {
     pageType: PageType = "DOCUMENT_EDIT";
 
     async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
+        const alertDiv: HTMLDivElement = Controls.createDiv(parent);
+        alertDiv.id = "alertdiv-id";
+        try {
+            await this.renderEditAsync(parent, pageContext);
+        }
+        catch (error: Error | unknown) {
+            this.handleError(error, pageContext);
+        }
+    }
+
+    private async renderEditAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         // render action toolbar
         const headingActions: HTMLHeadingElement = Controls.createHeading(parent, 4);
         const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
@@ -41,6 +52,13 @@ export class DocumentEditPage implements Page {
         document.getElementById("confirmationyesbutton-id")!.addEventListener("click", (e: Event) => this.onBackEdit(e, pageContext));
     }
 
+    private handleError(error: Error | unknown, pageContext: PageContext) {
+        const alertDiv: HTMLDivElement = document.getElementById("alertdiv-id") as HTMLDivElement;
+        Controls.createAlert(alertDiv, pageContext.locale.translateError(error));
+    }
+
+    // event callbacks
+
     private async onBackAsync(e: Event, pageContext: PageContext): Promise<void> {
         e.preventDefault();
         if (!pageContext.documentItem.changed) {
@@ -68,16 +86,21 @@ export class DocumentEditPage implements Page {
         e.preventDefault();
         const name: string = (document.getElementById("name-id") as HTMLInputElement).value.trim();
         if (name.length > 0) {
-            const token: string = pageContext.authenticationClient.getToken()!;
-            if (pageContext.documentItem.edit != null) {
-                await DocumentService.renameItemAsync(token, pageContext.documentItem.edit.id, name);
-            } else {
-                await DocumentService.createFolderAsync(token, pageContext.documentItem.containerId!, name);
+            try {
+                const token: string = pageContext.authenticationClient.getToken()!;
+                if (pageContext.documentItem.edit != null) {
+                    await DocumentService.renameItemAsync(token, pageContext.documentItem.edit.id, name);
+                } else {
+                    await DocumentService.createFolderAsync(token, pageContext.documentItem.containerId!, name);
+                }
+                pageContext.documentItem.edit = null
+                pageContext.documentItem.changed = false;
+                pageContext.pageType = "DESKTOP";
+                await pageContext.renderAsync();
             }
-            pageContext.documentItem.edit = null
-            pageContext.documentItem.changed = false;
-            pageContext.pageType = "DESKTOP";
-            await pageContext.renderAsync();
+            catch (error: Error | unknown) {
+                this.handleError(error, pageContext);
+            }
         }
     }
 }

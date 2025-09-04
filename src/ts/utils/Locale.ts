@@ -37,6 +37,7 @@ export class Locale {
         "INFO_REALLY_DELETE_PASSWORD": "Willst du das Kennwort wirklich löschen?",
         "LABEL_DESTINATION_FOLDER": "Zielordner:",
 
+        "ERROR_FILE_TOO_LARGE_1_2": "Die Datei {0} ist zu groß. Die Dateigröße ist {1}, aber höchstens 20MB sind erlaubt.",
         "ERROR_WRONG_DATA_PROTECTION_KEY": "Der Schlüssel zum Entschlüsseln der Daten ist ungültig oder fehlt. Bitte überprüfe deinen Schlüssel auf der Seite 'Datenschutz'.",
     }
 
@@ -70,6 +71,7 @@ export class Locale {
         "INFO_REALLY_DELETE_PASSWORD": "Do you really want to delete the password?",
         "LABEL_DESTINATION_FOLDER": "Destination folder:",
 
+        "ERROR_FILE_TOO_LARGE_1_2": "The file {0} is too large. The file size is {1} but at most 20MB are allowed.",
         "ERROR_WRONG_DATA_PROTECTION_KEY": "The key to decrypt the data is invalid or missing. Please check your key on the 'Data Protection' page.",
     }
 
