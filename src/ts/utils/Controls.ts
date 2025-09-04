@@ -268,4 +268,14 @@ export class Controls {
             node.removeChild(node.lastChild);
         }
     }
+
+    static showElem(elem: HTMLElement | null, show: boolean): void {
+        if (elem != null) {
+            if (show && elem.classList.contains("d-none")) {
+                elem.classList.remove("d-none");
+            } else if (!show && !elem.classList.contains("d-none")) {
+                elem.classList.add("d-none");
+            }
+        }
+    }
 }

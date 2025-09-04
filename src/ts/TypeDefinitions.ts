@@ -149,16 +149,18 @@ export type DocumentItemResult = {
   name: string,
   parentId: number | null,
   size: number,
-  type: string
+  type: DocumentItemType
 }
+
+export type DocumentItemType = "Document" | "Folder" | "Volume";
 
 /**
  * Type representing the different pages in the application.
  */
 export type PageType = "LOGIN_USERNAME_PASSWORD" | "LOGIN_PIN" | "LOGIN_PASS2" | "ABOUT" | "DESKTOP"
   | "DATA_PROTECTION" | "NAVIGATION_BAR" | "CONTACT_DETAIL" | "NOTE_DETAIL" | "PASSWORD_ITEM_DETAIL"
-  | "DIARY_DETAIL" | "DOCUMENT_DETAIL";
+  | "DIARY_DETAIL" | "DOCUMENT_EDIT" | "DOCUMENT_MOVE";
 
 export type DesktopTab = "BIRTHDAYS" | "CONTACTS" | "NOTES" | "PASSWORD_MANAGER" | "DIARY" | "DOCUMENTS";
 
-export const Version: string = "1.1.6";
+export const Version: string = "1.1.8";

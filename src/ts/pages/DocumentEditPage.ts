@@ -3,11 +3,9 @@ import { DocumentService } from "../services/DocumentService";
 import { PageType } from "../TypeDefinitions";
 import { Controls } from "../utils/Controls";
 
-export class DocumentDetailPage implements Page {
-
+export class DocumentEditPage implements Page {
     hideNavBar?: boolean | undefined = true;
-
-    pageType: PageType = "DOCUMENT_DETAIL";
+    pageType: PageType = "DOCUMENT_EDIT";
 
     async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         // render action toolbar
@@ -68,7 +66,7 @@ export class DocumentDetailPage implements Page {
 
     private async onSaveAsync(e: Event, pageContext: PageContext): Promise<void> {
         e.preventDefault();
-        const name: string = (document.getElementById("name-id") as HTMLInputElement).value;
+        const name: string = (document.getElementById("name-id") as HTMLInputElement).value.trim();
         if (name.length > 0) {
             const token: string = pageContext.authenticationClient.getToken()!;
             if (pageContext.documentItem.edit != null) {

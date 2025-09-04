@@ -4,7 +4,8 @@ import { ContactDetailPage } from "./pages/ContactDetailPage";
 import { DataProtectionPage } from "./pages/DataProtectionPage";
 import { DesktopPage } from "./pages/DesktopPage";
 import { DiaryDetailPage } from "./pages/DiaryDetailPage";
-import { DocumentDetailPage } from "./pages/DocumentDetailPage";
+import { DocumentEditPage } from "./pages/DocumentEditPage";
+import { DocumentMovePage } from "./pages/DocumentMovePage";
 import { LoginPass2Page } from "./pages/LoginPass2Page";
 import { LoginPinPage } from "./pages/LoginPinPage";
 import { LoginUsernamePasswordPage } from "./pages/LoginUsernamePasswordPage";
@@ -49,7 +50,8 @@ export class App {
         pageContext.registerPage(new NoteDetailPage());
         pageContext.registerPage(new PasswordItemDetailPage());
         pageContext.registerPage(new DiaryDetailPage());
-        pageContext.registerPage(new DocumentDetailPage());
+        pageContext.registerPage(new DocumentEditPage());
+        pageContext.registerPage(new DocumentMovePage());
         await pageContext.locale.setLanguageAsync();
         await pageContext.authenticationClient.loginWithLongLivedTokenAsync();
         if (pageContext.authenticationClient.isLoggedIn()) {

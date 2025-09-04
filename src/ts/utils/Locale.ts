@@ -35,6 +35,7 @@ export class Locale {
         "LABEL_DIARY_ENTRY": "Tagebucheintrag:",
         "INFO_REALLY_DELETE_CONTACT": "Willst du den Kontakt wirklich löschen?",
         "INFO_REALLY_DELETE_PASSWORD": "Willst du das Kennwort wirklich löschen?",
+        "LABEL_DESTINATION_FOLDER": "Zielordner:",
 
         "ERROR_WRONG_DATA_PROTECTION_KEY": "Der Schlüssel zum Entschlüsseln der Daten ist ungültig oder fehlt. Bitte überprüfe deinen Schlüssel auf der Seite 'Datenschutz'.",
     }
@@ -67,6 +68,7 @@ export class Locale {
         "LABEL_DIARY_ENTRY": "Diary entry:",
         "INFO_REALLY_DELETE_CONTACT": "Do you really want to delete the contact?",
         "INFO_REALLY_DELETE_PASSWORD": "Do you really want to delete the password?",
+        "LABEL_DESTINATION_FOLDER": "Destination folder:",
 
         "ERROR_WRONG_DATA_PROTECTION_KEY": "The key to decrypt the data is invalid or missing. Please check your key on the 'Data Protection' page.",
     }
