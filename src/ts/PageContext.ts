@@ -66,8 +66,7 @@ export class PageContext {
      * It also renders the navigation bar if available.
      */
     async renderAsync(): Promise<void> {
-        const loading = document.getElementById("loading-progress-id") as HTMLElement;
-        loading.classList.remove("d-none");
+        Controls.showElemById("loading-progress-id", true);
         const page: Page | undefined = this.pageRegistrations.get(this.pageType);
         const navBar: Page | undefined = this.pageRegistrations.get("NAVIGATION_BAR");
         if (page && navBar) {
@@ -79,6 +78,6 @@ export class PageContext {
             const content: HTMLDivElement = Controls.createDiv(main, "container py-4 px-3 mx-auto");
             await page.renderAsync(content, this);
         }
-        loading.classList.add("d-none");
+        Controls.showElemById("loading-progress-id", false);
     }
 }

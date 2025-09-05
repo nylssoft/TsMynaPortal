@@ -144,16 +144,11 @@ export class DocumentTab implements Tab {
 
     private updateActions(pageContext: PageContext) {
         const selected: DocumentItemResult[] = this.getSelected(pageContext);
-        const addFileElem: HTMLElement | null = document.getElementById("action-add-file-id");
-        const addFolderElem: HTMLElement | null = document.getElementById("action-add-folder-id");
-        const deleteElem: HTMLElement | null = document.getElementById("action-delete-id");
-        const editElem: HTMLElement | null = document.getElementById("action-edit-id");
-        const moveElem: HTMLElement | null = document.getElementById("action-move-id");
-        Controls.showElem(addFileElem, selected.length == 0);
-        Controls.showElem(addFolderElem, selected.length == 0);
-        Controls.showElem(deleteElem, selected.length > 0);
-        Controls.showElem(editElem, selected.length == 1);
-        Controls.showElem(moveElem, selected.length > 0);
+        Controls.showElemById("action-add-file-id", selected.length == 0);
+        Controls.showElemById("action-add-folder-id", selected.length == 0);
+        Controls.showElemById("action-delete-id", selected.length > 0);
+        Controls.showElemById("action-edit-id", selected.length == 1);
+        Controls.showElemById("action-move-id", selected.length > 0);
     }
 
     private getSelected(pageContext: PageContext): DocumentItemResult[] {
@@ -230,6 +225,7 @@ export class DocumentTab implements Tab {
         e.preventDefault();
         const inputFile: HTMLInputElement = document.getElementById("file-input-id") as HTMLInputElement;
         if (inputFile.files != null) {
+            Controls.showElemById("loading-progress-id", true);
             try {
                 const curFiles: File[] = [];
                 for (let i: number = 0; i < inputFile.files.length; i++) {
@@ -244,6 +240,7 @@ export class DocumentTab implements Tab {
             catch (error: Error | unknown) {
                 this.handleError(error, pageContext);
             }
+            Controls.showElemById("loading-progress-id", false);
         }
     }
 
@@ -296,12 +293,14 @@ export class DocumentTab implements Tab {
             await pageContext.renderAsync();
             return;
         }
+        Controls.showElemById("loading-progress-id", true);
         try {
             await this.downloadFileAsync(id, pageContext);
         }
         catch (error: Error | unknown) {
             this.handleError(error, pageContext);
         }
+        Controls.showElemById("loading-progress-id", false);
     }
 
     private onSelectAll(e: Event, pageContext: PageContext) {

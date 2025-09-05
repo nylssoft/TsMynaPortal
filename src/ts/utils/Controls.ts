@@ -278,4 +278,8 @@ export class Controls {
             }
         }
     }
+
+    static showElemById(id: string, show: boolean): void {
+        this.showElem(document.getElementById(id), show);
+    }
 }
