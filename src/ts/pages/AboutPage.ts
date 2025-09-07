@@ -13,7 +13,7 @@ export class AboutPage implements Page {
         const aboutMessage: HTMLDivElement = Controls.createDiv(parent, "alert alert-success");
         Controls.createParagraph(aboutMessage, "", pageContext.locale.translate("WEBSITE_INFO"));
         Controls.createParagraph(aboutMessage, "", `${Version} ${pageContext.locale.translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.locale.translate("COPYRIGHT")}`);
-        const anchor: HTMLAnchorElement = Controls.createAnchor(aboutMessage, "https://github.com/nylssoft/TsMynaPortal", "Soruce Code");
+        const anchor: HTMLAnchorElement = Controls.createAnchor(aboutMessage, "https://github.com/nylssoft/TsMynaPortal", "Source Code");
         anchor.setAttribute("target", "_blank");
     }
 }
