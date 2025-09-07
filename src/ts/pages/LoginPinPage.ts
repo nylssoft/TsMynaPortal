@@ -40,8 +40,10 @@ export class LoginPinPage implements Page {
                 const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
                 if (encryptionKey == null) {
                     await Security.setEncryptionKeyAsync(user, Security.generateEncryptionKey());
+                    pageContext.pageType = "DATA_PROTECTION";
+                } else {
+                    pageContext.pageType = "DESKTOP";
                 }
-                pageContext.pageType = "DESKTOP";
             }
             await pageContext.renderAsync();
         }
