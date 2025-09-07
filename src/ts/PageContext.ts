@@ -77,6 +77,7 @@ export class PageContext {
             }
             const content: HTMLDivElement = Controls.createDiv(main, "container py-4 px-3 mx-auto");
             await page.renderAsync(content, this);
+            Controls.createDiv(main, "mt-4");
         }
         Controls.showElemById("loading-progress-id", false);
     }

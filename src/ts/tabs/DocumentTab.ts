@@ -64,7 +64,10 @@ export class DocumentTab implements Tab {
             inputFile.id = "file-input-id";
             inputFile.multiple = true;
             inputFile.addEventListener("change", async (e: Event) => await this.onAddDocumentAsync(e, pageContext));
-
+            // download success
+            const downloadAlert: HTMLDivElement = Controls.createDiv(parent, "text-center fixed-bottom alert alert-success fade", undefined, "download-alert-id");
+            downloadAlert.setAttribute("role", "alert");
+            Controls.createDiv(downloadAlert, undefined, undefined, "download-alert-text-id");
         }
         catch (error: Error | unknown) {
             this.handleError(error, pageContext);
@@ -140,10 +143,6 @@ export class DocumentTab implements Tab {
                 iconBadge.addEventListener("click", async (e: Event) => await this.onClickItemAsync(e, pageContext, type, id));
             });
         }
-        // download success
-        const downloadAlert: HTMLDivElement = Controls.createDiv(listGroup, "text-center fixed-bottom alert alert-success fade", undefined, "download-alert-id");
-        downloadAlert.setAttribute("role", "alert");
-        Controls.createDiv(downloadAlert, undefined, undefined, "download-alert-text-id");
     }
 
     private updateActions(pageContext: PageContext) {
