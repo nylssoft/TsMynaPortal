@@ -39,10 +39,11 @@ export class Controls {
      * @param parent parent element to append the new div to
      * @param classname class name to assign to the div
      * @param txt text content to set for the div
+     * @param id optional ID
      * @returns HTMLDivElement created with the specified class and text content
      */
-    static createDiv(parent: HTMLElement, classname?: string, txt?: string): HTMLDivElement {
-        return Controls.createElement(parent, "div", classname, txt) as HTMLDivElement;
+    static createDiv(parent: HTMLElement, classname?: string, txt?: string, id?: string): HTMLDivElement {
+        return Controls.createElement(parent, "div", classname, txt, id) as HTMLDivElement;
     }
 
     /**

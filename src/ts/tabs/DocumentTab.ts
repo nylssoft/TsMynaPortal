@@ -140,6 +140,10 @@ export class DocumentTab implements Tab {
                 iconBadge.addEventListener("click", async (e: Event) => await this.onClickItemAsync(e, pageContext, type, id));
             });
         }
+        // download success
+        const downloadAlert: HTMLDivElement = Controls.createDiv(listGroup, "text-center fixed-bottom alert alert-success fade", undefined, "download-alert-id");
+        downloadAlert.setAttribute("role", "alert");
+        Controls.createDiv(downloadAlert, undefined, undefined, "download-alert-text-id");
     }
 
     private updateActions(pageContext: PageContext) {
@@ -180,13 +184,23 @@ export class DocumentTab implements Tab {
         if (item != null && item.id != null && item.name != null) {
             const token: string = pageContext.authenticationClient.getToken()!;
             const user: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
-            const blob: Blob = await DocumentService.downloadBlobAsync(token, user, item.id);
-            const obj_url: string = URL.createObjectURL(blob);
+            const blob: Blob = await DocumentService.downloadBlobAsync(token, user, item);
+            const objUrl: string = URL.createObjectURL(blob);
             const a: HTMLAnchorElement = document.createElement("a");
-            a.href = obj_url;
-            a.setAttribute("download", item.name);
+            a.href = objUrl;
+            a.download = item.name;
+            a.style.display = "none";
+            document.body.appendChild(a);
             a.click();
-            URL.revokeObjectURL(obj_url);
+            document.body.removeChild(a);
+            URL.revokeObjectURL(objUrl);
+            // fade in download success
+            const downloadText: HTMLElement = document.getElementById("download-alert-text-id") as HTMLElement;
+            downloadText.textContent = pageContext.locale.translateWithArgs("FILE_DOWNLOADED_1", [item.name]);
+            const downloadAlert: HTMLElement = document.getElementById("download-alert-id") as HTMLElement;
+            downloadAlert.classList.add("show");
+            // hide after 1 second
+            window.setTimeout(() => downloadAlert.classList.remove("show"), 1000);
         }
     }
 

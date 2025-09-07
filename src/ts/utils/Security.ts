@@ -74,7 +74,7 @@ export class Security {
         return new File([data.buffer], filename, { type: "application/octet-stream" });
     }
 
-    static async decodeBlobAsync(cryptoKey: CryptoKey, blob: Blob): Promise<Blob> {
+    static async decodeBlobAsync(cryptoKey: CryptoKey, blob: Blob, mimeType: string): Promise<Blob> {
         const iv: Uint8Array<ArrayBuffer> = new Uint8Array(12);
         const data: Uint8Array<ArrayBuffer> = new Uint8Array(blob.size - 12);
         const reader: ReadableStreamDefaultReader<Uint8Array<ArrayBuffer>> = blob.stream().getReader();
@@ -93,7 +93,7 @@ export class Security {
         }
         const options: AesGcmParams = { name: "AES-GCM", iv: iv };
         const decoded: ArrayBuffer = await crypto.subtle.decrypt(options, cryptoKey, data);
-        return new Blob([decoded]);
+        return new Blob([decoded], { type: mimeType });
     }
 
     /**
