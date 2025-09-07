@@ -1,5 +1,6 @@
 import { PageContext } from "./PageContext";
 import { AboutPage } from "./pages/AboutPage";
+import { AppointmentDetailPage } from "./pages/AppointmentDetailPage";
 import { ContactDetailPage } from "./pages/ContactDetailPage";
 import { DataProtectionPage } from "./pages/DataProtectionPage";
 import { DesktopPage } from "./pages/DesktopPage";
@@ -52,6 +53,7 @@ export class App {
         pageContext.registerPage(new DiaryDetailPage());
         pageContext.registerPage(new DocumentEditPage());
         pageContext.registerPage(new DocumentMovePage());
+        pageContext.registerPage(new AppointmentDetailPage());
         await pageContext.locale.setLanguageAsync();
         await pageContext.authenticationClient.loginWithLongLivedTokenAsync();
         if (pageContext.authenticationClient.isLoggedIn()) {

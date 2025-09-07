@@ -27,8 +27,10 @@ export class AppointmentTab implements Tab {
             iAdd.addEventListener("click", async (e: MouseEvent) => {
                 e.preventDefault();
                 pageContext.appointment.edit = true;
-                // pageContext.pageType = "APPOINTMENT_DETAIL";
-                // await pageContext.renderAsync();
+                pageContext.appointment.result = null;
+                pageContext.appointment.monthAndYear = null;
+                pageContext.pageType = "APPOINTMENT_DETAIL";
+                await pageContext.renderAsync();
             });
 
         }
@@ -53,9 +55,11 @@ export class AppointmentTab implements Tab {
             Controls.createSpan(a, "ms-2", item.definition!.description!);
             a.addEventListener("click", async (e: MouseEvent) => {
                 e.preventDefault();
+                pageContext.appointment.edit = false;
+                pageContext.appointment.monthAndYear = null;
                 pageContext.appointment.result = item;
-                // pageContext.pageType = "APPOINTMENT_DETAIL";
-                // await pageContext.renderAsync();
+                pageContext.pageType = "APPOINTMENT_DETAIL";
+                await pageContext.renderAsync();
             });
         });
     }
