@@ -8,6 +8,7 @@ import { PasswordTab } from "../tabs/PasswordTab";
 import { DiaryTab } from "../tabs/DiaryTab";
 import { TabRenderer } from "../tabs/TabRenderer";
 import { DocumentTab } from "../tabs/DocumentTab";
+import { AppointmentTab } from "../tabs/AppointmentTab";
 
 /**
  * Page implementation for the Desktop page.
@@ -25,6 +26,7 @@ export class DesktopPage implements Page {
         this.tabRenderer.registerTab(new PasswordTab());
         this.tabRenderer.registerTab(new DiaryTab());
         this.tabRenderer.registerTab(new DocumentTab())
+        this.tabRenderer.registerTab(new AppointmentTab())
     }
 
     async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {

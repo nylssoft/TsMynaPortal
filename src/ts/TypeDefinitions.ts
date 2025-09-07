@@ -64,22 +64,19 @@ export type UserInfoResult = {
   secKey: string | null
 }
 
-/**
- * ContactsResult represents the result of fetching contacts.
- * It includes properties such as nextId, version, and items.
- * This type is used to manage the contacts data in the application.
- */
+export type AuditResult = {
+  performedUtc: string,
+  action: string
+}
+
+// contact types
+
 export type ContactsResult = {
   nextId: number,
   version: number,
   items: ContactResult[]
 }
 
-/**
- * ContactResult represents a single contact's information.
- * It includes properties such as id, name, address, phone, birthday, email, note, and optionally daysUntilBirthday.
- * This type is used to manage individual contact data in the application.
- */
 export type ContactResult = {
   id?: number,
   name: string,
@@ -91,11 +88,8 @@ export type ContactResult = {
   daysUntilBirthday?: number
 }
 
-/**
- * NoteResult represents a single note's information.
- * It includes properties such as id, title, lastModifiedUtc, and content.
- * This type is used to manage individual note data in the application.
- */
+// note types
+
 export type NoteResult = {
   id?: number,
   title: string,
@@ -103,15 +97,7 @@ export type NoteResult = {
   lastModifiedUtc?: string,
 }
 
-/**
- * AuditResult represents a single audit entry.
- * It includes properties such as performedUtc and action.
- * This type is used to manage audit logs in the application.
- */
-export type AuditResult = {
-  performedUtc: string,
-  action: string
-}
+// password types
 
 export type PasswordItemsResult = {
   nextId: number,
@@ -126,6 +112,8 @@ export type PasswordItemResult = {
   Password: string,
   Url: string
 }
+
+// diary types
 
 export type DiaryEntryResult = {
   date: string,
@@ -142,6 +130,8 @@ export type MonthAndYear = {
   year: number
 }
 
+// document types
+
 export type DocumentItemResult = {
   accessRole: string | null,
   children: number,
@@ -154,6 +144,46 @@ export type DocumentItemResult = {
 
 export type DocumentItemType = "Document" | "Folder" | "Volume";
 
+// appointment types
+
+export type AppointmentBatchRequest = {
+  Method: string,
+  Uuid: string,
+  accessToken: string
+}
+
+export type AppointmentResult = {
+  uuid: string,
+  createdUtc: Date,
+  modifiedUtc: Date,
+  ownerKey: string,
+  definition?: AppointmentDefinition,
+  votes?: AppointmentVote[],
+  accessToken?: string
+}
+
+export type AppointmentDefinition = {
+  description: string,
+  options: AppointmentOption[],
+  participants: AppointmentParticipant[],
+}
+
+export type AppointmentParticipant = {
+  userUuid: string,
+  username: string
+}
+
+export type AppointmentVote = {
+  userUuid: string,
+  accepted: AppointmentOption[]
+}
+
+export type AppointmentOption = {
+  year: number,
+  month: number,
+  days: number[]
+}
+
 /**
  * Type representing the different pages in the application.
  */
@@ -161,6 +191,6 @@ export type PageType = "LOGIN_USERNAME_PASSWORD" | "LOGIN_PIN" | "LOGIN_PASS2" |
   | "DATA_PROTECTION" | "NAVIGATION_BAR" | "CONTACT_DETAIL" | "NOTE_DETAIL" | "PASSWORD_ITEM_DETAIL"
   | "DIARY_DETAIL" | "DOCUMENT_EDIT" | "DOCUMENT_MOVE";
 
-export type DesktopTab = "BIRTHDAYS" | "CONTACTS" | "NOTES" | "PASSWORD_MANAGER" | "DIARY" | "DOCUMENTS";
+export type DesktopTab = "BIRTHDAYS" | "CONTACTS" | "NOTES" | "PASSWORD_MANAGER" | "DIARY" | "DOCUMENTS" | "APPOINTMENTS";
 
-export const Version: string = "1.2.5";
+export const Version: string = "1.2.6";
