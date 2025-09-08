@@ -4,7 +4,12 @@ import { Security } from "../utils/Security";
 
 export class AppointmentService {
 
-    static async getAppointmentDetails(token: string, user: UserInfoResult): Promise<AppointmentResult[]> {
+    static async getAppointmentAsync(accessToken: string, uuid: string): Promise<AppointmentResult> {
+        const resp: Response = await FetchHelper.fetchAsync(`/api/appointment/${uuid}`, { headers: { "accesstoken": accessToken } });
+        return await resp.json();
+    }
+
+    static async getAppointmentDetailsAsync(token: string, user: UserInfoResult): Promise<AppointmentResult[]> {
         const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
         if (encryptionKey == null || encryptionKey.length === 0) {
             throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
@@ -77,7 +82,7 @@ export class AppointmentService {
         participants.forEach(p => {
             definition.Participants.push({ "Username": p.username, "UserUuid": p.userUuid });
         });
-        options.forEach(o => {
+        options.filter(o => o.days.length > 0).forEach(o => {
             definition.Options.push({ "Year": o.year, "Month": o.month, "Days": o.days });
         });
         await FetchHelper.fetchAsync(`/api/appointment/${uuid}`, {
@@ -94,9 +99,18 @@ export class AppointmentService {
         return "";
     }
 
-    static buildAppointmentUrl(appointment: AppointmentResult) {
-        const requestId: string = encodeURI(btoa(appointment.accessToken!));
-        return `${location.origin}?vote=${requestId}`;
+    static getUserUuid(appointment: AppointmentResult | null, name: string): string | null {
+        if (appointment != null) {
+            const participant = appointment.definition!.participants.find(p => p.username == name);
+            if (participant) {
+                return participant.userUuid;
+            }
+        }
+        return null;
     }
 
+    static buildAppointmentUrl(appointment: AppointmentResult) {
+        const requestId: string = encodeURI(btoa(appointment.accessToken!));
+        return `https://www.nielsi.de/makeadate?id=${requestId}`;
+    }
 }

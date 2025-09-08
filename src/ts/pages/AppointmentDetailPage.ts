@@ -1,6 +1,6 @@
 import { Page, PageContext } from "../PageContext";
 import { AppointmentService } from "../services/AppointmentService";
-import { AppointmentOption, AppointmentResult, MonthAndYear, PageType } from "../TypeDefinitions";
+import { AppointmentOption, AppointmentParticipant, AppointmentResult, PageType, UserInfoResult } from "../TypeDefinitions";
 import { Controls } from "../utils/Controls";
 
 export class AppointmentDetailPage implements Page {
@@ -9,7 +9,7 @@ export class AppointmentDetailPage implements Page {
 
     async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         try {
-            pageContext.appointment.monthAndYear = pageContext.appointment.getMinMonthAndYear();
+            // clone options for editing
             pageContext.appointment.options = [];
             const item: AppointmentResult | null = pageContext.appointment.result;
             if (item != null) {
@@ -21,6 +21,9 @@ export class AppointmentDetailPage implements Page {
                     }
                     pageContext.appointment.options.push(clonedOpt);
                 }
+            }
+            if (!pageContext.appointment.edit || pageContext.appointment.result == null) {
+                pageContext.appointment.monthAndYear = pageContext.appointment.getMinMonthAndYear();
             }
             if (pageContext.appointment.edit) {
                 await this.renderEditAsync(parent, pageContext);
@@ -80,14 +83,15 @@ export class AppointmentDetailPage implements Page {
         const divCol22: HTMLDivElement = Controls.createDiv(divRow2, "col-10");
         const url: string = AppointmentService.buildAppointmentUrl(item);
         const textarea: HTMLTextAreaElement = Controls.createElement(divCol22, "textarea", "form-control-plaintext", url) as HTMLTextAreaElement;
-        textarea.style.height = "200px";
+        textarea.style.height = "100px";
         textarea.readOnly = true;
         const divCol23: HTMLDivElement = Controls.createDiv(divRow2, "col-1 mt-2");
         const iconCopy: HTMLElement = Controls.createElement(divCol23, "i", "bi bi-clipboard");
         iconCopy.setAttribute("role", "button");
         iconCopy.addEventListener("click", async (e: MouseEvent) => await this.copyToClipboardAsync(url));
-        const calendarDiv: HTMLDivElement = Controls.createDiv(cardBody, "mt-1", undefined, "calendar-div-id");
-        calendarDiv.style.maxWidth = "400px";
+        const divRow3: HTMLDivElement = Controls.createDiv(cardBody, "row card-text");
+        const divCol31: HTMLDivElement = Controls.createDiv(divRow3, "col-12 mt-2");
+        const calendarDiv: HTMLDivElement = Controls.createDiv(divCol31);
         this.renderCalendar(pageContext, calendarDiv);
         // render delete confirmation dialog
         Controls.createConfirmationDialog(
@@ -123,14 +127,15 @@ export class AppointmentDetailPage implements Page {
         inputDescription.addEventListener("input", (e: Event) => this.onInput(e, pageContext));
         const participantNames: string = AppointmentService.getParticipantNames(item);
         const divParticipants: HTMLDivElement = Controls.createDiv(divRows, "mb-3");
-        Controls.createLabel(divParticipants, "description-id", "form-label", pageContext.locale.translate("LABEL_PARTICIPANTS"));
-        const inputParticipants: HTMLInputElement = Controls.createInput(divParticipants, "text", "description-id", "form-control", participantNames);
+        Controls.createLabel(divParticipants, "participants-id", "form-label", pageContext.locale.translate("LABEL_PARTICIPANTS"));
+        const inputParticipants: HTMLInputElement = Controls.createInput(divParticipants, "text", "participants-id", "form-control", participantNames);
         inputParticipants.setAttribute("autocomplete", "off");
         inputParticipants.setAttribute("spellcheck", "false");
         inputParticipants.addEventListener("input", (e: Event) => this.onInput(e, pageContext));
-        const calendarDiv: HTMLDivElement = Controls.createDiv(divRows, "mt-1", undefined, "calendar-div-id");
-        calendarDiv.style.maxWidth = "400px";
-        this.renderCalendar(pageContext, calendarDiv);
+        const divOptions: HTMLDivElement = Controls.createDiv(divRows, "mb-3");
+        Controls.createLabel(divOptions, "calendar-id", "form-label", pageContext.locale.translate("LABEL_OPTIONS"));
+        const divCalendar: HTMLDivElement = Controls.createDiv(divOptions);
+        this.renderCalendar(pageContext, divCalendar);
         const saveButton: HTMLButtonElement = Controls.createButton(divRows, "submit", pageContext.locale.translate("BUTTON_SAVE"), "btn btn-primary", "savebutton-id");
         saveButton.addEventListener("click", async (e: Event) => await this.onSaveAsync(e, pageContext));
         // render back confirmation dialog
@@ -257,12 +262,54 @@ export class AppointmentDetailPage implements Page {
 
     private async onSaveAsync(e: Event, pageContext: PageContext): Promise<void> {
         e.preventDefault();
-        const description: string = (document.getElementById("description-id") as HTMLInputElement).value;
-        console.log(description);
-        console.log("TODO: save appointment");
+        const description: string = (document.getElementById("description-id") as HTMLInputElement).value.trim();
+        const participantText: string = (document.getElementById("participants-id") as HTMLInputElement).value.trim();
+        const participants: AppointmentParticipant[] = this.buildParticipants(participantText, pageContext);
+        const options = pageContext.appointment.options.filter(opt => opt.days.length > 0);
+        const token: string = pageContext.authenticationClient.getToken()!;
+        const appointment: AppointmentResult | null = pageContext.appointment.result;
+        const hasVotesWithAcceptedDays: boolean = appointment != null && appointment.votes!.some(v => v.accepted.some(opt => opt.days.length > 0));
+        if (description.length == 0 || options.length == 0 || participants.length == 0 || hasVotesWithAcceptedDays) {
+            // TODO: show alert?
+            return;
+        }
+        if (appointment != null) {
+            await AppointmentService.updateAppointmentAsync(token, appointment.accessToken!, appointment.uuid, description, participants, options);
+            const updated: AppointmentResult = await AppointmentService.getAppointmentAsync(appointment.accessToken!, appointment.uuid);
+            appointment.definition!.description = updated.definition!.description;
+            appointment.definition!.participants = updated.definition!.participants;
+            appointment.definition!.options = updated.definition!.options;
+        } else {
+            const user: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
+            await AppointmentService.createAppointmentAsync(token, user, description, participants, options);
+        }
         pageContext.appointment.changed = false;
         document.getElementById("backbutton-id")!.removeAttribute("data-bs-toggle");
         document.getElementById("backbutton-id")!.click();
+    }
+
+    private buildParticipants(participants: string, pageContext: PageContext): AppointmentParticipant[] {
+        const arr: string[] = participants.replaceAll(",", " ").replaceAll(";", " ").split(" ");
+        const nameSet: Set<string> = new Set<string>();
+        arr.forEach(elem => {
+            const str = elem.trim();
+            if (str.length > 0) {
+                nameSet.add(str);
+            }
+        });
+        const newParticipants: AppointmentParticipant[] = [];
+        nameSet.forEach(name => {
+            let userUuid: string | null = AppointmentService.getUserUuid(pageContext.appointment.result, name);
+            if (userUuid == null) {
+                userUuid = crypto.randomUUID();
+            }
+            newParticipants.push({
+                "username": name,
+                "userUuid": userUuid
+            });
+        });
+        newParticipants.sort((p1, p2) => p1.username.localeCompare(p2.username));
+        return newParticipants;
     }
 
     private async onBackAsync(e: Event, pageContext: PageContext): Promise<void> {

@@ -108,6 +108,7 @@ export class Appointment {
                 } else {
                     opt.days.push(day);
                 }
+                opt.days.sort((a, b) => a - b);
                 return;
             }
         }

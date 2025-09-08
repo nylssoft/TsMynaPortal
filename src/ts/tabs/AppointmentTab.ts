@@ -13,7 +13,7 @@ export class AppointmentTab implements Tab {
         try {
             const token: string = pageContext.authenticationClient.getToken()!;
             const userInfo: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
-            const appointments: AppointmentResult[] = await AppointmentService.getAppointmentDetails(token, userInfo);
+            const appointments: AppointmentResult[] = await AppointmentService.getAppointmentDetailsAsync(token, userInfo);
             appointments.sort((a, b) => a.definition!.description!.localeCompare(b.definition!.description!));
             const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.locale.translate("HEADER_APPOINTMENTS"));
             if (appointments.length > 0) {
