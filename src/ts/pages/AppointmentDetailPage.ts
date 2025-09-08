@@ -1,6 +1,6 @@
 import { Page, PageContext } from "../PageContext";
 import { AppointmentService } from "../services/AppointmentService";
-import { AppointmentResult, MonthAndYear, PageType } from "../TypeDefinitions";
+import { AppointmentOption, AppointmentResult, MonthAndYear, PageType } from "../TypeDefinitions";
 import { Controls } from "../utils/Controls";
 
 export class AppointmentDetailPage implements Page {
@@ -9,6 +9,19 @@ export class AppointmentDetailPage implements Page {
 
     async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         try {
+            pageContext.appointment.monthAndYear = pageContext.appointment.getMinMonthAndYear();
+            pageContext.appointment.options = [];
+            const item: AppointmentResult | null = pageContext.appointment.result;
+            if (item != null) {
+                for (const opt of item.definition!.options) {
+                    const clonedOpt: AppointmentOption = {
+                        year: opt.year,
+                        month: opt.month,
+                        days: [...opt.days]
+                    }
+                    pageContext.appointment.options.push(clonedOpt);
+                }
+            }
             if (pageContext.appointment.edit) {
                 await this.renderEditAsync(parent, pageContext);
             } else {
@@ -30,11 +43,7 @@ export class AppointmentDetailPage implements Page {
     }
 
     private async renderViewAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
-        // collect all data
-        const appointment: AppointmentResult = pageContext.appointment.result!;
-        if (pageContext.appointment.monthAndYear == null) {
-            pageContext.appointment.monthAndYear = AppointmentService.getMinMonthAndYear(appointment);
-        }
+        const item: AppointmentResult = pageContext.appointment.result!;
         // render action toolbar
         const headingActions: HTMLHeadingElement = Controls.createHeading(parent, 4);
         const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
@@ -57,19 +66,19 @@ export class AppointmentDetailPage implements Page {
         copyAlert.setAttribute("role", "alert");
         Controls.createDiv(copyAlert, "", pageContext.locale.translate("COPIED_TO_CLIPBOARD"));
         const cardBody: HTMLDivElement = Controls.createDiv(card, "card-body");
-        Controls.createHeading(cardBody, 2, "card-title", appointment.definition!.description!);
+        Controls.createHeading(cardBody, 2, "card-title", item.definition!.description!);
         const divRow1: HTMLDivElement = Controls.createDiv(cardBody, "row card-text");
         const divCol11: HTMLDivElement = Controls.createDiv(divRow1, "col-1 mt-2");
         Controls.createElement(divCol11, "i", "bi bi-person");
         const divCol12: HTMLDivElement = Controls.createDiv(divRow1, "col-10");
-        const participantNames: string = AppointmentService.getParticipantNames(appointment);
+        const participantNames: string = AppointmentService.getParticipantNames(item);
         const inputParticipants: HTMLInputElement = Controls.createInput(divCol12, "text", "login-id", "form-control-plaintext", participantNames);
         inputParticipants.readOnly = true;
         const divRow2: HTMLDivElement = Controls.createDiv(cardBody, "row card-text");
         const divCol21: HTMLDivElement = Controls.createDiv(divRow2, "col-1 mt-2");
         Controls.createElement(divCol21, "i", "bi bi-link-45deg");
         const divCol22: HTMLDivElement = Controls.createDiv(divRow2, "col-10");
-        const url: string = AppointmentService.buildAppointmentUrl(appointment);
+        const url: string = AppointmentService.buildAppointmentUrl(item);
         const textarea: HTMLTextAreaElement = Controls.createElement(divCol22, "textarea", "form-control-plaintext", url) as HTMLTextAreaElement;
         textarea.style.height = "200px";
         textarea.readOnly = true;
@@ -80,7 +89,6 @@ export class AppointmentDetailPage implements Page {
         const calendarDiv: HTMLDivElement = Controls.createDiv(cardBody, "mt-1", undefined, "calendar-div-id");
         calendarDiv.style.maxWidth = "400px";
         this.renderCalendar(pageContext, calendarDiv);
-
         // render delete confirmation dialog
         Controls.createConfirmationDialog(
             parent,
@@ -92,11 +100,7 @@ export class AppointmentDetailPage implements Page {
     }
 
     private async renderEditAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
-        // collect all data
-        const appointment: AppointmentResult | null = pageContext.appointment.result;
-        if (pageContext.appointment.monthAndYear == null) {
-            pageContext.appointment.monthAndYear = AppointmentService.getMinMonthAndYear(appointment);
-        }
+        const item: AppointmentResult | null = pageContext.appointment.result;
         // render action toolbar
         const headingActions: HTMLHeadingElement = Controls.createHeading(parent, 4);
         const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
@@ -112,18 +116,21 @@ export class AppointmentDetailPage implements Page {
         const divRows: HTMLDivElement = Controls.createDiv(formElement, "row align-items-center");
         const divDescription: HTMLDivElement = Controls.createDiv(divRows, "mb-3");
         Controls.createLabel(divDescription, "description-id", "form-label", pageContext.locale.translate("LABEL_DESCRIPTION"));
-        const inputDescription: HTMLInputElement = Controls.createInput(divDescription, "text", "description-id", "form-control", appointment?.definition?.description);
+        const inputDescription: HTMLInputElement = Controls.createInput(divDescription, "text", "description-id", "form-control", item?.definition?.description);
         inputDescription.setAttribute("autocomplete", "off");
         inputDescription.setAttribute("spellcheck", "false");
         inputDescription.focus();
         inputDescription.addEventListener("input", (e: Event) => this.onInput(e, pageContext));
-        const participantNames: string = AppointmentService.getParticipantNames(appointment);
+        const participantNames: string = AppointmentService.getParticipantNames(item);
         const divParticipants: HTMLDivElement = Controls.createDiv(divRows, "mb-3");
         Controls.createLabel(divParticipants, "description-id", "form-label", pageContext.locale.translate("LABEL_PARTICIPANTS"));
         const inputParticipants: HTMLInputElement = Controls.createInput(divParticipants, "text", "description-id", "form-control", participantNames);
         inputParticipants.setAttribute("autocomplete", "off");
         inputParticipants.setAttribute("spellcheck", "false");
         inputParticipants.addEventListener("input", (e: Event) => this.onInput(e, pageContext));
+        const calendarDiv: HTMLDivElement = Controls.createDiv(divRows, "mt-1", undefined, "calendar-div-id");
+        calendarDiv.style.maxWidth = "400px";
+        this.renderCalendar(pageContext, calendarDiv);
         const saveButton: HTMLButtonElement = Controls.createButton(divRows, "submit", pageContext.locale.translate("BUTTON_SAVE"), "btn btn-primary", "savebutton-id");
         saveButton.addEventListener("click", async (e: Event) => await this.onSaveAsync(e, pageContext));
         // render back confirmation dialog
@@ -137,12 +144,10 @@ export class AppointmentDetailPage implements Page {
     }
 
     private renderCalendar(pageContext: PageContext, parent: HTMLElement) {
-        const appointment: AppointmentResult | null = pageContext.appointment.result;
-        const monthAndYear: MonthAndYear = pageContext.appointment.monthAndYear!;
         Controls.removeAllChildren(parent);
         const heading: HTMLHeadingElement = Controls.createHeading(parent, 5, "d-flex justify-content-between align-items-center");
         const iLeft: HTMLElement = Controls.createElement(heading, "i", "ms-4 bi bi-chevron-left");
-        if (AppointmentService.hasPreviousMonth(monthAndYear, appointment)) {
+        if (pageContext.appointment.hasPreviousMonth()) {
             iLeft.setAttribute("role", "button");
             iLeft.addEventListener("click", async (e: MouseEvent) => {
                 e.preventDefault();
@@ -152,11 +157,11 @@ export class AppointmentDetailPage implements Page {
         } else {
             iLeft.classList.add("opacity-25");
         }
-        const date: Date = AppointmentService.getDate(pageContext.appointment.monthAndYear!, 1)
+        const date: Date = pageContext.appointment.getDate()
         const datestr: string = date.toLocaleDateString(pageContext.locale.getLanguage(), { year: "numeric", month: "long" });
         Controls.createSpan(heading, "mx-auto", datestr);
         const iRight: HTMLElement = Controls.createElement(heading, "i", "me-4 bi bi-chevron-right")
-        if (AppointmentService.hasNextMonth(monthAndYear, appointment)) {
+        if (pageContext.appointment.hasNextMonth()) {
             iRight.setAttribute("role", "button");
             iRight.addEventListener("click", async (e: MouseEvent) => {
                 e.preventDefault();
@@ -166,8 +171,8 @@ export class AppointmentDetailPage implements Page {
         } else {
             iRight.classList.add("opacity-25");
         }
-        const firstDay: number = AppointmentService.getFirstDayInMonth(pageContext.appointment.monthAndYear!);
-        const daysInMonth: number = AppointmentService.getDaysInMonth(pageContext.appointment.monthAndYear!);
+        const firstDay: number = pageContext.appointment.getFirstDayInMonth();
+        const daysInMonth: number = pageContext.appointment.getDaysInMonth();
         const table: HTMLTableElement = Controls.createElement(parent, "table", "table") as HTMLTableElement;
         const theader: HTMLTableSectionElement = Controls.createElement(table, "thead") as HTMLTableSectionElement;
         const trhead: HTMLTableRowElement = Controls.createElement(theader, "tr") as HTMLTableRowElement;
@@ -187,7 +192,7 @@ export class AppointmentDetailPage implements Page {
         let tbody = Controls.createElement(table, "tbody");
         let day: number = 1;
         const now: Date = new Date();
-        const optionDays: number[] = AppointmentService.getOptionDays(pageContext.appointment.monthAndYear!, pageContext.appointment.result);
+        const optionDays: number[] = pageContext.appointment.getOptionDays();
         for (let i: number = 0; i < 6; i++) {
             const tr: HTMLTableRowElement = Controls.createElement(tbody, "tr") as HTMLTableRowElement;
             for (let j: number = 0; j < 7; j++) {
@@ -195,7 +200,7 @@ export class AppointmentDetailPage implements Page {
                     Controls.createElement(tr, "td", "text-center", "\u00A0");
                 } else {
                     const td: HTMLTableCellElement = Controls.createElement(tr, "td", "text-center", `${day}`) as HTMLTableCellElement;
-                    if (AppointmentService.isBeforeToday(now, day, pageContext.appointment.monthAndYear!)) {
+                    if (pageContext.appointment.isBeforeToday(now, day)) {
                         td.classList.add("text-secondary");
                         if (pageContext.theme.isLight()) {
                             td.classList.add("opacity-25");
@@ -207,8 +212,13 @@ export class AppointmentDetailPage implements Page {
                     if (pageContext.appointment.edit) {
                         td.setAttribute("role", "button");
                         const constDay: number = day; // bind to const for the following capture
-                        td.addEventListener("click", async (e: MouseEvent) => {
-                            e.preventDefault();
+                        td.addEventListener("click", (e: MouseEvent) => {
+                            pageContext.appointment.toggleOption(constDay);
+                            if (!pageContext.appointment.changed) {
+                                pageContext.appointment.changed = true;
+                                document.getElementById("backbutton-id")!.setAttribute("data-bs-toggle", "modal");
+                            }
+                            this.renderCalendar(pageContext, parent);
                         });
                     }
                     day++;
@@ -232,7 +242,8 @@ export class AppointmentDetailPage implements Page {
 
     private async onDeleteViewAsync(e: Event, pageContext: PageContext): Promise<void> {
         e.preventDefault();
-        console.log("TODO: delete appointment");
+        const token: string = pageContext.authenticationClient.getToken()!;
+        await AppointmentService.deleteAppointmentAsync(token, pageContext.appointment.result!.uuid);
         document.getElementById("backbutton-id")!.click();
     }
 

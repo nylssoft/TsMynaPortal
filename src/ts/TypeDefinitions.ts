@@ -184,6 +184,28 @@ export type AppointmentOption = {
   days: number[]
 }
 
+export type AppointmentUpdateDefinition = {
+  Description: string,
+  Options: AppointmentUpdateOption[],
+  Participants: AppointmentUpdateParticipant[],
+}
+
+export type AppointmentUpdateParticipant = {
+  UserUuid: string,
+  Username: string
+}
+
+export type AppointmentUpdateOption = {
+  Year: number,
+  Month: number,
+  Days: number[]
+}
+
+export type AppointmentUpdate = {
+  OwnerKey: string,
+  Definition: AppointmentUpdateDefinition
+}
+
 /**
  * Type representing the different pages in the application.
  */
@@ -193,4 +215,4 @@ export type PageType = "LOGIN_USERNAME_PASSWORD" | "LOGIN_PIN" | "LOGIN_PASS2" |
 
 export type DesktopTab = "BIRTHDAYS" | "CONTACTS" | "NOTES" | "PASSWORD_MANAGER" | "DIARY" | "DOCUMENTS" | "APPOINTMENTS";
 
-export const Version: string = "1.2.7";
+export const Version: string = "1.2.8";

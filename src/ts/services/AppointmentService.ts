@@ -1,4 +1,4 @@
-import { AppointmentBatchRequest, AppointmentResult, MonthAndYear, UserInfoResult } from "../TypeDefinitions";
+import { AppointmentBatchRequest, AppointmentDefinition, AppointmentOption, AppointmentParticipant, AppointmentResult, AppointmentUpdate, AppointmentUpdateDefinition, MonthAndYear, UserInfoResult } from "../TypeDefinitions";
 import { FetchHelper } from "../utils/FetchHelper";
 import { Security } from "../utils/Security";
 
@@ -35,6 +35,58 @@ export class AppointmentService {
         }
     }
 
+    static async deleteAppointmentAsync(token: string, uuid: string): Promise<void> {
+        await FetchHelper.fetchAsync(`/api/appointment/${uuid}`, {
+            method: "DELETE",
+            headers: { "token": token, "Accept": "application/json", "Content-Type": "application/json" }
+        });
+    }
+
+    static async createAppointmentAsync(token: string, user: UserInfoResult, description: string, participants: AppointmentParticipant[], options: AppointmentOption[]): Promise<void> {
+        const uuid: string = crypto.randomUUID();
+        const definition: AppointmentUpdateDefinition = {
+            "Description": description,
+            "Participants": [],
+            "Options": []
+        };
+        participants.forEach(p => {
+            definition.Participants.push({ "Username": p.username, "UserUuid": p.userUuid });
+        });
+        options.forEach(o => {
+            definition.Options.push({ "Year": o.year, "Month": o.month, "Days": o.days });
+        });
+        const resp: Response = await FetchHelper.fetchAsync(`api/appointment/${uuid}/accesstoken`, { headers: { "token": token } })
+        const accessToken: string = await resp.json();
+        const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
+        const cryptoKey: CryptoKey = await Security.createCryptoKeyAsync(encryptionKey!, user.passwordManagerSalt)
+        const ownerKey = await Security.encodeMessageAsync(cryptoKey, accessToken);
+        const appointment: AppointmentUpdate = { "OwnerKey": ownerKey, "Definition": definition };
+        await FetchHelper.fetchAsync(`/api/appointment/${uuid}`, {
+            method: "POST",
+            headers: { "Accept": "application/json", "Content-Type": "application/json", "token": token, "accesstoken": accessToken },
+            body: JSON.stringify(appointment)
+        });
+    }
+
+    static async updateAppointmentAsync(token: string, accessToken: string, uuid: string, description: string, participants: AppointmentParticipant[], options: AppointmentOption[]): Promise<void> {
+        const definition: AppointmentUpdateDefinition = {
+            "Description": description,
+            "Participants": [],
+            "Options": []
+        };
+        participants.forEach(p => {
+            definition.Participants.push({ "Username": p.username, "UserUuid": p.userUuid });
+        });
+        options.forEach(o => {
+            definition.Options.push({ "Year": o.year, "Month": o.month, "Days": o.days });
+        });
+        await FetchHelper.fetchAsync(`/api/appointment/${uuid}`, {
+            method: "PUT",
+            headers: { "Accept": "application/json", "Content-Type": "application/json", "token": token, "accesstoken": accessToken },
+            body: JSON.stringify(definition)
+        });
+    }
+
     static getParticipantNames(appointment: AppointmentResult | null): string {
         if (appointment != null && appointment.definition) {
             return appointment.definition.participants.map(p => p.username).join(", ");
@@ -47,77 +99,4 @@ export class AppointmentService {
         return `${location.origin}?vote=${requestId}`;
     }
 
-    static getDaysInMonth(monthAndYear: MonthAndYear): number {
-        return 32 - new Date(monthAndYear.year, monthAndYear.month - 1, 32).getDate();
-    }
-
-    static getFirstDayInMonth(monthAndYear: MonthAndYear): number {
-        const date: Date = new Date(monthAndYear.year, monthAndYear.month - 1);
-        return (date.getDay() + 6) % 7;
-    }
-
-    static isBeforeToday(now: Date, day: number, monthAndYear: MonthAndYear): boolean {
-        return day < now.getDate() && monthAndYear.year == now.getFullYear() && monthAndYear.month == now.getMonth() + 1 ||
-            monthAndYear.year < now.getFullYear() ||
-            monthAndYear.year == now.getFullYear() && monthAndYear.month < now.getMonth() + 1;
-    }
-
-    static getMinMonthAndYear(appointment: AppointmentResult | null): MonthAndYear {
-        let minMonth: number = 0;
-        let minYear: number = 9999;
-        if (appointment != null) {
-            for (const opt of appointment.definition!.options) {
-                if (opt.year < minYear) {
-                    minYear = opt.year;
-                    minMonth = opt.month;
-                } else if (opt.year == minYear && opt.month < minMonth) {
-                    minMonth = opt.month;
-                }
-            }
-        }
-        if (minYear == 9999) {
-            const now: Date = new Date();
-            minYear = now.getFullYear();
-            minMonth = now.getMonth() + 1;
-        }
-        return { year: minYear, month: minMonth };
-    }
-
-    static hasPreviousMonth(monthAndYear: MonthAndYear, appointment: AppointmentResult | null): boolean {
-        if (appointment != null) {
-            for (const opt of appointment.definition!.options) {
-                if (opt.year < monthAndYear.year || opt.year == monthAndYear.year && opt.month < monthAndYear.month) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    static hasNextMonth(monthAndYear: MonthAndYear, appointment: AppointmentResult | null): boolean {
-        if (appointment != null) {
-            for (const opt of appointment.definition!.options) {
-                if (opt.year > monthAndYear.year || opt.year == monthAndYear.year && opt.month > monthAndYear.month) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    static getDate(monthAndYear: MonthAndYear, day: number): Date {
-        return new Date(Date.UTC(monthAndYear.year, monthAndYear.month - 1, day));
-    }
-
-    static getOptionDays(monthAndYear: MonthAndYear, appointment: AppointmentResult | null): number[] {
-        const ret: number[] = [];
-        if (appointment != null) {
-            appointment.definition!.options.forEach(opt => {
-                if (opt.year == monthAndYear.year && opt.month == monthAndYear.month) {
-                    ret.push(...opt.days);
-                }
-            });
-        }
-        return ret;
-    }
 }
