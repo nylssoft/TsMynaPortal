@@ -1,4 +1,4 @@
-import { AppointmentBatchRequest, AppointmentDefinition, AppointmentOption, AppointmentParticipant, AppointmentResult, AppointmentUpdate, AppointmentUpdateDefinition, MonthAndYear, UserInfoResult } from "../TypeDefinitions";
+import { AppointmentBatchRequest, AppointmentOption, AppointmentParticipant, AppointmentResult, AppointmentUpdate, AppointmentUpdateDefinition, AppointmentUpdateOption, AppointmentUpdateVote, AppointmentVote, UserInfoResult } from "../TypeDefinitions";
 import { FetchHelper } from "../utils/FetchHelper";
 import { Security } from "../utils/Security";
 
@@ -89,6 +89,26 @@ export class AppointmentService {
             method: "PUT",
             headers: { "Accept": "application/json", "Content-Type": "application/json", "token": token, "accesstoken": accessToken },
             body: JSON.stringify(definition)
+        });
+    }
+
+    static async voteAsync(accessToken: string, appointmentUuid: string, vote: AppointmentVote): Promise<void> {
+        const updateVote: AppointmentUpdateVote = {
+            "UserUuid": vote.userUuid,
+            "Accepted": []
+        };
+        vote.accepted.forEach(opt => {
+            const updateOption: AppointmentUpdateOption = {
+                Year: opt.year,
+                Month: opt.month,
+                Days: opt.days
+            };
+            updateVote.Accepted.push(updateOption);
+        });
+        await FetchHelper.fetchAsync(`/api/appointment/${appointmentUuid}/vote`, {
+            method: "PUT",
+            headers: { "Accept": "application/json", "Content-Type": "application/json", "accesstoken": accessToken },
+            body: JSON.stringify(updateVote)
         });
     }
 

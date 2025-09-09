@@ -201,9 +201,20 @@ export type AppointmentUpdateOption = {
   Days: number[]
 }
 
+export type AppointmentUpdateVote = {
+  UserUuid: string,
+  Accepted: AppointmentUpdateOption[]
+}
+
 export type AppointmentUpdate = {
   OwnerKey: string,
   Definition: AppointmentUpdateDefinition
+}
+
+export type AppointmentBestVote = {
+  year: number,
+  month: number,
+  day: number
 }
 
 /**
@@ -215,4 +226,4 @@ export type PageType = "LOGIN_USERNAME_PASSWORD" | "LOGIN_PIN" | "LOGIN_PASS2" |
 
 export type DesktopTab = "BIRTHDAYS" | "CONTACTS" | "NOTES" | "PASSWORD_MANAGER" | "DIARY" | "DOCUMENTS" | "APPOINTMENTS";
 
-export const Version: string = "1.3.2";
+export const Version: string = "1.3.3";

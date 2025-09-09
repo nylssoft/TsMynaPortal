@@ -1,6 +1,6 @@
 import { Page, PageContext } from "../PageContext";
 import { AppointmentService } from "../services/AppointmentService";
-import { AppointmentResult, PageType } from "../TypeDefinitions";
+import { AppointmentBestVote, AppointmentOption, AppointmentResult, AppointmentVote, MonthAndYear, PageType } from "../TypeDefinitions";
 import { Controls } from "../utils/Controls";
 
 export class AppointmentVotePage implements Page {
@@ -28,6 +28,7 @@ export class AppointmentVotePage implements Page {
             }
             const uuid: string = arr[1];
             const appointment: AppointmentResult = await AppointmentService.getAppointmentAsync(accessToken, uuid);
+            appointment.accessToken = accessToken;
             if (this.myName == null) {
                 this.myName = window.localStorage.getItem(this.KEY_MYNAME);
             }
@@ -128,6 +129,37 @@ export class AppointmentVotePage implements Page {
     }
 
     private renderCalendar(pageContext: PageContext, parent: HTMLElement) {
+        const appointment: AppointmentResult = pageContext.vote.result!;
+        const myUserUuid = AppointmentService.getUserUuid(appointment, this.myName!);
+        const monthAndYear: MonthAndYear = pageContext.vote.monthAndYear;
+        const option: AppointmentOption = { year: monthAndYear.year, month: monthAndYear.month, days: [] };
+        for (const opt of pageContext.vote.options) {
+            if (opt.year == monthAndYear.year && opt.month == monthAndYear.month) {
+                option.days = opt.days;
+                break;
+            }
+        }
+        const selectableDays: Set<number> = new Set<number>();
+        const myAcceptedDays: Set<number> = new Set<number>();
+        const acceptedCount: Map<number, number> = new Map<number, number>();
+        const bestVotes: AppointmentBestVote[] = this.getBestVotes(appointment);
+        option.days.forEach(d => selectableDays.add(d));
+        appointment.votes!.forEach(v => {
+            const acceptedOption: AppointmentOption | undefined = v.accepted.find(o => o.year == option.year && o.month == option.month);
+            if (acceptedOption) {
+                if (v.userUuid == myUserUuid) {
+                    acceptedOption.days.forEach(d => myAcceptedDays.add(d));
+                }
+                acceptedOption.days.forEach(d => {
+                    let cnt: number | undefined = acceptedCount.get(d);
+                    if (cnt == undefined) {
+                        cnt = 0;
+                    }
+                    cnt += 1;
+                    acceptedCount.set(d, cnt);
+                });
+            }
+        });
         Controls.removeAllChildren(parent);
         const heading: HTMLHeadingElement = Controls.createHeading(parent, 5, "d-flex justify-content-between align-items-center");
         const iLeft: HTMLElement = Controls.createElement(heading, "i", "ms-4 bi bi-chevron-left");
@@ -173,21 +205,56 @@ export class AppointmentVotePage implements Page {
             const th: HTMLTableCellElement = Controls.createElement(trhead, "th", "text-center", pageContext.locale.translate(val.label)) as HTMLTableCellElement;
             th.title = pageContext.locale.translate(val.title);
         });
-        let tbody = Controls.createElement(table, "tbody");
+        let tbody: HTMLElement = Controls.createElement(table, "tbody");
         let day: number = 1;
         const now: Date = new Date();
         const optionDays: number[] = pageContext.vote.getOptionDays();
         for (let i: number = 0; i < 6; i++) {
             const tr: HTMLTableRowElement = Controls.createElement(tbody, "tr") as HTMLTableRowElement;
             for (let j: number = 0; j < 7; j++) {
+                const dayConst: number = day;
+                const isBestVote: boolean = bestVotes.some(v => v.year == option.year && v.month == option.month && v.day == dayConst);
                 if (i === 0 && j < firstDay || day > daysInMonth) {
-                    Controls.createElement(tr, "td", "text-center", "\u00A0");
+                    Controls.createElement(tr, "td", "text-center py-2", "\u00A0");
                 } else {
-                    const td: HTMLTableCellElement = Controls.createElement(tr, "td", "text-center", `${day}`) as HTMLTableCellElement;
+                    const td: HTMLTableCellElement = Controls.createElement(tr, "td", "py-2 text-center position-relative", `${day}`) as HTMLTableCellElement;
                     if (pageContext.vote.isBeforeToday(now, day) || !optionDays.includes(day)) {
                         td.classList.add("text-secondary");
                         if (pageContext.theme.isLight()) {
                             td.classList.add("opacity-25");
+                        }
+                    } else {
+                        td.setAttribute("role", "button");
+                        td.addEventListener("click", async (e: Event) => {
+                            const myUserUuid: string | null = AppointmentService.getUserUuid(appointment, this.myName!);
+                            const vote: AppointmentVote | undefined = appointment.votes!.find(v => v.userUuid == myUserUuid);
+                            if (vote && myUserUuid != null) {
+                                let acceptedOption: AppointmentOption | undefined = vote.accepted.find(o => o.year == option.year && o.month == option.month);
+                                if (!acceptedOption) {
+                                    acceptedOption = { "year": option.year, "month": option.month, "days": [] };
+                                    vote.accepted.push(acceptedOption);
+                                    vote.accepted.sort((a, b) => (a.year - b.year) * 1000 + (a.month - b.month));
+                                }
+                                if (acceptedOption.days.includes(dayConst)) {
+                                    acceptedOption.days = acceptedOption.days.filter(d => d != dayConst);
+                                }
+                                else {
+                                    acceptedOption.days.push(dayConst);
+                                }
+                                await AppointmentService.voteAsync(appointment.accessToken!, appointment.uuid, vote);
+                                await pageContext.renderAsync();
+                            }
+                        })
+                    }
+                    if (myAcceptedDays.has(day)) {
+                        td.classList.add("table-active");
+                    }
+                    if (acceptedCount.has(day)) {
+                        const span: HTMLSpanElement = Controls.createSpan(td, "position-absolute top-0 start-100 translate-middle badge rounded-pill z-1", `${acceptedCount.get(day)}`);
+                        if (isBestVote) {
+                            span.classList.add("bg-success");
+                        } else {
+                            span.classList.add("bg-info");
                         }
                     }
                     day++;
@@ -195,4 +262,35 @@ export class AppointmentVotePage implements Page {
             }
         }
     }
+
+    private getBestVotes(appointment: AppointmentResult): AppointmentBestVote[] {
+        let bestVotes: AppointmentBestVote[] = [];
+        let bestCount: number = 0;
+        appointment.definition!.options.forEach(option => {
+            const acceptedCount: Map<number, number> = new Map<number, number>();
+            appointment.votes!.forEach(v => {
+                const acceptedOption: AppointmentOption | undefined = v.accepted.find(o => o.year == option.year && o.month == option.month);
+                if (acceptedOption) {
+                    acceptedOption.days.filter(d => option.days.includes(d)).forEach(d => {
+                        let cnt: number | undefined = acceptedCount.get(d);
+                        if (!cnt) {
+                            cnt = 0;
+                        }
+                        cnt += 1;
+                        acceptedCount.set(d, cnt);
+                        if (cnt >= bestCount) {
+                            if (cnt > bestCount) {
+                                bestVotes = [];
+                            }
+                            const bestVote: AppointmentBestVote = { "year": option.year, "month": option.month, "day": d };
+                            bestVotes.push(bestVote);
+                            bestCount = cnt;
+                        }
+                    });
+                }
+            });
+        });
+        return bestVotes;
+    }
+
 }
