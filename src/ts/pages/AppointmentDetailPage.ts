@@ -8,6 +8,8 @@ export class AppointmentDetailPage implements Page {
     pageType: PageType = "APPOINTMENT_DETAIL";
 
     async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
+        const alertDiv: HTMLDivElement = Controls.createDiv(parent);
+        alertDiv.id = "alertdiv-id";
         try {
             // clone options for editing
             pageContext.appointment.options = [];
@@ -32,17 +34,13 @@ export class AppointmentDetailPage implements Page {
             }
         }
         catch (error: Error | unknown) {
-            this.renderError(parent, pageContext, error);
+            this.handleError(error, pageContext);
         }
     }
 
-    private renderError(parent: HTMLElement, pageContext: PageContext, error: Error | unknown) {
-        const headingActions: HTMLHeadingElement = Controls.createHeading(parent, 4);
-        const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
-        iBack.setAttribute("role", "button");
-        iBack.addEventListener("click", async (e: Event) => await this.onBackAsync(e, pageContext));
-        Controls.createSpan(headingActions, "ms-4", pageContext.locale.translate("HEADER_APPOINTMENTS"));
-        Controls.createAlert(Controls.createDiv(parent), pageContext.locale.translateError(error));
+    private handleError(error: Error | unknown, pageContext: PageContext) {
+        const alertDiv: HTMLDivElement = document.getElementById("alertdiv-id") as HTMLDivElement;
+        Controls.createAlert(alertDiv, pageContext.locale.translateError(error));
     }
 
     private async renderViewAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
@@ -90,9 +88,10 @@ export class AppointmentDetailPage implements Page {
         iconCopy.setAttribute("role", "button");
         iconCopy.addEventListener("click", async (e: MouseEvent) => await this.copyToClipboardAsync(url));
         const divRow3: HTMLDivElement = Controls.createDiv(cardBody, "row card-text");
-        const divCol31: HTMLDivElement = Controls.createDiv(divRow3, "col-12 mt-2");
-        const calendarDiv: HTMLDivElement = Controls.createDiv(divCol31);
-        this.renderCalendar(pageContext, calendarDiv);
+        const divCol31: HTMLDivElement = Controls.createDiv(divRow3, "col-12 mt-4 d-flex justify-content-center");
+        const divCalendar: HTMLDivElement = Controls.createDiv(divCol31);
+        divCalendar.style.maxWidth = "400px";
+        this.renderCalendar(pageContext, divCalendar);
         // render delete confirmation dialog
         Controls.createConfirmationDialog(
             parent,
@@ -135,6 +134,7 @@ export class AppointmentDetailPage implements Page {
         const divOptions: HTMLDivElement = Controls.createDiv(divRows, "mb-3");
         Controls.createLabel(divOptions, "calendar-id", "form-label", pageContext.locale.translate("LABEL_OPTIONS"));
         const divCalendar: HTMLDivElement = Controls.createDiv(divOptions);
+        divCalendar.style.maxWidth = "400px";
         this.renderCalendar(pageContext, divCalendar);
         const saveButton: HTMLButtonElement = Controls.createButton(divRows, "submit", pageContext.locale.translate("BUTTON_SAVE"), "btn btn-primary", "savebutton-id");
         saveButton.addEventListener("click", async (e: Event) => await this.onSaveAsync(e, pageContext));
@@ -262,30 +262,47 @@ export class AppointmentDetailPage implements Page {
 
     private async onSaveAsync(e: Event, pageContext: PageContext): Promise<void> {
         e.preventDefault();
-        const description: string = (document.getElementById("description-id") as HTMLInputElement).value.trim();
-        const participantText: string = (document.getElementById("participants-id") as HTMLInputElement).value.trim();
-        const participants: AppointmentParticipant[] = this.buildParticipants(participantText, pageContext);
-        const options = pageContext.appointment.options.filter(opt => opt.days.length > 0);
-        const token: string = pageContext.authenticationClient.getToken()!;
-        const appointment: AppointmentResult | null = pageContext.appointment.result;
-        const hasVotesWithAcceptedDays: boolean = appointment != null && appointment.votes!.some(v => v.accepted.some(opt => opt.days.length > 0));
-        if (description.length == 0 || options.length == 0 || participants.length == 0 || hasVotesWithAcceptedDays) {
-            // TODO: show alert?
-            return;
+        try {
+            const description: string = (document.getElementById("description-id") as HTMLInputElement).value.trim();
+            if (description.length == 0) {
+                throw new Error("ERROR_DESCRIPTION_MISSING");
+            }
+            const participantText: string = (document.getElementById("participants-id") as HTMLInputElement).value.trim();
+            const participants: AppointmentParticipant[] = this.buildParticipants(participantText, pageContext);
+            const appointment: AppointmentResult | null = pageContext.appointment.result;
+            if (participants.length == 0) {
+                throw new Error("ERROR_PARTICIPANTS_MISSING");
+            }
+            const options = pageContext.appointment.options.filter(opt => opt.days.length > 0);
+            if (options.length == 0) {
+                throw new Error("ERROR_OPTIONS_MISSING");
+            }
+            const hasVotesWithAcceptedDays: boolean = appointment != null && appointment.votes!.some(v => v.accepted.some(opt => opt.days.length > 0));
+            if (hasVotesWithAcceptedDays) {
+                const participantNames: string[] = participants.map(p => p.username);
+                const currentParticipants: string[] = appointment!.definition!.participants.map(p => p.username);
+                if (!currentParticipants.every(name => participantNames.includes(name))) {
+                    throw new Error("ERROR_CANNOT_REMOVE_PARTICIPANT_AS_VOTES_ALREADY_EXIST");
+                }
+            }
+            const token: string = pageContext.authenticationClient.getToken()!;
+            if (appointment != null) {
+                await AppointmentService.updateAppointmentAsync(token, appointment.accessToken!, appointment.uuid, description, participants, options);
+                const updated: AppointmentResult = await AppointmentService.getAppointmentAsync(appointment.accessToken!, appointment.uuid);
+                appointment.definition!.description = updated.definition!.description;
+                appointment.definition!.participants = updated.definition!.participants;
+                appointment.definition!.options = updated.definition!.options;
+            } else {
+                const user: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
+                await AppointmentService.createAppointmentAsync(token, user, description, participants, options);
+            }
+            pageContext.appointment.changed = false;
+            document.getElementById("backbutton-id")!.removeAttribute("data-bs-toggle");
+            document.getElementById("backbutton-id")!.click();
         }
-        if (appointment != null) {
-            await AppointmentService.updateAppointmentAsync(token, appointment.accessToken!, appointment.uuid, description, participants, options);
-            const updated: AppointmentResult = await AppointmentService.getAppointmentAsync(appointment.accessToken!, appointment.uuid);
-            appointment.definition!.description = updated.definition!.description;
-            appointment.definition!.participants = updated.definition!.participants;
-            appointment.definition!.options = updated.definition!.options;
-        } else {
-            const user: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
-            await AppointmentService.createAppointmentAsync(token, user, description, participants, options);
+        catch (error: Error | unknown) {
+            this.handleError(error, pageContext);
         }
-        pageContext.appointment.changed = false;
-        document.getElementById("backbutton-id")!.removeAttribute("data-bs-toggle");
-        document.getElementById("backbutton-id")!.click();
     }
 
     private buildParticipants(participants: string, pageContext: PageContext): AppointmentParticipant[] {

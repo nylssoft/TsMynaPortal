@@ -40,6 +40,10 @@ export class Locale {
 
         "ERROR_FILE_TOO_LARGE_1_2": "Die Datei {0} ist zu groß. Die Dateigröße ist {1}, aber höchstens 20MB sind erlaubt.",
         "ERROR_WRONG_DATA_PROTECTION_KEY": "Der Schlüssel zum Entschlüsseln der Daten ist ungültig oder fehlt. Bitte überprüfe deinen Schlüssel auf der Seite 'Datenschutz'.",
+        "ERROR_DESCRIPTION_MISSING": "Die Beschreibung fehlt.",
+        "ERROR_PARTICIPANTS_MISSING": "Die Teilnehmer fehlen.",
+        "ERROR_OPTIONS_MISSING": "Es wurden keine Tage ausgewählt.",
+        "ERROR_CANNOT_REMOVE_PARTICIPANT_AS_VOTES_ALREADY_EXIST": "Teilnehmer können nicht entfernt werden, wenn schon abgestimmt wurde."
     }
 
     private englisch = {
@@ -75,6 +79,10 @@ export class Locale {
 
         "ERROR_FILE_TOO_LARGE_1_2": "The file {0} is too large. The file size is {1} but at most 20MB are allowed.",
         "ERROR_WRONG_DATA_PROTECTION_KEY": "The key to decrypt the data is invalid or missing. Please check your key on the 'Data Protection' page.",
+        "ERROR_DESCRIPTION_MISSING": "The description is missing.",
+        "ERROR_PARTICIPANTS_MISSING": "The participants are missing.",
+        "ERROR_OPTIONS_MISSING": "No days have been selected.",
+        "ERROR_CANNOT_REMOVE_PARTICIPANT_AS_VOTES_ALREADY_EXIST": "Participants cannot be removed if voting has already started."
     }
 
     /**
