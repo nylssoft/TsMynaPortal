@@ -131,6 +131,23 @@ export class AppointmentService {
 
     static buildAppointmentUrl(appointment: AppointmentResult) {
         const requestId: string = encodeURI(btoa(appointment.accessToken!));
-        return `${window.location.href}?id=${requestId}`;
+        return `${window.location.href}?vid=${requestId}`;
+    }
+
+    static async getAppointmentByVoteIdAsync(vid: string): Promise<AppointmentResult> {
+        let accessToken: string = "";
+        try {
+            accessToken = atob(vid);
+        }
+        catch (err) {
+            console.error(err);
+        }
+        const arr: string[] = accessToken.split("#");
+        if (arr.length != 3) {
+            throw new Error("INFO_APPOINTMENT_INVALID");
+        }
+        const appointment: AppointmentResult = await AppointmentService.getAppointmentAsync(accessToken, arr[1]);
+        appointment.accessToken = accessToken;
+        return appointment;
     }
 }

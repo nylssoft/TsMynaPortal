@@ -1,70 +1,35 @@
 import { Page, PageContext } from "../PageContext";
 import { AppointmentService } from "../services/AppointmentService";
-import { AppointmentBestVote, AppointmentOption, AppointmentResult, AppointmentVote, MonthAndYear, PageType } from "../TypeDefinitions";
+import { AppointmentBestVote, AppointmentOption, AppointmentResult, AppointmentVote, PageType } from "../TypeDefinitions";
 import { Controls } from "../utils/Controls";
 
 export class AppointmentVotePage implements Page {
-    hideNavBar?: boolean | undefined = true;
     pageType: PageType = "APPOINTMENT_VOTE";
-
-    private myName: string | null = null;
 
     private readonly KEY_MYNAME: string = "makeadate-myname";
 
     async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
-        Controls.createHeading(parent, 4, "", pageContext.locale.translate("HEADER_APPOINTMENTS"));
-        const params: URLSearchParams = new URLSearchParams(window.location.search);
         try {
-            let accessToken: string = "";
-            try {
-                accessToken = atob(params.get("id")!);
-            }
-            catch (err) {
-                console.error(err);
-            }
-            const arr: string[] = accessToken.split("#");
-            if (arr.length != 3) {
-                throw new Error("INFO_APPOINTMENT_INVALID");
-            }
-            const uuid: string = arr[1];
-            const appointment: AppointmentResult = await AppointmentService.getAppointmentAsync(accessToken, uuid);
-            appointment.accessToken = accessToken;
-            if (this.myName == null) {
-                this.myName = window.localStorage.getItem(this.KEY_MYNAME);
-            }
-            if (this.myName != null) {
-                const participantNames: string[] = appointment.definition!.participants.map(p => p.username);
-                if (!participantNames.includes(this.myName)) {
-                    this.myName = null;
-                }
-            }
+            const appointment: AppointmentResult = await AppointmentService.getAppointmentByVoteIdAsync(pageContext.vote.vid!);
             if (appointment.definition!.participants.length == 0) {
                 throw new Error(pageContext.locale.translateWithArgs("INFO_APPOINTMENT_NO_PARTICIPANTS_1", [appointment.definition!.description]));
             }
-            const now: Date = new Date();
-            const year: number = now.getFullYear();
-            const month: number = now.getMonth() + 1;
-            const day: number = now.getDate();
-            appointment.definition!.options = appointment.definition!.options
-                .filter(opt => opt.year > year || opt.year == year && opt.month >= month);
-            appointment.definition!.options
-                .filter(opt => opt.year == year && opt.month == month)
-                .forEach(opt => opt.days = opt.days.filter(d => d >= day));
-            appointment.votes!.forEach(v => {
-                v.accepted = v.accepted.filter(opt => opt.year > year || opt.year == year && opt.month >= month);
-                v.accepted
-                    .filter(opt => opt.year == year && opt.month == month)
-                    .forEach(opt => opt.days = opt.days.filter(d => d >= day));
-            });
-            if (!appointment.definition!.options.some(opt => opt.days.length > 0)) {
-                throw new Error(pageContext.locale.translateWithArgs("INFO_APPOINTMENT_NO_OPTIONS_1", [appointment.definition!.description]));
+            if (pageContext.vote.vusername == null) {
+                pageContext.vote.vusername = window.localStorage.getItem(this.KEY_MYNAME);
             }
-            if (this.myName == null) {
-                this.renderSelectName(parent, pageContext, appointment);
+            if (pageContext.vote.vusername != null) {
+                const participantNames: string[] = appointment.definition!.participants.map(p => p.username);
+                if (!participantNames.includes(pageContext.vote.vusername)) {
+                    pageContext.vote.vusername = null;
+                }
+            }
+            this.filterOptionsAndVotes(appointment, pageContext);
+            pageContext.vote.result = appointment;
+            pageContext.vote.options = appointment.definition!.options;
+            pageContext.vote.monthAndYear = pageContext.vote.getMinMonthAndYear();
+            if (pageContext.vote.vusername == null) {
+                this.renderSelectName(parent, pageContext);
             } else {
-                pageContext.vote.result = appointment;
-                pageContext.vote.options = appointment.definition!.options;
-                pageContext.vote.monthAndYear = pageContext.vote.getMinMonthAndYear();
                 this.renderVoteAppointment(parent, pageContext);
             }
         }
@@ -77,8 +42,9 @@ export class AppointmentVotePage implements Page {
         Controls.createAlert(Controls.createDiv(parent), pageContext.locale.translateError(error));
     }
 
-    private renderSelectName(parent1: HTMLElement, pageContext: PageContext, appointment: AppointmentResult) {
-        const card: HTMLDivElement = Controls.createDiv(parent1, "card p-4 shadow-sm");
+    private renderSelectName(parent: HTMLElement, pageContext: PageContext) {
+        const appointment: AppointmentResult = pageContext.vote.result!;
+        const card: HTMLDivElement = Controls.createDiv(parent, "card p-4 shadow-sm");
         card.style.maxWidth = "400px";
         Controls.createParagraph(card, "", pageContext.locale.translateWithArgs("INFO_FIND_APPOINTMENT_1", [appointment.definition!.description]));
         Controls.createParagraph(card, "", pageContext.locale.translate("INFO_QUESTION_YOUR_NAME"));
@@ -88,7 +54,7 @@ export class AppointmentVotePage implements Page {
             const radioButton: HTMLInputElement = Controls.createInput(li, "radio", "", "form-check-input me-2 mt-1");
             radioButton.value = p.username;
             radioButton.name = "username";
-            if (this.myName != null && this.myName == p.username) {
+            if (p.username == pageContext.vote.vusername) {
                 radioButton.checked = true;
             }
             Controls.createSpan(li, `bi bi-person`);
@@ -104,8 +70,8 @@ export class AppointmentVotePage implements Page {
         voteButton.addEventListener("click", async (e: Event) => {
             const elem: HTMLInputElement | null = document.querySelector("input[name='username']:checked") as HTMLInputElement;
             if (elem != null) {
-                this.myName = elem.value;
-                window.localStorage.setItem(this.KEY_MYNAME, this.myName);
+                pageContext.vote.vusername = elem.value;
+                window.localStorage.setItem(this.KEY_MYNAME, pageContext.vote.vusername);
                 await pageContext.renderAsync();
             }
         });
@@ -116,12 +82,13 @@ export class AppointmentVotePage implements Page {
         const main: HTMLDivElement = Controls.createDiv(parent);
         const card: HTMLDivElement = Controls.createDiv(main, "card p-4 shadow-sm");
         card.style.maxWidth = "400px";
-        const title: HTMLParagraphElement = Controls.createParagraph(card, "", pageContext.locale.translateWithArgs("INFO_HELLO_1", [this.myName!]));
+        const title: HTMLParagraphElement = Controls.createParagraph(card, "", pageContext.locale.translateWithArgs("INFO_HELLO_1", [pageContext.vote.vusername!]));
         const iSwitch: HTMLElement = Controls.createElement(title, "i", "ms-4 bi bi-person", undefined, "switchbutton-id");
         iSwitch.setAttribute("role", "button");
         iSwitch.addEventListener("click", (e: Event) => {
+            e.preventDefault();
             Controls.removeAllChildren(main);
-            this.renderSelectName(parent, pageContext, appointment);
+            this.renderSelectName(parent, pageContext);
         });
         Controls.createParagraph(card, "", pageContext.locale.translateWithArgs("INFO_QUESTION_TIME_FOR_1", [appointment.definition!.description]));
         const calendarDiv: HTMLDivElement = Controls.createDiv(card);
@@ -130,36 +97,14 @@ export class AppointmentVotePage implements Page {
 
     private renderCalendar(pageContext: PageContext, parent: HTMLElement) {
         const appointment: AppointmentResult = pageContext.vote.result!;
-        const myUserUuid = AppointmentService.getUserUuid(appointment, this.myName!);
-        const monthAndYear: MonthAndYear = pageContext.vote.monthAndYear;
-        const option: AppointmentOption = { year: monthAndYear.year, month: monthAndYear.month, days: [] };
-        for (const opt of pageContext.vote.options) {
-            if (opt.year == monthAndYear.year && opt.month == monthAndYear.month) {
-                option.days = opt.days;
-                break;
-            }
-        }
+        const option: AppointmentOption = pageContext.vote.getCurrentOption()!;
+        const bestVotes: AppointmentBestVote[] = pageContext.vote.getBestVotes();
         const selectableDays: Set<number> = new Set<number>();
-        const myAcceptedDays: Set<number> = new Set<number>();
-        const acceptedCount: Map<number, number> = new Map<number, number>();
-        const bestVotes: AppointmentBestVote[] = this.getBestVotes(appointment);
         option.days.forEach(d => selectableDays.add(d));
-        appointment.votes!.forEach(v => {
-            const acceptedOption: AppointmentOption | undefined = v.accepted.find(o => o.year == option.year && o.month == option.month);
-            if (acceptedOption) {
-                if (v.userUuid == myUserUuid) {
-                    acceptedOption.days.forEach(d => myAcceptedDays.add(d));
-                }
-                acceptedOption.days.forEach(d => {
-                    let cnt: number | undefined = acceptedCount.get(d);
-                    if (cnt == undefined) {
-                        cnt = 0;
-                    }
-                    cnt += 1;
-                    acceptedCount.set(d, cnt);
-                });
-            }
-        });
+        const acceptedCount: Map<number, number> = new Map<number, number>();
+        const myAcceptedDays: Set<number> = new Set<number>();
+        const myUserUuid = AppointmentService.getUserUuid(appointment, pageContext.vote.vusername!)!;
+        pageContext.vote.initAcceptedDays(myUserUuid, myAcceptedDays, acceptedCount);
         Controls.removeAllChildren(parent);
         const heading: HTMLHeadingElement = Controls.createHeading(parent, 5, "d-flex justify-content-between align-items-center");
         const iLeft: HTMLElement = Controls.createElement(heading, "i", "ms-4 bi bi-chevron-left");
@@ -225,26 +170,7 @@ export class AppointmentVotePage implements Page {
                         }
                     } else {
                         td.setAttribute("role", "button");
-                        td.addEventListener("click", async (e: Event) => {
-                            const myUserUuid: string | null = AppointmentService.getUserUuid(appointment, this.myName!);
-                            const vote: AppointmentVote | undefined = appointment.votes!.find(v => v.userUuid == myUserUuid);
-                            if (vote && myUserUuid != null) {
-                                let acceptedOption: AppointmentOption | undefined = vote.accepted.find(o => o.year == option.year && o.month == option.month);
-                                if (!acceptedOption) {
-                                    acceptedOption = { "year": option.year, "month": option.month, "days": [] };
-                                    vote.accepted.push(acceptedOption);
-                                    vote.accepted.sort((a, b) => (a.year - b.year) * 1000 + (a.month - b.month));
-                                }
-                                if (acceptedOption.days.includes(dayConst)) {
-                                    acceptedOption.days = acceptedOption.days.filter(d => d != dayConst);
-                                }
-                                else {
-                                    acceptedOption.days.push(dayConst);
-                                }
-                                await AppointmentService.voteAsync(appointment.accessToken!, appointment.uuid, vote);
-                                await pageContext.renderAsync();
-                            }
-                        })
+                        td.addEventListener("click", async (e: Event) => this.onClickDayAsync(e, parent, pageContext, dayConst));
                     }
                     if (myAcceptedDays.has(day)) {
                         td.classList.add("table-active");
@@ -252,9 +178,9 @@ export class AppointmentVotePage implements Page {
                     if (acceptedCount.has(day)) {
                         const span: HTMLSpanElement = Controls.createSpan(td, "position-absolute top-0 start-100 translate-middle badge rounded-pill z-1", `${acceptedCount.get(day)}`);
                         if (isBestVote) {
-                            span.classList.add("bg-success");
+                            span.classList.add("bg-primary");
                         } else {
-                            span.classList.add("bg-info");
+                            span.classList.add("bg-secondary");
                         }
                     }
                     day++;
@@ -263,34 +189,46 @@ export class AppointmentVotePage implements Page {
         }
     }
 
-    private getBestVotes(appointment: AppointmentResult): AppointmentBestVote[] {
-        let bestVotes: AppointmentBestVote[] = [];
-        let bestCount: number = 0;
-        appointment.definition!.options.forEach(option => {
-            const acceptedCount: Map<number, number> = new Map<number, number>();
-            appointment.votes!.forEach(v => {
-                const acceptedOption: AppointmentOption | undefined = v.accepted.find(o => o.year == option.year && o.month == option.month);
-                if (acceptedOption) {
-                    acceptedOption.days.filter(d => option.days.includes(d)).forEach(d => {
-                        let cnt: number | undefined = acceptedCount.get(d);
-                        if (!cnt) {
-                            cnt = 0;
-                        }
-                        cnt += 1;
-                        acceptedCount.set(d, cnt);
-                        if (cnt >= bestCount) {
-                            if (cnt > bestCount) {
-                                bestVotes = [];
-                            }
-                            const bestVote: AppointmentBestVote = { "year": option.year, "month": option.month, "day": d };
-                            bestVotes.push(bestVote);
-                            bestCount = cnt;
-                        }
-                    });
-                }
-            });
+    private filterOptionsAndVotes(appointment: AppointmentResult, pageContext: PageContext) {
+        const now: Date = new Date();
+        const year: number = now.getFullYear();
+        const month: number = now.getMonth() + 1;
+        const day: number = now.getDate();
+        appointment.definition!.options = appointment.definition!.options
+            .filter(opt => opt.year > year || opt.year == year && opt.month >= month);
+        appointment.definition!.options
+            .filter(opt => opt.year == year && opt.month == month)
+            .forEach(opt => opt.days = opt.days.filter(d => d >= day));
+        appointment.votes!.forEach(v => {
+            v.accepted = v.accepted.filter(opt => opt.year > year || opt.year == year && opt.month >= month);
+            v.accepted
+                .filter(opt => opt.year == year && opt.month == month)
+                .forEach(opt => opt.days = opt.days.filter(d => d >= day));
         });
-        return bestVotes;
+        if (!appointment.definition!.options.some(opt => opt.days.length > 0)) {
+            throw new Error(pageContext.locale.translateWithArgs("INFO_APPOINTMENT_NO_OPTIONS_1", [appointment.definition!.description]));
+        }
     }
 
+    private async onClickDayAsync(e: Event, parent: HTMLElement, pageContext: PageContext, day: number): Promise<void> {
+        e.preventDefault();
+        const appointment: AppointmentResult = pageContext.vote.result!;
+        const myUserUuid: string = AppointmentService.getUserUuid(appointment, pageContext.vote.vusername!)!;
+        const vote: AppointmentVote = appointment.votes!.find(v => v.userUuid == myUserUuid)!;
+        const option: AppointmentOption = pageContext.vote.getCurrentOption()!;
+        let acceptedOption: AppointmentOption | undefined = vote.accepted.find(o => o.year == option.year && o.month == option.month);
+        if (!acceptedOption) {
+            acceptedOption = { "year": option.year, "month": option.month, "days": [] };
+            vote.accepted.push(acceptedOption);
+            vote.accepted.sort((a, b) => (a.year - b.year) * 1000 + (a.month - b.month));
+        }
+        if (acceptedOption.days.includes(day)) {
+            acceptedOption.days = acceptedOption.days.filter(d => d != day);
+        }
+        else {
+            acceptedOption.days.push(day);
+        }
+        await AppointmentService.voteAsync(appointment.accessToken!, appointment.uuid, vote);
+        this.renderCalendar(pageContext, parent);
+    }
 }

@@ -8,6 +8,7 @@ import { ToggleLanguageAction } from "../actions/ToggleLanguageAction";
 import { Controls } from "../utils/Controls";
 import { PageContext, Page } from "../PageContext";
 import { PageType } from "../TypeDefinitions";
+import { ShowVotePageAction } from "../actions/ShowVotePageAction";
 
 /**
  * Page implementation for the navigation bar.
@@ -21,11 +22,15 @@ export class NavigationBarPage implements Page {
 
     async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const ul: HTMLUListElement = this.createNavBar(parent, pageContext, "APP_NAME");
-        if (pageContext.authenticationClient.isLoggedIn()) {
-            this.createNavItem(ul, pageContext, "DESKTOP", new ShowDesktopPageAction());
-            this.createNavItem(ul, pageContext, "DATA_PROTECTION", new ShowDataProtectionPageAction());
+        if (pageContext.vote.vid != null) {
+            this.createNavItem(ul, pageContext, "HEADER_APPOINTMENTS", new ShowVotePageAction());
         } else {
-            this.createNavItem(ul, pageContext, "BUTTON_LOGIN", new ShowLoginPageAction());
+            if (pageContext.authenticationClient.isLoggedIn()) {
+                this.createNavItem(ul, pageContext, "DESKTOP", new ShowDesktopPageAction());
+                this.createNavItem(ul, pageContext, "DATA_PROTECTION", new ShowDataProtectionPageAction());
+            } else {
+                this.createNavItem(ul, pageContext, "BUTTON_LOGIN", new ShowLoginPageAction());
+            }
         }
         this.createNavItem(ul, pageContext, "ABOUT", new ShowAboutPageAction());
         const aToogleLanguage: HTMLAnchorElement = this.createNavItem(ul, pageContext, "LANGUAGE", new ToggleLanguageAction());

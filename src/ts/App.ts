@@ -58,7 +58,8 @@ export class App {
         pageContext.registerPage(new AppointmentVotePage());
         await pageContext.locale.setLanguageAsync();
         const params = new URLSearchParams(window.location.search);
-        if (params.has("id")) {
+        if (params.has("vid")) {
+            pageContext.vote.vid = params.get("vid");
             pageContext.pageType = "APPOINTMENT_VOTE";
         } else {
             await pageContext.authenticationClient.loginWithLongLivedTokenAsync();
