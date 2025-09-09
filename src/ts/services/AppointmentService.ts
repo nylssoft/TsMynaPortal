@@ -111,6 +111,6 @@ export class AppointmentService {
 
     static buildAppointmentUrl(appointment: AppointmentResult) {
         const requestId: string = encodeURI(btoa(appointment.accessToken!));
-        return `https://www.nielsi.de/makeadate?id=${requestId}`;
+        return `${window.location.href}?id=${requestId}`;
     }
 }

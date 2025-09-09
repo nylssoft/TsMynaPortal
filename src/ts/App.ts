@@ -1,6 +1,7 @@
 import { PageContext } from "./PageContext";
 import { AboutPage } from "./pages/AboutPage";
 import { AppointmentDetailPage } from "./pages/AppointmentDetailPage";
+import { AppointmentVotePage } from "./pages/AppointmentVotePage";
 import { ContactDetailPage } from "./pages/ContactDetailPage";
 import { DataProtectionPage } from "./pages/DataProtectionPage";
 import { DesktopPage } from "./pages/DesktopPage";
@@ -54,16 +55,22 @@ export class App {
         pageContext.registerPage(new DocumentEditPage());
         pageContext.registerPage(new DocumentMovePage());
         pageContext.registerPage(new AppointmentDetailPage());
+        pageContext.registerPage(new AppointmentVotePage());
         await pageContext.locale.setLanguageAsync();
-        await pageContext.authenticationClient.loginWithLongLivedTokenAsync();
-        if (pageContext.authenticationClient.isLoggedIn()) {
-            pageContext.pageType = "DESKTOP";
-        } else if (pageContext.authenticationClient.isRequiresPin()) {
-            pageContext.pageType = "LOGIN_PIN";
-        } else if (pageContext.authenticationClient.isRequiresPass2()) {
-            pageContext.pageType = "LOGIN_PASS2";
+        const params = new URLSearchParams(window.location.search);
+        if (params.has("id")) {
+            pageContext.pageType = "APPOINTMENT_VOTE";
         } else {
-            pageContext.pageType = "LOGIN_USERNAME_PASSWORD";
+            await pageContext.authenticationClient.loginWithLongLivedTokenAsync();
+            if (pageContext.authenticationClient.isLoggedIn()) {
+                pageContext.pageType = "DESKTOP";
+            } else if (pageContext.authenticationClient.isRequiresPin()) {
+                pageContext.pageType = "LOGIN_PIN";
+            } else if (pageContext.authenticationClient.isRequiresPass2()) {
+                pageContext.pageType = "LOGIN_PASS2";
+            } else {
+                pageContext.pageType = "LOGIN_USERNAME_PASSWORD";
+            }
         }
         await pageContext.renderAsync();
     }

@@ -47,6 +47,7 @@ export class PageContext {
     readonly diary: Diary = new Diary();
     readonly documentItem: DocumentItem = new DocumentItem();
     readonly appointment: Appointment = new Appointment();
+    readonly vote: Appointment = new Appointment();
 
     // current page
     pageType: PageType = "LOGIN_USERNAME_PASSWORD";
