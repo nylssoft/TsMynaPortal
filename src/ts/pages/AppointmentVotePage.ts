@@ -80,7 +80,7 @@ export class AppointmentVotePage implements Page {
     private renderVoteAppointment(parent: HTMLElement, pageContext: PageContext) {
         const appointment: AppointmentResult = pageContext.vote.result!;
         const main: HTMLDivElement = Controls.createDiv(parent);
-        const card: HTMLDivElement = Controls.createDiv(main, "card p-4 shadow-sm");
+        const card: HTMLDivElement = Controls.createDiv(main);
         card.style.maxWidth = "400px";
         const title: HTMLParagraphElement = Controls.createParagraph(card, "", pageContext.locale.translateWithArgs("INFO_HELLO_1", [pageContext.vote.vusername!]));
         const iSwitch: HTMLElement = Controls.createElement(title, "i", "ms-4 bi bi-person", undefined, "switchbutton-id");
@@ -163,6 +163,7 @@ export class AppointmentVotePage implements Page {
                     Controls.createElement(tr, "td", "text-center py-2", "\u00A0");
                 } else {
                     const td: HTMLTableCellElement = Controls.createElement(tr, "td", "py-2 text-center position-relative", `${day}`) as HTMLTableCellElement;
+                    // td.style.minWidth = "30px";
                     if (pageContext.vote.isBeforeToday(now, day) || !optionDays.includes(day)) {
                         td.classList.add("text-secondary");
                         if (pageContext.theme.isLight()) {
@@ -173,14 +174,15 @@ export class AppointmentVotePage implements Page {
                         td.addEventListener("click", async (e: Event) => this.onClickDayAsync(e, parent, pageContext, dayConst));
                     }
                     if (myAcceptedDays.has(day)) {
-                        td.classList.add("table-active");
+                        td.classList.add("table-primary");
                     }
                     if (acceptedCount.has(day)) {
-                        const span: HTMLSpanElement = Controls.createSpan(td, "position-absolute top-0 start-100 translate-middle badge rounded-pill z-1", `${acceptedCount.get(day)}`);
+                        const badge: HTMLSpanElement = Controls.createSpan(td, "position-absolute top-0 start-100 badge rounded-pill z-1", `${acceptedCount.get(day)}`);
+                        badge.setAttribute("style", "font-size: 0.6em; transform: translateX(-90%);");
                         if (isBestVote) {
-                            span.classList.add("bg-primary");
+                            badge.classList.add("text-bg-primary");
                         } else {
-                            span.classList.add("bg-secondary");
+                            badge.classList.add("text-bg-secondary");
                         }
                     }
                     day++;
