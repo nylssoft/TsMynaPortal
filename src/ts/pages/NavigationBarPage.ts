@@ -9,6 +9,7 @@ import { Controls } from "../utils/Controls";
 import { PageContext, Page } from "../PageContext";
 import { PageType } from "../TypeDefinitions";
 import { ShowVotePageAction } from "../actions/ShowVotePageAction";
+import { ShowSettingsPageAction } from "../actions/ShowSettingsPageAction";
 
 /**
  * Page implementation for the navigation bar.
@@ -33,8 +34,7 @@ export class NavigationBarPage implements Page {
             }
         }
         this.createNavItem(ul, pageContext, "ABOUT", new ShowAboutPageAction());
-        const aToogleLanguage: HTMLAnchorElement = this.createNavItem(ul, pageContext, "LANGUAGE", new ToggleLanguageAction());
-        Controls.createSpan(aToogleLanguage, `mx-2 fi ${pageContext.locale.getLanguage() == "de" ? "fi-gb" : "fi-de"}`);
+        this.createNavItem(ul, pageContext, "SETTINGS", new ShowSettingsPageAction());
         if (pageContext.authenticationClient.isLoggedIn()) {
             this.createNavItem(ul, pageContext, "BUTTON_LOGOUT", new LogoutAction());
         }
@@ -47,8 +47,13 @@ export class NavigationBarPage implements Page {
         aBrand.setAttribute("role", "button");
         aBrand.addEventListener("click", async (e: MouseEvent) => {
             e.preventDefault();
-            pageContext.theme.toggle();
-            await pageContext.renderAsync();
+            if (pageContext.vote.vid != null) {
+                await new ShowVotePageAction().runAsync(e, pageContext);
+            } else if (pageContext.authenticationClient.isLoggedIn()) {
+                await new ShowDesktopPageAction().runAsync(e, pageContext);
+            } else {
+                await new ShowLoginPageAction().runAsync(e, pageContext);
+            }
         });
         const button: HTMLButtonElement = Controls.createElement(container, "button", "navbar-toggler") as HTMLButtonElement;
         button.setAttribute("type", "button");
@@ -66,7 +71,8 @@ export class NavigationBarPage implements Page {
     private createNavItem(parent: HTMLElement, pageContext: PageContext, label: string, action: ClickAction): HTMLAnchorElement {
         const li: HTMLLIElement = Controls.createElement(parent, "li", "nav-item") as HTMLLIElement;
         const a: HTMLAnchorElement = Controls.createElement(li, "a", "nav-link", pageContext.locale.translate(label)) as HTMLAnchorElement;
-        a.href = "#";
+        a.setAttribute("role", "button");
+        // a.href = "";
         a.addEventListener("click", async (e: MouseEvent) => action.runAsync(e, pageContext));
         if (action.isActive(pageContext)) {
             a.classList.add("active");

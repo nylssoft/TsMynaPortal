@@ -14,6 +14,7 @@ import { LoginUsernamePasswordPage } from "./pages/LoginUsernamePasswordPage";
 import { NavigationBarPage } from "./pages/NavigationBarPage";
 import { NoteDetailPage } from "./pages/NoteDetailPage";
 import { PasswordItemDetailPage } from "./pages/PasswordItemDetailPage";
+import { SettingsPage } from "./pages/SettingsPage";
 
 /**
  * Main application class that initializes the application, handles authentication, and renders the UI.
@@ -56,6 +57,7 @@ export class App {
         pageContext.registerPage(new DocumentMovePage());
         pageContext.registerPage(new AppointmentDetailPage());
         pageContext.registerPage(new AppointmentVotePage());
+        pageContext.registerPage(new SettingsPage());
         await pageContext.locale.setLanguageAsync();
         const params = new URLSearchParams(window.location.search);
         if (params.has("vid")) {
