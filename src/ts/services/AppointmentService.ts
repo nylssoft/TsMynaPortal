@@ -121,9 +121,19 @@ export class AppointmentService {
 
     static getUserUuid(appointment: AppointmentResult | null, name: string): string | null {
         if (appointment != null) {
-            const participant = appointment.definition!.participants.find(p => p.username == name);
+            const participant: AppointmentParticipant | undefined = appointment.definition!.participants.find(p => p.username == name);
             if (participant) {
                 return participant.userUuid;
+            }
+        }
+        return null;
+    }
+
+    static getUsername(appointment: AppointmentResult | null, userUuid: string): string | null {
+        if (appointment != null) {
+            const participant: AppointmentParticipant | undefined = appointment.definition!.participants.find(p => p.userUuid == userUuid);
+            if (participant) {
+                return participant.username;
             }
         }
         return null;

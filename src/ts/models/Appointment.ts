@@ -17,6 +17,8 @@ export class Appointment {
     vid: string | null = null;
     // vote username
     vusername: string | null = null;
+    // flag whether the list with the accepted days and users will be shown
+    voteShowList: boolean = false;
 
     nextMonth() {
         this.monthAndYear.month += 1;

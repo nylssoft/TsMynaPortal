@@ -163,7 +163,7 @@ export class AppointmentVotePage implements Page {
                     Controls.createElement(tr, "td", "text-center py-2", "\u00A0");
                 } else {
                     const td: HTMLTableCellElement = Controls.createElement(tr, "td", "py-2 text-center position-relative", `${day}`) as HTMLTableCellElement;
-                    // td.style.minWidth = "30px";
+                    td.setAttribute("style", "width: 50px; height: 50px;");
                     if (pageContext.vote.isBeforeToday(now, day) || !optionDays.includes(day)) {
                         td.classList.add("text-secondary");
                         if (pageContext.theme.isLight()) {
@@ -187,6 +187,48 @@ export class AppointmentVotePage implements Page {
                     }
                     day++;
                 }
+            }
+        }
+        if (pageContext.vote.voteShowList) {
+            this.renderList(parent, pageContext);
+        } else {
+            const iList: HTMLElement = Controls.createElement(parent, "i", "bi bi-list-ul");
+            iList.setAttribute("role", "button");
+            iList.addEventListener("click", () => {
+                parent.removeChild(iList);
+                pageContext.vote.voteShowList = true;
+                this.renderList(parent, pageContext);
+            });
+        }
+    }
+
+    private renderList(parent: HTMLElement, pageContext: PageContext) {
+        const iClose: HTMLElement = Controls.createElement(parent, "i", "bi bi-x-lg");
+        iClose.setAttribute("role", "button");
+        iClose.addEventListener("click", () => {
+            pageContext.vote.voteShowList = false;
+            this.renderCalendar(pageContext, parent);
+        });
+        const appointment: AppointmentResult = pageContext.vote.result!;
+        const opt: AppointmentOption = pageContext.vote.getCurrentOption()!;
+        const grid: HTMLDivElement = Controls.createDiv(parent, "container");
+        for (const day of opt.days) {
+            const d: Date = new Date(Date.UTC(opt.year, opt.month - 1, day));
+            const datestr: string = d.toLocaleDateString(pageContext.locale.getLanguage(), { weekday: "long", day: "numeric" });
+            const acceptedUsernames: string[] = [];
+            for (const vote of appointment.votes!) {
+                const vopt: AppointmentOption | undefined = vote.accepted.find(vopt => vopt.year == opt.year && vopt.month == opt.month);
+                if (vopt && vopt.days.includes(day)) {
+                    acceptedUsernames.push(AppointmentService.getUsername(appointment, vote.userUuid)!);
+                }
+            }
+            if (acceptedUsernames.length > 0) {
+                acceptedUsernames.sort();
+                const row: HTMLDivElement = Controls.createDiv(grid, "row");
+                const col1: HTMLDivElement = Controls.createDiv(row, "col-4");
+                Controls.createSpan(col1, "", datestr);
+                const col2: HTMLDivElement = Controls.createDiv(row, "col-8");
+                Controls.createSpan(col2, "", acceptedUsernames.join(', '));
             }
         }
     }
