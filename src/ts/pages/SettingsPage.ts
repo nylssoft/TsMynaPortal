@@ -17,7 +17,7 @@ export class SettingsPage implements Page {
         // storage info
         const divRowStorage: HTMLDivElement = Controls.createDiv(grid, "row align-items-center");
         const divColStorage: HTMLDivElement = Controls.createDiv(divRowStorage, "col");
-        const storageMsg: string = pageContext.locale.translateWithArgs("INFO_STORAGE_1_2", [ DocumentService.formatSize(userDetails.usedStorage), DocumentService.formatSize(userDetails.storageQuota)]);
+        const storageMsg: string = pageContext.locale.translateWithArgs("INFO_STORAGE_1_2", [DocumentService.formatSize(userDetails.usedStorage), DocumentService.formatSize(userDetails.storageQuota)]);
         Controls.createParagraph(divColStorage, undefined, storageMsg);
         // select theme
         const divRow1: HTMLDivElement = Controls.createDiv(grid, "row g-3 align-items-center mb-3");
@@ -91,9 +91,16 @@ export class SettingsPage implements Page {
             Controls.createLabel(divSwitchUsePin, "switch-use-pin-id", "form-check-label", pageContext.locale.translate("OPTION_PIN"));
             if (userDetails.usePin) {
                 switchUsePin.checked = true;
-                const divRowSetPin: HTMLDivElement = Controls.createDiv(grid, "row mt-3 align-items-center");
-                const divColSetPin: HTMLDivElement = Controls.createDiv(divRowSetPin, "col");
-                Controls.createButton(divColSetPin, "button", pageContext.locale.translate("BUTTON_SET_PIN"), "btn btn-primary");
+                switchUsePin.addEventListener("change", async (_: Event) => {
+                    await pageContext.authenticationClient.updatePinAsync("");
+                    await pageContext.renderAsync();
+                });
+            } else {
+                switchUsePin.addEventListener("change", async (_: Event) => {
+                    pageContext.pageType = "PIN_EDIT";
+                    pageContext.settings.pinChanged = false;
+                    await pageContext.renderAsync();
+                });
             }
         }
         // switch 2FA
@@ -119,6 +126,12 @@ export class SettingsPage implements Page {
         // change password button
         const divRowChangePwd: HTMLDivElement = Controls.createDiv(grid, "row mt-3 align-items-center");
         const divColChangePwd: HTMLDivElement = Controls.createDiv(divRowChangePwd, "col");
-        Controls.createButton(divColChangePwd, "button", pageContext.locale.translate("BUTTON_CHANGE_PWD"), "btn btn-primary");
+        const buttonChangePwd: HTMLButtonElement = Controls.createButton(divColChangePwd, "button", pageContext.locale.translate("BUTTON_CHANGE_PWD"), "btn btn-primary");
+        buttonChangePwd.addEventListener("click", async (e: Event) => {
+            e.preventDefault();
+            pageContext.settings.passwordChanged = false;
+            pageContext.pageType = "PASSWORD_EDIT";
+            await pageContext.renderAsync();
+        });
     }
 }

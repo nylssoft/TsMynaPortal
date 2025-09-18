@@ -342,5 +342,33 @@ export class AuthenticationClient {
         if (this.userInfo != null) {
             this.userInfo.allowResetPassword = allowReset;
         }
-    }    
+    }
+
+    public async updatePinAsync(pin: string): Promise<void> {
+        const token: string | null = this.getToken();
+        if (token == null) throw new Error("ERROR_INVALID_PARAMETERS");
+        await FetchHelper.fetchAsync("/api/pwdman/user/pin", {
+            method: "PUT",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "token": token
+            },
+            body: JSON.stringify(pin)
+        });
+    }
+
+    public async updatePasswordAsync(oldPwd: string, newPwd: string): Promise<void> {
+        const token: string | null = this.getToken();
+        if (token == null) throw new Error("ERROR_INVALID_PARAMETERS");
+        await FetchHelper.fetchAsync("/api/pwdman/userpwd", {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "token": token
+            },
+            body: JSON.stringify({ "oldpassword": oldPwd, "newpassword": newPwd })
+        });
+    }
 }

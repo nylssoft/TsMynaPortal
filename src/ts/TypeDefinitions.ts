@@ -223,8 +223,8 @@ export type AppointmentBestVote = {
 export type PageType = "LOGIN_USERNAME_PASSWORD" | "LOGIN_PIN" | "LOGIN_PASS2" | "ABOUT" | "DESKTOP"
   | "DATA_PROTECTION" | "NAVIGATION_BAR" | "CONTACT_DETAIL" | "NOTE_DETAIL" | "PASSWORD_ITEM_DETAIL"
   | "DIARY_DETAIL" | "DOCUMENT_EDIT" | "DOCUMENT_MOVE" | "APPOINTMENT_DETAIL" | "APPOINTMENT_VOTE"
-  | "SETTINGS";
+  | "SETTINGS" | "PIN_EDIT" | "PASSWORD_EDIT" | "2FA_EDIT";
 
 export type DesktopTab = "BIRTHDAYS" | "CONTACTS" | "NOTES" | "PASSWORD_MANAGER" | "DIARY" | "DOCUMENTS" | "APPOINTMENTS";
 
-export const Version: string = "1.3.7";
+export const Version: string = "1.3.8";

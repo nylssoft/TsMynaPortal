@@ -13,7 +13,9 @@ import { LoginPinPage } from "./pages/LoginPinPage";
 import { LoginUsernamePasswordPage } from "./pages/LoginUsernamePasswordPage";
 import { NavigationBarPage } from "./pages/NavigationBarPage";
 import { NoteDetailPage } from "./pages/NoteDetailPage";
+import { PasswordChangePage } from "./pages/PasswordChangePage";
 import { PasswordItemDetailPage } from "./pages/PasswordItemDetailPage";
+import { PinEditPage } from "./pages/PinEditPage";
 import { SettingsPage } from "./pages/SettingsPage";
 
 /**
@@ -58,6 +60,8 @@ export class App {
         pageContext.registerPage(new AppointmentDetailPage());
         pageContext.registerPage(new AppointmentVotePage());
         pageContext.registerPage(new SettingsPage());
+        pageContext.registerPage(new PinEditPage());
+        pageContext.registerPage(new PasswordChangePage());
         await pageContext.locale.setLanguageAsync();
         const params = new URLSearchParams(window.location.search);
         if (params.has("vid")) {
