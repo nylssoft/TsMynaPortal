@@ -275,6 +275,13 @@ export class AuthenticationClient {
         return this.userInfo;
     }
 
+    public async getUserInfoWithDetailsAsync(): Promise<UserInfoResult> {
+        const token: string | null = this.getToken();
+        if (token == null) throw new Error("ERROR_INVALID_PARAMETERS");
+        const resp = await FetchHelper.fetchAsync('/api/pwdman/user?details=true', { headers: { 'token': token } });
+        return await resp.json() as UserInfoResult;
+    }
+
     /**
      * Retrieves the last login date asynchronously.
      * 
@@ -302,4 +309,38 @@ export class AuthenticationClient {
         this.lastLoginDate = new Date();
         return this.lastLoginDate;
     }
+
+    public async updateKeepLoginAsync(keepLogin: boolean): Promise<void> {
+        const token: string | null = this.getToken();
+        if (token == null) throw new Error("ERROR_INVALID_PARAMETERS");
+        await FetchHelper.fetchAsync("/api/pwdman/user/lltoken", {
+            method: "PUT",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "token": token
+            },
+            body: JSON.stringify(keepLogin)
+        });
+        if (this.userInfo != null) {
+            this.userInfo.useLongLivedToken = keepLogin;
+        }
+    }
+
+    public async updateAllowPasswordResetAsync(allowReset: boolean): Promise<void> {
+        const token: string | null = this.getToken();
+        if (token == null) throw new Error("ERROR_INVALID_PARAMETERS");
+        await FetchHelper.fetchAsync("/api/pwdman/user/allowresetpwd", {
+            method: "PUT",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "token": token
+            },
+            body: JSON.stringify(allowReset)
+        });
+        if (this.userInfo != null) {
+            this.userInfo.allowResetPassword = allowReset;
+        }
+    }    
 }

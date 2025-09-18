@@ -44,6 +44,8 @@ export class Locale {
         "LABEL_LANGUAGE": "Sprache:",
         "LABEL_DESIGN": "Design:",
         "SETTINGS": "Einstellungen",
+        "INFO_STORAGE_1_2": "Speicherplatz: {0} von {1} verwendet.",
+        "BUTTON_SET_PIN": "PIN festlegen",
 
         "ERROR_FILE_TOO_LARGE_1_2": "Die Datei {0} ist zu groß. Die Dateigröße ist {1}, aber höchstens 20MB sind erlaubt.",
         "ERROR_WRONG_DATA_PROTECTION_KEY": "Der Schlüssel zum Entschlüsseln der Daten ist ungültig oder fehlt. Bitte überprüfe deinen Schlüssel auf der Seite 'Datenschutz'.",
@@ -90,6 +92,8 @@ export class Locale {
         "LABEL_LANGUAGE": "Language:",
         "LABEL_DESIGN": "Design:",
         "SETTINGS": "Settings",
+        "INFO_STORAGE_1_2": "Storage: {0} of {1} used.",
+        "BUTTON_SET_PIN": "Set PIN",
 
         "ERROR_FILE_TOO_LARGE_1_2": "The file {0} is too large. The file size is {1} but at most 20MB are allowed.",
         "ERROR_WRONG_DATA_PROTECTION_KEY": "The key to decrypt the data is invalid or missing. Please check your key on the 'Data Protection' page.",
