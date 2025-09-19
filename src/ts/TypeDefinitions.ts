@@ -217,14 +217,21 @@ export type AppointmentBestVote = {
   day: number
 }
 
+// two factor
+
+export type TwoFactorResult = {
+  secretKey: string,
+  issuer: string
+}
+
 /**
  * Type representing the different pages in the application.
  */
 export type PageType = "LOGIN_USERNAME_PASSWORD" | "LOGIN_PIN" | "LOGIN_PASS2" | "ABOUT" | "DESKTOP"
   | "DATA_PROTECTION" | "NAVIGATION_BAR" | "CONTACT_DETAIL" | "NOTE_DETAIL" | "PASSWORD_ITEM_DETAIL"
   | "DIARY_DETAIL" | "DOCUMENT_EDIT" | "DOCUMENT_MOVE" | "APPOINTMENT_DETAIL" | "APPOINTMENT_VOTE"
-  | "SETTINGS" | "PIN_EDIT" | "PASSWORD_EDIT" | "2FA_EDIT";
+  | "SETTINGS" | "PIN_EDIT" | "PASSWORD_EDIT" | "TWO_FACTOR_EDIT";
 
 export type DesktopTab = "BIRTHDAYS" | "CONTACTS" | "NOTES" | "PASSWORD_MANAGER" | "DIARY" | "DOCUMENTS" | "APPOINTMENTS";
 
-export const Version: string = "1.3.9";
+export const Version: string = "1.4.0";

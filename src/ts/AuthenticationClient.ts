@@ -1,6 +1,6 @@
 import { FetchHelper } from "./utils/FetchHelper";
 import { Security } from "./utils/Security";
-import { AuthResult, ClientInfo, UserInfoResult, AuditResult } from "./TypeDefinitions";
+import { AuthResult, ClientInfo, UserInfoResult, AuditResult, TwoFactorResult } from "./TypeDefinitions";
 
 /**
  * Provides methods for managing authentication of the current user.
@@ -371,4 +371,55 @@ export class AuthenticationClient {
             body: JSON.stringify({ "oldpassword": oldPwd, "newpassword": newPwd })
         });
     }
+
+    public async getTwoFactorAsync(forceNew: boolean): Promise<TwoFactorResult> {
+        const token: string | null = this.getToken();
+        if (token == null) throw new Error("ERROR_INVALID_PARAMETERS");
+        const resp: Response = await FetchHelper.fetchAsync("/api/pwdman/user/2fa", {
+            method: "PUT",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "token": token
+            },
+            body: JSON.stringify(forceNew)
+        });
+        return await resp.json() as TwoFactorResult;
+    }
+
+    public async enableTwoFactorAsync(code: string): Promise<void> {
+        const token: string | null = this.getToken();
+        if (token == null) throw new Error("ERROR_INVALID_PARAMETERS");
+        const resp: Response = await FetchHelper.fetchAsync("/api/pwdman/user/2fa", {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "token": token
+            },
+            body: JSON.stringify(code)
+        });
+        const ok: boolean = await resp.json() as boolean;
+        if (!ok) throw new Error("INFO_SEC_KEY_INVALID");
+        if (this.userInfo != null) {
+            this.userInfo.requires2FA = true;
+        }
+    }
+
+    public async disableTwoFactorAsync(): Promise<void> {
+        const token: string | null = this.getToken();
+        if (token == null) throw new Error("ERROR_INVALID_PARAMETERS");
+        await FetchHelper.fetchAsync("/api/pwdman/user/2fa", {
+            method: "DELETE",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "token": token
+            }
+        });
+        if (this.userInfo != null) {
+            this.userInfo.requires2FA = false;
+        }
+    }
+
 }

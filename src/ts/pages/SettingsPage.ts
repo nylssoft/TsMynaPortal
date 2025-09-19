@@ -26,8 +26,8 @@ export class SettingsPage implements Page {
         Controls.createAlert(alertDiv, pageContext.locale.translateError(error));
     }
 
-    private async renderEditAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {    
-        let userDetails: UserInfoResult |null = null;
+    private async renderEditAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
+        let userDetails: UserInfoResult | null = null;
         if (pageContext.authenticationClient.isLoggedIn()) {
             userDetails = await pageContext.authenticationClient.getUserInfoWithDetailsAsync();
         }
@@ -128,6 +128,18 @@ export class SettingsPage implements Page {
         input2FA.role = "switch";
         Controls.createLabel(divSwitch2FA, "switch-2fa-id", "form-check-label", pageContext.locale.translate("OPTION_TWO_FACTOR"));
         input2FA.checked = userDetails.requires2FA;
+        if (userDetails.requires2FA) {
+            input2FA.addEventListener("change", async (_: Event) => {
+                await pageContext.authenticationClient.disableTwoFactorAsync();
+                await pageContext.renderAsync();
+            });
+        } else {
+            input2FA.addEventListener("change", async (_: Event) => {
+                pageContext.pageType = "TWO_FACTOR_EDIT";
+                pageContext.settings.twoFactorChanged = false;
+                await pageContext.renderAsync();
+            });
+        }
         // switch allow password reset
         const divRowAllowPwdReset: HTMLDivElement = Controls.createDiv(grid, "row mt-3");
         const divColAllowPwdReset: HTMLDivElement = Controls.createDiv(divRowAllowPwdReset, "col");
