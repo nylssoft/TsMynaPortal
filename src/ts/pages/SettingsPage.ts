@@ -129,10 +129,9 @@ export class SettingsPage implements Page {
         Controls.createLabel(divSwitch2FA, "switch-2fa-id", "form-check-label", pageContext.locale.translate("OPTION_TWO_FACTOR"));
         input2FA.checked = userDetails.requires2FA;
         if (userDetails.requires2FA) {
-            input2FA.addEventListener("change", async (_: Event) => {
-                await pageContext.authenticationClient.disableTwoFactorAsync();
-                await pageContext.renderAsync();
-            });
+            input2FA.setAttribute("data-bs-target", "#confirmationdialog-id");
+            input2FA.setAttribute("data-bs-toggle", "modal");
+            input2FA.addEventListener("click", (e: Event) => e.preventDefault());
         } else {
             input2FA.addEventListener("change", async (_: Event) => {
                 pageContext.pageType = "TWO_FACTOR_EDIT";
@@ -169,5 +168,19 @@ export class SettingsPage implements Page {
         const infoElem: HTMLDivElement = Controls.createDiv(divColStorage, "alert alert-success");
         infoElem.setAttribute("role", "alert");
         Controls.createParagraph(infoElem, undefined, storageMsg);
+        // render disable two factor confirmation dialog
+        Controls.createConfirmationDialog(
+            parent,
+            pageContext.locale.translate("OPTION_TWO_FACTOR"),
+            pageContext.locale.translate("INFO_REALLY_DEACTIVATE_TWO_FACTOR"),
+            pageContext.locale.translate("BUTTON_YES"),
+            pageContext.locale.translate("BUTTON_NO"));
+        document.getElementById("confirmationyesbutton-id")!.addEventListener("click", async (e: Event) => await this.onDisable2FA(e, pageContext));
+    }
+
+    private async onDisable2FA(e: Event, pageContext: PageContext): Promise<void> {
+        e.preventDefault();
+        await pageContext.authenticationClient.disableTwoFactorAsync();
+        await pageContext.renderAsync();
     }
 }
