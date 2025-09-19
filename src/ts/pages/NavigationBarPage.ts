@@ -33,11 +33,11 @@ export class NavigationBarPage implements Page {
                 this.createNavItem(ul, pageContext, "BUTTON_LOGIN", new ShowLoginPageAction());
             }
         }
-        this.createNavItem(ul, pageContext, "ABOUT", new ShowAboutPageAction());
         this.createNavItem(ul, pageContext, "SETTINGS", new ShowSettingsPageAction());
         if (pageContext.authenticationClient.isLoggedIn() || pageContext.authenticationClient.isRequiresPin() || pageContext.authenticationClient.isRequiresPass2()) {
             this.createNavItem(ul, pageContext, "BUTTON_LOGOUT", new LogoutAction());
         }
+        this.createNavItem(ul, pageContext, "ABOUT", new ShowAboutPageAction());
     }
 
     private createNavBar(parent: HTMLElement, pageContext: PageContext, label: string): HTMLUListElement {
