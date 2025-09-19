@@ -117,14 +117,13 @@ export class AuthenticationClient {
      * Logs out the user by clearing the auth result and long-lived token.
      */
     public async logoutAsync(): Promise<void> {
-        const token: string | null = this.getToken();
-        if (token != null) {
+        if (this.isLoggedIn()) {
             try {
                 const user: UserInfoResult | null = await this.getUserInfoAsync();
                 if (user != null) {
                     window.sessionStorage.removeItem(Security.getSessionStorageKey(user));
                 }
-                await FetchHelper.fetchAsync("/api/pwdman/logout", { headers: { "token": token } });
+                await FetchHelper.fetchAsync("/api/pwdman/logout", { headers: { "token": this.getToken()! } });
             } catch (error: Error | unknown) {
                 console.error("Logout failed:", error);
                 window.sessionStorage.clear();
