@@ -11,14 +11,28 @@ export class SettingsPage implements Page {
     pageType: PageType = "SETTINGS";
 
     async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
-        const userDetails: UserInfoResult = await pageContext.authenticationClient.getUserInfoWithDetailsAsync();
+        const alertDiv: HTMLDivElement = Controls.createDiv(parent);
+        alertDiv.id = "alertdiv-id";
+        try {
+            await this.renderEditAsync(parent, pageContext);
+        }
+        catch (error: Error | unknown) {
+            this.handleError(error, pageContext);
+        }
+    }
+
+    private handleError(error: Error | unknown, pageContext: PageContext) {
+        const alertDiv: HTMLDivElement = document.getElementById("alertdiv-id") as HTMLDivElement;
+        Controls.createAlert(alertDiv, pageContext.locale.translateError(error));
+    }
+
+    private async renderEditAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {    
+        let userDetails: UserInfoResult |null = null;
+        if (pageContext.authenticationClient.isLoggedIn()) {
+            userDetails = await pageContext.authenticationClient.getUserInfoWithDetailsAsync();
+        }
         const grid: HTMLDivElement = Controls.createDiv(parent, "card p-4 shadow-sm");
         grid.style.maxWidth = "400px";
-        // storage info
-        const divRowStorage: HTMLDivElement = Controls.createDiv(grid, "row align-items-center");
-        const divColStorage: HTMLDivElement = Controls.createDiv(divRowStorage, "col");
-        const storageMsg: string = pageContext.locale.translateWithArgs("INFO_STORAGE_1_2", [DocumentService.formatSize(userDetails.usedStorage), DocumentService.formatSize(userDetails.storageQuota)]);
-        Controls.createParagraph(divColStorage, undefined, storageMsg);
         // select theme
         const divRow1: HTMLDivElement = Controls.createDiv(grid, "row g-3 align-items-center mb-3");
         const divCol11: HTMLDivElement = Controls.createDiv(divRow1, "col-4");
@@ -68,6 +82,9 @@ export class SettingsPage implements Page {
             radioGerman.checked = true;
         } else {
             radioEnglish.checked = true;
+        }
+        if (userDetails == null) {
+            return;
         }
         // switch keep login
         const divRowKeepLogin: HTMLDivElement = Controls.createDiv(grid, "row mt-3");
@@ -133,5 +150,12 @@ export class SettingsPage implements Page {
             pageContext.pageType = "PASSWORD_EDIT";
             await pageContext.renderAsync();
         });
+        // storage info
+        const divRowStorage: HTMLDivElement = Controls.createDiv(grid, "row mt-4 align-items-center");
+        const divColStorage: HTMLDivElement = Controls.createDiv(divRowStorage, "col");
+        const storageMsg: string = pageContext.locale.translateWithArgs("INFO_STORAGE_1_2", [DocumentService.formatSize(userDetails.usedStorage), DocumentService.formatSize(userDetails.storageQuota)]);
+        const infoElem: HTMLDivElement = Controls.createDiv(divColStorage, "alert alert-success");
+        infoElem.setAttribute("role", "alert");
+        Controls.createParagraph(infoElem, undefined, storageMsg);
     }
 }

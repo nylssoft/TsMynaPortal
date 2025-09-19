@@ -44,7 +44,7 @@ export class Locale {
         "LABEL_LANGUAGE": "Sprache:",
         "LABEL_DESIGN": "Design:",
         "SETTINGS": "Einstellungen",
-        "INFO_STORAGE_1_2": "{0} von {1} werden verwendet.",
+        "INFO_STORAGE_1_2": "Es werden {0} von {1} Could-Speicher verwendet.",
         "BUTTON_SET_PIN": "PIN festlegen",
         "INFO_PIN": "Lege eine 4-6 stellige PIN fest, um dich zukünftig schneller anzumelden.",
 
@@ -93,7 +93,7 @@ export class Locale {
         "LABEL_LANGUAGE": "Language:",
         "LABEL_DESIGN": "Design:",
         "SETTINGS": "Settings",
-        "INFO_STORAGE_1_2": "{0} of {1} are used.",
+        "INFO_STORAGE_1_2": "{0} of {1} cloud storage is used.",
         "BUTTON_SET_PIN": "Set PIN",
         "INFO_PIN": "Set a 4-6 digit PIN to log in faster in the future.",
 
