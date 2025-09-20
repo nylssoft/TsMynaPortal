@@ -120,6 +120,8 @@ export class PasswordChangePage implements Page {
             await pageContext.authenticationClient.logoutAsync();
             pageContext.pageType = "LOGIN_USERNAME_PASSWORD";
             await pageContext.renderAsync();
+            const alertDiv: HTMLDivElement = document.getElementById("alertdiv-id") as HTMLDivElement;
+            Controls.createAlert(alertDiv, pageContext.locale.translate("INFO_NEW_PWD_SUCCESS"), "alert-success");
         }
         catch (error: Error | unknown) {
             this.handleError(error, pageContext);

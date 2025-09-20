@@ -35,6 +35,7 @@ export class LoginUsernamePasswordPage implements Page {
         passwordHelpDiv.id = "passwordhelp-id";
         const divSaySignedIn: HTMLDivElement = Controls.createDiv(divRows, "mb-3 form-check");
         const inputStaySignedIn: HTMLInputElement = Controls.createInput(divSaySignedIn, "checkbox", "staysignedin-id", "form-check-input");
+        inputStaySignedIn.checked = true;
         Controls.createLabel(divSaySignedIn, "staysignedin-id", "form-check-label", pageContext.locale.translate("STAY_SIGNED_IN"));
         const buttonLogin: HTMLButtonElement = Controls.createButton(divRows, "submit", pageContext.locale.translate("BUTTON_LOGIN"), "btn btn-primary");
         buttonLogin.addEventListener("click", async (e: MouseEvent) => this.onClickLoginWithUsernameAndPasswordAsync(e, pageContext, inputUsername, inputPassword, inputStaySignedIn, alertDiv));
