@@ -1,6 +1,6 @@
 import { FetchHelper } from "./utils/FetchHelper";
 import { Security } from "./utils/Security";
-import { AuthResult, ClientInfo, UserInfoResult, AuditResult, TwoFactorResult } from "./TypeDefinitions";
+import { AuthResult, ClientInfo, UserInfoResult, AuditResult, TwoFactorResult, ResetPassword } from "./TypeDefinitions";
 
 /**
  * Provides methods for managing authentication of the current user.
@@ -421,4 +421,43 @@ export class AuthenticationClient {
         }
     }
 
+    public async requestPasswordResetAsync(email: string, language: string, captchaResponse: string): Promise<void> {
+        await FetchHelper.fetchAsync(`/api/pwdman/resetpwd?locale=${language}&captcha=${captchaResponse}`, {
+            method: "POST",
+            headers: { "Accept": "application/json", "Content-Type": "application/json" },
+            body: JSON.stringify(email)
+        });
+    }
+
+    public async resetPasswordAsync(token: string, email: string, password: string): Promise<void> {
+        const resetPassword: ResetPassword = {
+            Token: token,
+            Email: email,
+            Password: password
+        }
+        await FetchHelper.fetchAsync("/api/pwdman/resetpwd2", {
+            method: "POST",
+            headers: { "Accept": "application/json", "Content-Type": "application/json" },
+            body: JSON.stringify(resetPassword)
+        });
+    }
+
+    public verifyPasswordStrength(pwd: string): boolean {
+        if (pwd.length >= 8) {
+            const cntSymbols: number = this.countCharacters(pwd, "!@$()=+-,:.");
+            const cntUpper: number = this.countCharacters(pwd, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+            const cntLower: number = this.countCharacters(pwd, "abcdefghijklmnopqrstuvwxyz");
+            const cntDigits: number = this.countCharacters(pwd, "0123456789");
+            return cntSymbols > 0 && cntUpper > 0 && cntLower > 0 && cntDigits > 0;
+        }
+        return false;
+    }
+
+    private countCharacters(txt: string, charset: string): number {
+        let cnt: number = 0;
+        for (let idx: number = 0; idx < txt.length; idx++) {
+            cnt += charset.includes(txt[idx]) ? 1 : 0;
+        }
+        return cnt;
+    }
 }

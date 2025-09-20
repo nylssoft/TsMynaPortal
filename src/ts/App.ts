@@ -15,9 +15,11 @@ import { NavigationBarPage } from "./pages/NavigationBarPage";
 import { NoteDetailPage } from "./pages/NoteDetailPage";
 import { PasswordChangePage } from "./pages/PasswordChangePage";
 import { PasswordItemDetailPage } from "./pages/PasswordItemDetailPage";
+import { RequestResetPasswordPage } from "./pages/RequestResetPasswordPage";
 import { PinEditPage } from "./pages/PinEditPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { TwoFactorEditPage } from "./pages/TwoFactorEditPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 
 /**
  * Main application class that initializes the application, handles authentication, and renders the UI.
@@ -64,6 +66,8 @@ export class App {
         pageContext.registerPage(new PinEditPage());
         pageContext.registerPage(new PasswordChangePage());
         pageContext.registerPage(new TwoFactorEditPage());
+        pageContext.registerPage(new RequestResetPasswordPage());
+        pageContext.registerPage(new ResetPasswordPage());
         await pageContext.locale.setLanguageAsync();
         const params = new URLSearchParams(window.location.search);
         if (params.has("vid")) {

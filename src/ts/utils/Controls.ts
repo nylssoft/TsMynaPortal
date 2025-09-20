@@ -157,11 +157,12 @@ export class Controls {
      * 
      * @param parent parent element to append the new alert to
      * @param msg message to display in the alert
+     * @param alertClass class name to assign to the alert (default is "alert-danger")
      * @returns HTMLDivElement representing the alert
      */
-    static createAlert(parent: HTMLElement, msg: string): HTMLDivElement {
+    static createAlert(parent: HTMLElement, msg: string, alertClass: string = "alert-danger"): HTMLDivElement {
         Controls.removeAllChildren(parent);
-        const alertDiv: HTMLDivElement = Controls.createDiv(parent, "alert alert-danger alert-dismissible");
+        const alertDiv: HTMLDivElement = Controls.createDiv(parent, `alert ${alertClass} alert-dismissible`);
         alertDiv.setAttribute("role", "alert");
         Controls.createDiv(alertDiv, "", msg);
         const alertButton: HTMLButtonElement = Controls.createButton(alertDiv, "button", "", "btn-close");

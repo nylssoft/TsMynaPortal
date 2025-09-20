@@ -50,7 +50,10 @@ export class PageContext {
     readonly appointment: Appointment = new Appointment();
     readonly vote: Appointment = new Appointment();
     readonly settings: Settings = new Settings();
-
+    // flag whether a page with a back button has changed data
+    dataChanged: boolean = false;
+    // email address for password reset
+    passwordResetEmail: string = "";
     // current page
     pageType: PageType = "LOGIN_USERNAME_PASSWORD";
     // all page registrations

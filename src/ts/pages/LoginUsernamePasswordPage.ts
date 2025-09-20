@@ -13,7 +13,7 @@ export class LoginUsernamePasswordPage implements Page {
     async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         parent = Controls.createDiv(parent, "card p-4 shadow-sm");
         parent.style.maxWidth = "400px";
-        const alertDiv: HTMLDivElement = Controls.createDiv(parent);
+        const alertDiv: HTMLDivElement = Controls.createDiv(parent, undefined, undefined, "alertdiv-id");
         const formElement: HTMLFormElement = Controls.createForm(parent, "align-items-center");
         const divRows: HTMLDivElement = Controls.createDiv(formElement, "row g-3 align-items-center");
         const divUsername: HTMLDivElement = Controls.createDiv(divRows, "mb-3");
@@ -38,6 +38,14 @@ export class LoginUsernamePasswordPage implements Page {
         Controls.createLabel(divSaySignedIn, "staysignedin-id", "form-check-label", pageContext.locale.translate("STAY_SIGNED_IN"));
         const buttonLogin: HTMLButtonElement = Controls.createButton(divRows, "submit", pageContext.locale.translate("BUTTON_LOGIN"), "btn btn-primary");
         buttonLogin.addEventListener("click", async (e: MouseEvent) => this.onClickLoginWithUsernameAndPasswordAsync(e, pageContext, inputUsername, inputPassword, inputStaySignedIn, alertDiv));
+        const aRequestResetPassword: HTMLAnchorElement = Controls.createAnchor(parent, "/resetpassword", pageContext.locale.translate("INFO_PWD_LOST"), "mt-3 d-block");
+        aRequestResetPassword.addEventListener("click", async (e: MouseEvent) => {
+            e.preventDefault();
+            pageContext.pageType = "REQUEST_RESET_PASSWORD";
+            pageContext.dataChanged = false;
+            pageContext.passwordResetEmail = "";
+            await pageContext.renderAsync();
+        });
     }
 
     private async onClickLoginWithUsernameAndPasswordAsync(e: MouseEvent, pageContext: PageContext, inputUsername: HTMLInputElement, inputPassword: HTMLInputElement, staySignedIn: HTMLInputElement, alertDiv: HTMLDivElement) {
