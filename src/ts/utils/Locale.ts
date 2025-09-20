@@ -47,6 +47,7 @@ export class Locale {
         "INFO_STORAGE_1_2": "Es werden {0} von {1} Could-Speicher verwendet.",
         "BUTTON_SET_PIN": "PIN festlegen",
         "INFO_PIN": "Lege eine 4-6 stellige PIN fest, um dich zukünftig schneller anzumelden.",
+        "INFO_LOGOUT_SUCCESS": "Du wurdest erfolgreich abgemeldet.",
 
         "ERROR_FILE_TOO_LARGE_1_2": "Die Datei {0} ist zu groß. Die Dateigröße ist {1}, aber höchstens 20MB sind erlaubt.",
         "ERROR_WRONG_DATA_PROTECTION_KEY": "Der Schlüssel zum Entschlüsseln der Daten ist ungültig oder fehlt. Bitte überprüfe deinen Schlüssel auf der Seite 'Datenschutz'.",
@@ -96,7 +97,8 @@ export class Locale {
         "INFO_STORAGE_1_2": "{0} of {1} cloud storage is used.",
         "BUTTON_SET_PIN": "Set PIN",
         "INFO_PIN": "Set a 4-6 digit PIN to log in faster in the future.",
-
+        "INFO_LOGOUT_SUCCESS": "You have been logged out successfully.",
+        
         "ERROR_FILE_TOO_LARGE_1_2": "The file {0} is too large. The file size is {1} but at most 20MB are allowed.",
         "ERROR_WRONG_DATA_PROTECTION_KEY": "The key to decrypt the data is invalid or missing. Please check your key on the 'Data Protection' page.",
         "ERROR_DESCRIPTION_MISSING": "The description is missing.",

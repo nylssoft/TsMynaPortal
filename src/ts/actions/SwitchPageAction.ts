@@ -24,11 +24,16 @@ export abstract class SwitchPageClickAction implements ClickAction {
         return this.switchPage;
     }
 
+    protected async afterRunAsync(paggeContext: PageContext): Promise<void> {
+        // No default implementation
+    }
+
     async runAsync(e: MouseEvent, pageContext: PageContext): Promise<void> {
         const nextPage: PageType = await this.beforeRunAsync(e, pageContext);
         e.preventDefault();
         pageContext.pageType = nextPage;
         await pageContext.renderAsync();
+        await this.afterRunAsync(pageContext);
     }
 
     isActive(pageContext: PageContext): boolean {
