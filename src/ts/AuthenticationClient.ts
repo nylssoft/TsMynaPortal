@@ -442,6 +442,30 @@ export class AuthenticationClient {
         });
     }
 
+    public async requestRegistrationAsync(email: string, language: string, captchaResponse: string): Promise<boolean> {
+        const resp: Response = await FetchHelper.fetchAsync(`/api/pwdman/register?locale=${language}&captcha=${captchaResponse}`, {
+            method: "POST",
+            headers: { "Accept": "application/json", "Content-Type": "application/json" },
+            body: JSON.stringify(email)
+        });
+        return await resp.json() as boolean;
+    }
+
+    public async registerAsync(token: string, email: string, username: string, password: string): Promise<UserInfoResult> {
+        const registerInfo = {
+            Username: username,
+            Password: password,
+            Email: email,
+            Token: token
+        };
+        const resp: Response = await FetchHelper.fetchAsync("/api/pwdman/profile", {
+            method: "POST",
+            headers: { "Accept": "application/json", "Content-Type": "application/json" },
+            body: JSON.stringify(registerInfo)
+        });
+        return await resp.json() as UserInfoResult;
+    }
+
     public verifyPasswordStrength(pwd: string): boolean {
         if (pwd.length >= 8) {
             const cntSymbols: number = this.countCharacters(pwd, "!@$()=+-,:.");

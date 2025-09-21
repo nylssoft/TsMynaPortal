@@ -10,6 +10,7 @@ import { PageContext, Page } from "../PageContext";
 import { PageType } from "../TypeDefinitions";
 import { ShowVotePageAction } from "../actions/ShowVotePageAction";
 import { ShowSettingsPageAction } from "../actions/ShowSettingsPageAction";
+import { ShowRegisterPageAction } from "../actions/ShowRegisterPageAction";
 
 /**
  * Page implementation for the navigation bar.
@@ -31,6 +32,7 @@ export class NavigationBarPage implements Page {
                 this.createNavItem(ul, pageContext, "DATA_PROTECTION", new ShowDataProtectionPageAction());
             } else {
                 this.createNavItem(ul, pageContext, "BUTTON_LOGIN", new ShowLoginPageAction());
+                this.createNavItem(ul, pageContext, "HEADER_REGISTER", new ShowRegisterPageAction());
             }
         }
         this.createGamesDropdown(ul, pageContext);

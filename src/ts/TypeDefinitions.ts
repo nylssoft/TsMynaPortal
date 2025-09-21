@@ -232,6 +232,15 @@ export type ResetPassword = {
   Password: string
 }
 
+// regiseter
+
+export type RegisterInfo = {
+  Username: string,
+  Password: string,
+  Email: string,
+  Token: string
+}
+
 /**
  * Type representing the different pages in the application.
  */
@@ -239,8 +248,8 @@ export type PageType = "LOGIN_USERNAME_PASSWORD" | "LOGIN_PIN" | "LOGIN_PASS2" |
   | "DATA_PROTECTION" | "NAVIGATION_BAR" | "CONTACT_DETAIL" | "NOTE_DETAIL" | "PASSWORD_ITEM_DETAIL"
   | "DIARY_DETAIL" | "DOCUMENT_EDIT" | "DOCUMENT_MOVE" | "APPOINTMENT_DETAIL" | "APPOINTMENT_VOTE"
   | "SETTINGS" | "PIN_EDIT" | "PASSWORD_EDIT" | "TWO_FACTOR_EDIT"
-  | "REQUEST_RESET_PASSWORD" | "RESET_PASSWORD";
+  | "REQUEST_RESET_PASSWORD" | "RESET_PASSWORD" | "REQUEST_REGISTER" | "REGISTER";
 
 export type DesktopTab = "BIRTHDAYS" | "CONTACTS" | "NOTES" | "PASSWORD_MANAGER" | "DIARY" | "DOCUMENTS" | "APPOINTMENTS";
 
-export const Version: string = "1.4.5";
+export const Version: string = "1.4.6";

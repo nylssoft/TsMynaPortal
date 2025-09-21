@@ -8,9 +8,8 @@ declare global {
     }
 }
 
-export class RequestResetPasswordPage implements Page {
-    hideNavBar?: boolean | undefined = true;
-    pageType: PageType = "REQUEST_RESET_PASSWORD";
+export class RequestRegisterPage implements Page {
+    pageType: PageType = "REQUEST_REGISTER";
 
     async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
@@ -24,12 +23,6 @@ export class RequestResetPasswordPage implements Page {
     }
 
     private async renderEditAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
-        // render action toolbar
-        const headingActions: HTMLHeadingElement = Controls.createHeading(parent, 4);
-        const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
-        iBack.setAttribute("role", "button");
-        iBack.addEventListener("click", async (e: Event) => await this.onBackAsync(e, pageContext));
-        Controls.createSpan(headingActions, "ms-4", pageContext.locale.translate("HEADER_RESET_PWD"));
         // render card
         const card: HTMLDivElement = Controls.createDiv(parent, "card p-4 shadow-sm");
         card.style.maxWidth = "400px";
@@ -37,7 +30,7 @@ export class RequestResetPasswordPage implements Page {
         // info message
         const infoElem: HTMLDivElement = Controls.createDiv(cardBody, "alert alert-warning");
         infoElem.setAttribute("role", "alert");
-        Controls.createParagraph(infoElem, undefined, pageContext.locale.translate("INFO_RESET_PWD"));
+        Controls.createParagraph(infoElem, undefined, pageContext.locale.translate("INFO_EMAIL_REGISTER"));
         // form
         const formElement: HTMLFormElement = Controls.createForm(cardBody, "align-items-center");
         // email address
@@ -128,12 +121,6 @@ export class RequestResetPasswordPage implements Page {
 
     // event callbacks
 
-    private async onBackAsync(e: Event, pageContext: PageContext): Promise<void> {
-        e.preventDefault();
-        pageContext.pageType = "LOGIN_USERNAME_PASSWORD";
-        await pageContext.renderAsync();
-    }
-
     private async onContinue(e: Event, pageContext: PageContext): Promise<void> {
         e.preventDefault();
         try {
@@ -143,8 +130,14 @@ export class RequestResetPasswordPage implements Page {
                 throw new Error("ERROR_INVALID_EMAIL");
             }
             const captchaResponse: string = this.getCaptchaResponse();
-            await pageContext.authenticationClient.requestPasswordResetAsync(val, pageContext.locale.getLanguage(), captchaResponse);
-            pageContext.pageType = "RESET_PASSWORD";
+            const ok: boolean = await pageContext.authenticationClient.requestRegistrationAsync(val, pageContext.locale.getLanguage(), captchaResponse);
+            if (!ok) {
+                this.resetCaptchaWidget();
+                const alertDiv: HTMLDivElement = document.getElementById("alertdiv-id") as HTMLDivElement;
+                Controls.createAlert(alertDiv, pageContext.locale.translateWithArgs("ERROR_EMAIL_NOT_VALIDATED_1", [val]), "alert-success");
+                return;
+            }
+            pageContext.pageType = "REGISTER";
             pageContext.dataChanged = false;
             pageContext.dataEmail = val;
             await pageContext.renderAsync();

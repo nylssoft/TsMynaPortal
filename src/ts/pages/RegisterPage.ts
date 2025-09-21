@@ -1,10 +1,10 @@
 import { Page, PageContext } from "../PageContext";
-import { PageType } from "../TypeDefinitions";
+import { PageType, UserInfoResult } from "../TypeDefinitions";
 import { Controls } from "../utils/Controls";
 
-export class ResetPasswordPage implements Page {
+export class RegisterPage implements Page {
     hideNavBar?: boolean | undefined = true;
-    pageType: PageType = "RESET_PASSWORD";
+    pageType: PageType = "REGISTER";
 
     async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
@@ -24,7 +24,7 @@ export class ResetPasswordPage implements Page {
         iBack.setAttribute("role", "button");
         iBack.setAttribute("data-bs-target", "#confirmationdialog-id");
         iBack.addEventListener("click", async (e: Event) => await this.onBackAsync(e, pageContext));
-        Controls.createSpan(headingActions, "ms-4", pageContext.locale.translate("HEADER_NEW_PWD"));
+        Controls.createSpan(headingActions, "ms-4", pageContext.locale.translate("HEADER_REGISTER"));
         // render card
         const card: HTMLDivElement = Controls.createDiv(parent, "card p-4 shadow-sm");
         card.style.maxWidth = "400px";
@@ -39,12 +39,20 @@ export class ResetPasswordPage implements Page {
         // security key
         const divSecKeyRow: HTMLDivElement = Controls.createDiv(formElement, "row align-items-center");
         const divSecKey: HTMLDivElement = Controls.createDiv(divSecKeyRow, "mb-3");
-        Controls.createLabel(divSecKey, "code-id", "form-label", pageContext.locale.translate("LABEL_SEC_KEY"));
+        Controls.createLabel(divSecKey, "code-id", "form-label", pageContext.locale.translate("LABEL_REG_CODE"));
         const inputSecKey: HTMLInputElement = Controls.createInput(divSecKey, "text", "code-id", "form-control");
         inputSecKey.setAttribute("autocomplete", "off");
         inputSecKey.setAttribute("spellcheck", "false");
         inputSecKey.addEventListener("input", (e: Event) => this.onInput(e, pageContext));
         inputSecKey.focus();
+        // username
+        const divUsernameRow: HTMLDivElement = Controls.createDiv(formElement, "row align-items-center");
+        const divUsername: HTMLDivElement = Controls.createDiv(divUsernameRow, "mb-3");
+        Controls.createLabel(divUsername, "username-id", "form-label", pageContext.locale.translate("LABEL_USERNAME"));
+        const inputUsername: HTMLInputElement = Controls.createInput(divUsername, "text", "username-id", "form-control");
+        inputUsername.setAttribute("autocomplete", "off");
+        inputUsername.setAttribute("spellcheck", "false");
+        inputUsername.addEventListener("input", (e: Event) => this.onInput(e, pageContext));
         // new password
         const divNewPwdRow: HTMLDivElement = Controls.createDiv(formElement, "row align-items-center");
         const divNewPwd: HTMLDivElement = Controls.createDiv(divNewPwdRow, "mb-3");
@@ -67,7 +75,7 @@ export class ResetPasswordPage implements Page {
         // render back confirmation dialog
         Controls.createConfirmationDialog(
             parent,
-            pageContext.locale.translate("HEADER_NEW_PWD"),
+            pageContext.locale.translate("HEADER_REGISTER"),
             pageContext.locale.translate("CONFIRMATION_SAVE"),
             pageContext.locale.translate("BUTTON_YES"),
             pageContext.locale.translate("BUTTON_NO"));
@@ -84,7 +92,7 @@ export class ResetPasswordPage implements Page {
     private async onBackAsync(e: Event, pageContext: PageContext): Promise<void> {
         e.preventDefault();
         if (!pageContext.dataChanged) {
-            pageContext.pageType = "LOGIN_USERNAME_PASSWORD";
+            pageContext.pageType = "REQUEST_REGISTER";
             await pageContext.renderAsync();
         }
     }
@@ -106,24 +114,31 @@ export class ResetPasswordPage implements Page {
     private async onSaveAsync(e: Event, pageContext: PageContext): Promise<void> {
         e.preventDefault();
         try {
+            const seckey: HTMLInputElement = document.getElementById("code-id") as HTMLInputElement;
+            const username: HTMLInputElement = document.getElementById("username-id") as HTMLInputElement;
             const newpwd: HTMLInputElement = document.getElementById("newpwd-id") as HTMLInputElement;
             const confirmpwd: HTMLInputElement = document.getElementById("confirmpwd-id") as HTMLInputElement;
-            const seckey: HTMLInputElement = document.getElementById("code-id") as HTMLInputElement;
-            if (newpwd.value.length == 0 || seckey.value.length == 0 || confirmpwd.value.length == 0) {
-                throw new Error("ERROR_MISSING_INPUT");
+            if (seckey.value.trim().length == 0) {
+                throw new Error("ERROR_MISSING_REG_CODE");
+            }
+            if (username.value.trim().length == 0) {
+                throw new Error("ERROR_MISSING_NAME")
+            }
+            if (newpwd.value.length == 0) {
+                throw new Error("ERROR_MISSING_PWD");
             }
             if (!pageContext.authenticationClient.verifyPasswordStrength(newpwd.value)) {
                 throw new Error("INFO_PWD_NOT_STRONG_ENOUGH");
             }
             if (newpwd.value != confirmpwd.value) {
-                throw new Error("INFO_PWD_NOT_MATCH");
+                throw new Error("ERROR_MISMATCH_CONFIRM_PWD");
             }
-            await pageContext.authenticationClient.resetPasswordAsync(seckey.value, pageContext.dataEmail, newpwd.value);
+            const user: UserInfoResult = await pageContext.authenticationClient.registerAsync(seckey.value.trim(), pageContext.dataEmail, username.value.trim(), newpwd.value);
             pageContext.dataChanged = false;
             pageContext.pageType = "LOGIN_USERNAME_PASSWORD";
             await pageContext.renderAsync();
             const alertDiv: HTMLDivElement = document.getElementById("alertdiv-id") as HTMLDivElement;
-            Controls.createAlert(alertDiv, pageContext.locale.translate("INFO_NEW_PWD_SUCCESS"), "alert-success");
+            Controls.createAlert(alertDiv, pageContext.locale.translateWithArgs("INFO_REGISTER_SUCCESS_1", [user.name]), "alert-success");
         }
         catch (error: Error | unknown) {
             this.handleError(error, pageContext);

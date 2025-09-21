@@ -52,8 +52,8 @@ export class PageContext {
     readonly settings: Settings = new Settings();
     // flag whether a page with a back button has changed data
     dataChanged: boolean = false;
-    // email address for password reset
-    passwordResetEmail: string = "";
+    // email address for password reset request or registration request
+    dataEmail: string = "";
     // current page
     pageType: PageType = "LOGIN_USERNAME_PASSWORD";
     // all page registrations
