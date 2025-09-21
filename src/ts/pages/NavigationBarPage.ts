@@ -33,6 +33,7 @@ export class NavigationBarPage implements Page {
                 this.createNavItem(ul, pageContext, "BUTTON_LOGIN", new ShowLoginPageAction());
             }
         }
+        this.createGamesDropdown(ul, pageContext);
         this.createNavItem(ul, pageContext, "SETTINGS", new ShowSettingsPageAction());
         if (pageContext.authenticationClient.isLoggedIn() || pageContext.authenticationClient.isRequiresPin() || pageContext.authenticationClient.isRequiresPass2()) {
             this.createNavItem(ul, pageContext, "BUTTON_LOGOUT", new LogoutAction());
@@ -79,5 +80,32 @@ export class NavigationBarPage implements Page {
             a.setAttribute("aria-current", "page");
         }
         return a;
+    }
+
+    private createGamesDropdown(parent: HTMLElement, pageContext: PageContext): HTMLLIElement {
+        const li: HTMLLIElement = Controls.createElement(parent, "li", "nav-item dropdown") as HTMLLIElement;
+        const a: HTMLAnchorElement = Controls.createElement(li, "a", "nav-link dropdown-toggle", pageContext.locale.translate("GAMES")) as HTMLAnchorElement;
+        a.setAttribute("role", "button");
+        a.setAttribute("data-bs-toggle", "dropdown");
+        a.setAttribute("aria-expanded", "false");
+        a.href = "#";
+        const ul: HTMLUListElement = Controls.createElement(li, "ul", "dropdown-menu") as HTMLUListElement;
+        const baseurl: string = window.location.hostname == "localhost" ? "https://www.stockfleth.eu" : "";
+        this.createExternalUrl(ul, pageContext, "ARKANOID", `${baseurl}/arkanoid`);
+        this.createExternalUrl(ul, pageContext, "BACKGAMMON", `${baseurl}/backgammon`);
+        this.createExternalUrl(ul, pageContext, "CHESS", `${baseurl}/chess`);
+        this.createExternalUrl(ul, pageContext, "SKAT", `${baseurl}/skat`);
+        this.createExternalUrl(ul, pageContext, "TETRIS_ARCADE", `${baseurl}/webpack/tstetris`);
+        this.createExternalUrl(ul, pageContext, "TETRIS", `${baseurl}/tetris`);
+        return li;
+    }
+
+    private createExternalUrl(parent: HTMLElement, pageContext: PageContext, label: string, url: string): HTMLLIElement {
+        const li: HTMLLIElement = Controls.createElement(parent, "li") as HTMLLIElement;
+        const a: HTMLAnchorElement = Controls.createElement(li, "a", "dropdown-item", pageContext.locale.translate(label)) as HTMLAnchorElement;
+        a.href = url;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        return li;
     }
 }
