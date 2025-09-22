@@ -161,6 +161,16 @@ export class SettingsPage implements Page {
             pageContext.pageType = "PASSWORD_EDIT";
             await pageContext.renderAsync();
         });
+        // logout button
+        const divRowLogout: HTMLDivElement = Controls.createDiv(grid, "row mt-3 align-items-center");
+        const divColLogout: HTMLDivElement = Controls.createDiv(divRowLogout, "col");
+        const buttonLogout: HTMLButtonElement = Controls.createButton(divColLogout, "button", pageContext.locale.translate("BUTTON_LOGOUT"), "btn btn-primary");
+        buttonLogout.addEventListener("click", async (e: Event) => {
+            e.preventDefault();
+            await pageContext.authenticationClient.logoutAsync();
+            pageContext.pageType = "LOGIN_USERNAME_PASSWORD";
+            await pageContext.renderAsync();
+        });
         // storage info
         const divRowStorage: HTMLDivElement = Controls.createDiv(grid, "row mt-4 align-items-center");
         const divColStorage: HTMLDivElement = Controls.createDiv(divRowStorage, "col");
@@ -168,6 +178,14 @@ export class SettingsPage implements Page {
         const infoElem: HTMLDivElement = Controls.createDiv(divColStorage, "alert alert-success");
         infoElem.setAttribute("role", "alert");
         Controls.createParagraph(infoElem, undefined, storageMsg);
+        // delete account button
+        const divRowDeleteAccount: HTMLDivElement = Controls.createDiv(grid, "row mt-3 align-items-center");
+        const divColDeleteAccount: HTMLDivElement = Controls.createDiv(divRowDeleteAccount, "col");
+        const buttonDeleteAccount: HTMLButtonElement = Controls.createButton(divColDeleteAccount, "button", pageContext.locale.translate("BUTTON_DELETE_ACCOUNT"), "btn btn-danger");
+        buttonDeleteAccount.addEventListener("click", async (e: Event) => {
+            e.preventDefault();
+            this.handleError(new Error("Not implemented yet!"), pageContext);
+        });
         // render disable two factor confirmation dialog
         Controls.createConfirmationDialog(
             parent,

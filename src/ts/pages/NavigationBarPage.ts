@@ -1,5 +1,4 @@
 import { ClickAction } from "../actions/ClickAction";
-import { LogoutAction } from "../actions/LogoutAction";
 import { ShowAboutPageAction } from "../actions/ShowAboutPageAction";
 import { ShowDataProtectionPageAction } from "../actions/ShowDataProtectionPageAction";
 import { ShowDesktopPageAction } from "../actions/ShowDesktopPageAction";
@@ -37,9 +36,6 @@ export class NavigationBarPage implements Page {
         }
         this.createGamesDropdown(ul, pageContext);
         this.createNavItem(ul, pageContext, "SETTINGS", new ShowSettingsPageAction());
-        if (pageContext.authenticationClient.isLoggedIn() || pageContext.authenticationClient.isRequiresPin() || pageContext.authenticationClient.isRequiresPass2()) {
-            this.createNavItem(ul, pageContext, "BUTTON_LOGOUT", new LogoutAction());
-        }
         this.createNavItem(ul, pageContext, "ABOUT", new ShowAboutPageAction());
     }
 

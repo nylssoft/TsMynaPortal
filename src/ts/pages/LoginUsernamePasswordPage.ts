@@ -22,7 +22,6 @@ export class LoginUsernamePasswordPage implements Page {
         inputUsername.setAttribute("aria-describedby", "usernamehelp-id");
         inputUsername.setAttribute("autocomplete", "off");
         inputUsername.setAttribute("spellcheck", "false");
-        inputUsername.focus();
         const usernameHelpDiv: HTMLDivElement = Controls.createDiv(divUsername, "form-text", pageContext.locale.translate("INFO_ENTER_USERNAME"));
         usernameHelpDiv.id = "usernamehelp-id";
         const divPassword: HTMLDivElement = Controls.createDiv(divRows, "mb-3");
