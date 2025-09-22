@@ -44,7 +44,7 @@ export class LoginUsernamePasswordPage implements Page {
             e.preventDefault();
             pageContext.pageType = "REQUEST_RESET_PASSWORD";
             pageContext.dataChanged = false;
-            pageContext.passwordResetEmail = "";
+            pageContext.dataEmail = "";
             await pageContext.renderAsync();
         });
     }
