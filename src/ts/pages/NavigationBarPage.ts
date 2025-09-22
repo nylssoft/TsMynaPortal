@@ -93,12 +93,12 @@ export class NavigationBarPage implements Page {
         a.href = "#";
         const ul: HTMLUListElement = Controls.createElement(li, "ul", "dropdown-menu") as HTMLUListElement;
         const baseurl: string = window.location.hostname == "localhost" ? "https://www.stockfleth.eu" : "";
-        this.createExternalUrl(ul, pageContext, "ARKANOID", `${baseurl}/arkanoid`);
-        this.createExternalUrl(ul, pageContext, "BACKGAMMON", `${baseurl}/backgammon`);
-        this.createExternalUrl(ul, pageContext, "CHESS", `${baseurl}/chess`);
-        this.createExternalUrl(ul, pageContext, "SKAT", `${baseurl}/skat`);
+        this.createExternalUrl(ul, pageContext, "ARKANOID", `${baseurl}/arkanoid?nomenu=true`);
+        this.createExternalUrl(ul, pageContext, "BACKGAMMON", `${baseurl}/backgammon?nomenu=true`);
+        this.createExternalUrl(ul, pageContext, "CHESS", `${baseurl}/chess?nomenu=true`);
+        this.createExternalUrl(ul, pageContext, "SKAT", `${baseurl}/skat?nomenu=true`);
         this.createExternalUrl(ul, pageContext, "TETRIS_ARCADE", `${baseurl}/webpack/tstetris`);
-        this.createExternalUrl(ul, pageContext, "TETRIS", `${baseurl}/tetris`);
+        this.createExternalUrl(ul, pageContext, "TETRIS", `${baseurl}/tetris?nomenu=true`);
         return li;
     }
 

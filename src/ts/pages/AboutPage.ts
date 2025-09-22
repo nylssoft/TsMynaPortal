@@ -21,7 +21,7 @@ export class AboutPage implements Page {
         aGithub.setAttribute("target", "_blank");
         aGithub.setAttribute("rel", "noopener noreferrer");
         const divLegal: HTMLDivElement = Controls.createDiv(aboutMessage, "mt-2");
-        const aLegal: HTMLAnchorElement = Controls.createAnchor(divLegal, `${baseUrl}/view?page=legal`, pageContext.locale.translate("INFO_LEGAL_NOTICE"));
+        const aLegal: HTMLAnchorElement = Controls.createAnchor(divLegal, `${baseUrl}/view?page=legal&nomenu=true`, pageContext.locale.translate("INFO_LEGAL_NOTICE"));
         aLegal.setAttribute("target", "_blank");
         Controls.createHeading(card, 5, "card-title", pageContext.locale.translate("CARD_TITLE_PERSONAL"));
         const carouselDiv: HTMLDivElement = Controls.createDiv(card, "carousel slide", undefined, "carousel-id");
@@ -34,17 +34,17 @@ export class AboutPage implements Page {
             `${baseUrl}/images/markdown/welcome/restaurants-preview.png`,
             "CAROUSEL_TITLE_RESTAURANTS",
             "CAROUSEL_TEXT_RESTAURANTS",
-            `${baseUrl}/view?page=restaurants`, true);
+            `${baseUrl}/view?page=restaurants&nomenu=true`, true);
         this.createCarouselItem(pageContext, carouselInner,
             `${baseUrl}/images/markdown/welcome/bildergalerie-preview.png`,
             "CAROUSEL_TITLE_IMAGE_GALLERY",
             "CAROUSEL_TEXT_IMAGE_GALLERY",
-            `${baseUrl}/slideshow?shuffle=false`);
+            `${baseUrl}/slideshow?shuffle=false&nomenu=true`);
         this.createCarouselItem(pageContext, carouselInner,
             `${baseUrl}/images/markdown/welcome/concerts-preview.png`,
             "CAROUSEL_TITLE_CONCERTS",
             "CAROUSEL_TEXT_CONCERTS",
-            `${baseUrl}/view?page=concerts`);
+            `${baseUrl}/view?page=concerts&nomenu=true`);
         this.createCarouselItem(pageContext, carouselInner,
             `${baseUrl}/images/markdown/welcome/bilderrahmen-preview.png`,
             "CAROUSEL_TITLE_PICTURE_FRAMES",
