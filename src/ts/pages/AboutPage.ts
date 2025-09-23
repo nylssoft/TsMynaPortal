@@ -21,8 +21,8 @@ export class AboutPage implements Page {
         aGithub.setAttribute("target", "_blank");
         aGithub.setAttribute("rel", "noopener noreferrer");
         const divLegal: HTMLDivElement = Controls.createDiv(aboutMessage, "mt-2");
-        const aLegal: HTMLAnchorElement = Controls.createAnchor(divLegal, `${baseUrl}/view?page=legal&nomenu=true`, pageContext.locale.translate("INFO_LEGAL_NOTICE"));
-        aLegal.setAttribute("target", "_blank");
+        const aLegal: HTMLAnchorElement = Controls.createAnchor(divLegal, "/legal", pageContext.locale.translate("INFO_LEGAL_NOTICE"));
+        aLegal.addEventListener("click", async (e: Event) => await this.showMarkdownPageAsync(pageContext, e, "legal"));
         Controls.createHeading(card, 5, "card-title", pageContext.locale.translate("CARD_TITLE_PERSONAL"));
         const carouselDiv: HTMLDivElement = Controls.createDiv(card, "carousel slide", undefined, "carousel-id");
         const indicatorsDiv: HTMLDivElement = Controls.createDiv(carouselDiv, "carousel-indicators");
@@ -30,31 +30,32 @@ export class AboutPage implements Page {
             this.createCarouselIndicator(indicatorsDiv, i, i === 0);
         }
         const carouselInner: HTMLDivElement = Controls.createDiv(carouselDiv, "carousel-inner");
-        this.createCarouselItem(pageContext, carouselInner,
+        const item1: HTMLDivElement = this.createCarouselItem(pageContext, carouselInner,
             `${baseUrl}/images/markdown/welcome/restaurants-preview.png`,
             "CAROUSEL_TITLE_RESTAURANTS",
             "CAROUSEL_TEXT_RESTAURANTS",
-            `${baseUrl}/view?page=restaurants&nomenu=true`, true);
-        this.createCarouselItem(pageContext, carouselInner,
+            true);
+        item1.addEventListener("click", async (e: Event) => await this.showMarkdownPageAsync(pageContext, e, "restaurants"));
+        const item2: HTMLDivElement = this.createCarouselItem(pageContext, carouselInner,
             `${baseUrl}/images/markdown/welcome/bildergalerie-preview.png`,
             "CAROUSEL_TITLE_IMAGE_GALLERY",
-            "CAROUSEL_TEXT_IMAGE_GALLERY",
-            `${baseUrl}/slideshow?shuffle=false&nomenu=true`);
-        this.createCarouselItem(pageContext, carouselInner,
+            "CAROUSEL_TEXT_IMAGE_GALLERY");
+        item2.addEventListener("click", () => window.open(`${baseUrl}/slideshow?shuffle=false&nomenu=true`, "_blank"));
+        const item3: HTMLDivElement = this.createCarouselItem(pageContext, carouselInner,
             `${baseUrl}/images/markdown/welcome/concerts-preview.png`,
             "CAROUSEL_TITLE_CONCERTS",
-            "CAROUSEL_TEXT_CONCERTS",
-            `${baseUrl}/view?page=concerts&nomenu=true`);
-        this.createCarouselItem(pageContext, carouselInner,
+            "CAROUSEL_TEXT_CONCERTS");
+        item3.addEventListener("click", async (e: Event) => await this.showMarkdownPageAsync(pageContext, e, "concerts"));
+        const item4: HTMLDivElement = this.createCarouselItem(pageContext, carouselInner,
             `${baseUrl}/images/markdown/welcome/bilderrahmen-preview.png`,
             "CAROUSEL_TITLE_PICTURE_FRAMES",
-            "CAROUSEL_TEXT_PICTURE_FRAMES",
-            `${baseUrl}/webpack/tsphotoframe`);
-        this.createCarouselItem(pageContext, carouselInner,
+            "CAROUSEL_TEXT_PICTURE_FRAMES");
+        item4.addEventListener("click", () => window.open(`${baseUrl}/webpack/tsphotoframe`, "_blank"));
+        const item5: HTMLDivElement = this.createCarouselItem(pageContext, carouselInner,
             `${baseUrl}/images/markdown/welcome/baerbel-preview.png`,
             "CAROUSEL_TITLE_PAINTER",
-            "CAROUSEL_TEXT_PAINTER",
-            "https://www.baerbel-jentz.de");
+            "CAROUSEL_TEXT_PAINTER");
+        item5.addEventListener("click", () => window.open("https://www.baerbel-jentz.de", "_blank"));
         const buttonPrev: HTMLButtonElement = Controls.createButton(carouselDiv, "button", "", "carousel-control-prev");
         buttonPrev.setAttribute("data-bs-target", "#carousel-id");
         buttonPrev.setAttribute("data-bs-slide", "prev");
@@ -73,7 +74,7 @@ export class AboutPage implements Page {
         return button;
     }
 
-    private createCarouselItem(pageContext: PageContext, parent: HTMLDivElement, imgSrc: string, title: string, description: string, link: string, active: boolean = false): HTMLDivElement {
+    private createCarouselItem(pageContext: PageContext, parent: HTMLDivElement, imgSrc: string, title: string, description: string, active: boolean = false): HTMLDivElement {
         const carouselItem: HTMLDivElement = Controls.createDiv(parent, "carousel-item");
         if (active) {
             carouselItem.classList.add("active");
@@ -85,7 +86,13 @@ export class AboutPage implements Page {
         Controls.createElement(caption, "h5", undefined, pageContext.locale.translate(title));
         Controls.createElement(caption, "p", undefined, pageContext.locale.translate(description));
         carouselItem.style.cursor = "pointer";
-        carouselItem.addEventListener("click", () => window.open(link, "_blank"));
         return carouselItem;
+    }
+
+    private async showMarkdownPageAsync(pageContext: PageContext, e: Event, markdownPage: string): Promise<void> {
+        e.preventDefault();
+        pageContext.pageType = "VIEW_MARKDOWN";
+        pageContext.markdownPage = markdownPage;
+        await pageContext.renderAsync();
     }
 }

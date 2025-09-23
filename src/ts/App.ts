@@ -22,6 +22,7 @@ import { TwoFactorEditPage } from "./pages/TwoFactorEditPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { RequestRegisterPage } from "./pages/RequestRegisterPage";
 import { RegisterPage } from "./pages/RegisterPage";
+import { ViewMarkdownPage } from "./pages/ViewMarkdownPage";
 
 /**
  * Main application class that initializes the application, handles authentication, and renders the UI.
@@ -72,6 +73,7 @@ export class App {
         pageContext.registerPage(new ResetPasswordPage());
         pageContext.registerPage(new RequestRegisterPage());
         pageContext.registerPage(new RegisterPage());
+        pageContext.registerPage(new ViewMarkdownPage());
         await pageContext.locale.setLanguageAsync();
         const params = new URLSearchParams(window.location.search);
         if (params.has("vid")) {
