@@ -68,6 +68,7 @@ export class Locale {
         "CAROUSEL_TEXT_PAINTER": "Meine Schwägerin ist Hobby-Malerin",
         "INFO_LEGAL_NOTICE": "Impressum",
         "INFO_SOURCE_CODE": "Quellcode",
+        "INFO_ACCOUNT_DELETED": "Dein Konto wurde erfolgreich gelöscht.",
 
         "ERROR_FILE_TOO_LARGE_1_2": "Die Datei {0} ist zu groß. Die Dateigröße ist {1}, aber höchstens 20MB sind erlaubt.",
         "ERROR_WRONG_DATA_PROTECTION_KEY": "Der Schlüssel zum Entschlüsseln der Daten ist ungültig oder fehlt. Bitte überprüfe deinen Schlüssel auf der Seite 'Datenschutz'.",
@@ -138,6 +139,7 @@ export class Locale {
         "CAROUSEL_TEXT_PAINTER": "My sister-in-law is a hobby painter",
         "INFO_LEGAL_NOTICE": "Legal Notice",
         "INFO_SOURCE_CODE": "Source Code",
+        "INFO_ACCOUNT_DELETED": "Your account has been deleted successfully.",
 
         "ERROR_FILE_TOO_LARGE_1_2": "The file {0} is too large. The file size is {1} but at most 20MB are allowed.",
         "ERROR_WRONG_DATA_PROTECTION_KEY": "The key to decrypt the data is invalid or missing. Please check your key on the 'Data Protection' page.",

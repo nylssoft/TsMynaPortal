@@ -83,9 +83,26 @@ export class SettingsPage implements Page {
         } else {
             radioEnglish.checked = true;
         }
-        if (userDetails == null) {
-            return;
+        if (userDetails != null) {
+            this.renderUserSettings(pageContext, parent, grid, userDetails);
         }
+        if (pageContext.authenticationClient.isLoggedIn() || pageContext.authenticationClient.isRequiresPin() || pageContext.authenticationClient.isRequiresPass2()) {
+            // logout button
+            const divRowLogout: HTMLDivElement = Controls.createDiv(grid, "row mt-3 align-items-center");
+            const divColLogout: HTMLDivElement = Controls.createDiv(divRowLogout, "col");
+            const buttonLogout: HTMLButtonElement = Controls.createButton(divColLogout, "button", pageContext.locale.translate("BUTTON_LOGOUT"), "btn btn-primary");
+            buttonLogout.addEventListener("click", async (e: Event) => {
+                e.preventDefault();
+                await pageContext.authenticationClient.logoutAsync();
+                pageContext.pageType = "LOGIN_USERNAME_PASSWORD";
+                await pageContext.renderAsync();
+                const alertDiv: HTMLDivElement = document.getElementById("alertdiv-id") as HTMLDivElement;
+                Controls.createAlert(alertDiv, pageContext.locale.translate("INFO_LOGOUT_SUCCESS"), "alert-success");
+            });
+        }
+    }
+
+    private renderUserSettings(pageContext: PageContext, parent: HTMLElement, grid: HTMLElement, userDetails: UserInfoResult): void {
         // switch keep login
         const divRowKeepLogin: HTMLDivElement = Controls.createDiv(grid, "row mt-3");
         const divColKeepLogin: HTMLDivElement = Controls.createDiv(divRowKeepLogin, "col");
@@ -161,16 +178,12 @@ export class SettingsPage implements Page {
             pageContext.pageType = "PASSWORD_EDIT";
             await pageContext.renderAsync();
         });
-        // logout button
-        const divRowLogout: HTMLDivElement = Controls.createDiv(grid, "row mt-3 align-items-center");
-        const divColLogout: HTMLDivElement = Controls.createDiv(divRowLogout, "col");
-        const buttonLogout: HTMLButtonElement = Controls.createButton(divColLogout, "button", pageContext.locale.translate("BUTTON_LOGOUT"), "btn btn-primary");
-        buttonLogout.addEventListener("click", async (e: Event) => {
-            e.preventDefault();
-            await pageContext.authenticationClient.logoutAsync();
-            pageContext.pageType = "LOGIN_USERNAME_PASSWORD";
-            await pageContext.renderAsync();
-        });
+        // delete account button
+        const divRowDeleteAccount: HTMLDivElement = Controls.createDiv(grid, "row mt-3 align-items-center");
+        const divColDeleteAccount: HTMLDivElement = Controls.createDiv(divRowDeleteAccount, "col");
+        const buttonDeleteAccount: HTMLButtonElement = Controls.createButton(divColDeleteAccount, "button", pageContext.locale.translate("BUTTON_DELETE_ACCOUNT"), "btn btn-danger");
+        buttonDeleteAccount.setAttribute("data-bs-target", "#confirmationdialog-id_deleteaccount");
+        buttonDeleteAccount.setAttribute("data-bs-toggle", "modal");
         // storage info
         const divRowStorage: HTMLDivElement = Controls.createDiv(grid, "row mt-4 align-items-center");
         const divColStorage: HTMLDivElement = Controls.createDiv(divRowStorage, "col");
@@ -178,14 +191,6 @@ export class SettingsPage implements Page {
         const infoElem: HTMLDivElement = Controls.createDiv(divColStorage, "alert alert-success");
         infoElem.setAttribute("role", "alert");
         Controls.createParagraph(infoElem, undefined, storageMsg);
-        // delete account button
-        const divRowDeleteAccount: HTMLDivElement = Controls.createDiv(grid, "row mt-3 align-items-center");
-        const divColDeleteAccount: HTMLDivElement = Controls.createDiv(divRowDeleteAccount, "col");
-        const buttonDeleteAccount: HTMLButtonElement = Controls.createButton(divColDeleteAccount, "button", pageContext.locale.translate("BUTTON_DELETE_ACCOUNT"), "btn btn-danger");
-        buttonDeleteAccount.addEventListener("click", async (e: Event) => {
-            e.preventDefault();
-            this.handleError(new Error("Not implemented yet!"), pageContext);
-        });
         // render disable two factor confirmation dialog
         Controls.createConfirmationDialog(
             parent,
@@ -194,11 +199,31 @@ export class SettingsPage implements Page {
             pageContext.locale.translate("BUTTON_YES"),
             pageContext.locale.translate("BUTTON_NO"));
         document.getElementById("confirmationyesbutton-id")!.addEventListener("click", async (e: Event) => await this.onDisable2FA(e, pageContext));
+        // render deleta account confirmation dialog
+        Controls.createConfirmationDialog(
+            parent,
+            pageContext.locale.translate("BUTTON_DELETE_ACCOUNT"),
+            `${pageContext.locale.translate("INFO_DELETE_DATA")} ${pageContext.locale.translate("INFO_REALLY_DELETE_ACCOUNT")}`,
+            pageContext.locale.translate("BUTTON_YES"),
+            pageContext.locale.translate("BUTTON_NO"), "_deleteaccount");
+        document.getElementById("confirmationyesbutton-id_deleteaccount")!.addEventListener("click", async (e: Event) => {
+            e.preventDefault();
+            await this.onDeleteAccount(e, pageContext);
+        });
     }
 
     private async onDisable2FA(e: Event, pageContext: PageContext): Promise<void> {
         e.preventDefault();
         await pageContext.authenticationClient.disableTwoFactorAsync();
         await pageContext.renderAsync();
+    }
+
+    private async onDeleteAccount(e: Event, pageContext: PageContext): Promise<void> {
+        e.preventDefault();
+        await pageContext.authenticationClient.deleteAccountAsync();
+        pageContext.pageType = "LOGIN_USERNAME_PASSWORD";
+        await pageContext.renderAsync();
+        const alertDiv: HTMLDivElement = document.getElementById("alertdiv-id") as HTMLDivElement;
+        Controls.createAlert(alertDiv, pageContext.locale.translate("INFO_ACCOUNT_DELETED"), "alert-success");
     }
 }

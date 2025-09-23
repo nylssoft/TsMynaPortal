@@ -466,6 +466,18 @@ export class AuthenticationClient {
         return await resp.json() as UserInfoResult;
     }
 
+    public async deleteAccountAsync(): Promise<void> {
+        const token: string | null = this.getToken();
+        if (token == null) throw new Error("ERROR_INVALID_PARAMETERS");
+        const user: UserInfoResult | null = await this.getUserInfoAsync();
+        await FetchHelper.fetchAsync("/api/pwdman/user", {
+            method: "DELETE",
+            headers: { "Accept": "application/json", "Content-Type": "application/json", "token": token },
+            body: JSON.stringify(user.name)
+        });
+        await this.logoutAsync();
+    }
+
     public verifyPasswordStrength(pwd: string): boolean {
         if (pwd.length >= 8) {
             const cntSymbols: number = this.countCharacters(pwd, "!@$()=+-,:.");

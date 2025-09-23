@@ -171,25 +171,25 @@ export class Controls {
         return alertDiv;
     }
 
-    static createConfirmationDialog(parent: HTMLElement, title: string, body: string, yes: string, no: string): HTMLDivElement {
+    static createConfirmationDialog(parent: HTMLElement, title: string, body: string, yes: string, no: string, idsuffix: string = ""): HTMLDivElement {
         const modalDiv: HTMLDivElement = Controls.createDiv(parent, "modal fade");
-        modalDiv.id = "confirmationdialog-id";
+        modalDiv.id = `confirmationdialog-id${idsuffix}`;
         modalDiv.setAttribute("tabIndex", "-1");
-        modalDiv.setAttribute("aria-labelledby", "confirmationdialoglabel-id");
+        modalDiv.setAttribute("aria-labelledby", `confirmationdialoglabel-id${idsuffix}`);
         modalDiv.setAttribute("aria-hidden", "true");
         const modalDialogDiv: HTMLDivElement = Controls.createDiv(modalDiv, "modal-dialog");
         const modalContentDiv: HTMLDivElement = Controls.createDiv(modalDialogDiv, "modal-content");
         const modalHeaderDiv: HTMLDivElement = Controls.createDiv(modalContentDiv, "modal-header");
         const h1: HTMLHeadingElement = Controls.createHeading(modalHeaderDiv, 1, "modal-title fs-5", title);
-        h1.id = "confirmationdialoglabel-id";
+        h1.id = `confirmationdialoglabel-id${idsuffix}`;
         const buttonCloseHeader: HTMLButtonElement = Controls.createButton(modalHeaderDiv, "button", "", "btn-close");
         buttonCloseHeader.setAttribute("data-bs-dismiss", "modal");
         buttonCloseHeader.setAttribute("aria-label", "Close");
         const modalBodyDiv: HTMLDivElement = Controls.createDiv(modalContentDiv, "modal-body");
         Controls.createParagraph(modalBodyDiv, "alert alert-danger", body);
         const modalFooterDiv: HTMLDivElement = Controls.createDiv(modalContentDiv, "modal-footer");
-        const buttonYes: HTMLButtonElement = Controls.createButton(modalFooterDiv, "button", yes, "btn btn-secondary", "confirmationyesbutton-id");
-        const buttonNo: HTMLButtonElement = Controls.createButton(modalFooterDiv, "button", no, "btn btn-primary", "confirmationnobutton-id");
+        const buttonYes: HTMLButtonElement = Controls.createButton(modalFooterDiv, "button", yes, "btn btn-secondary", `confirmationyesbutton-id${idsuffix}`);
+        const buttonNo: HTMLButtonElement = Controls.createButton(modalFooterDiv, "button", no, "btn btn-primary", `confirmationnobutton-id${idsuffix}`);
         buttonYes.setAttribute("data-bs-dismiss", "modal");
         buttonNo.setAttribute("data-bs-dismiss", "modal");
         return modalDiv;
