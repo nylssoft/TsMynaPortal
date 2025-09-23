@@ -32,11 +32,8 @@ export class ViewMarkdownPage implements Page {
         card.innerHTML = markdown;
         const aLinks: NodeListOf<HTMLAnchorElement> = document.querySelectorAll('a[data-markdown]') as NodeListOf<HTMLAnchorElement>;
         aLinks.forEach(a => a.addEventListener("click", async (e: Event) => await this.onShowMarkdownPageAsync(e, pageContext, a.getAttribute("data-markdown")!)));
-        const h1 = document.querySelector("h1") as HTMLHeadingElement;
-        if (h1) {
-            document.title = h1.textContent;
-            h1.parentNode?.removeChild(h1);
-        }
+        const h1: HTMLElement | null = document.querySelector("h1");
+        h1?.parentNode?.removeChild(h1);
     }
 
     private handleError(error: Error | unknown, pageContext: PageContext) {
