@@ -92,7 +92,7 @@ export class AboutPage implements Page {
     private async showMarkdownPageAsync(pageContext: PageContext, e: Event, markdownPage: string): Promise<void> {
         e.preventDefault();
         pageContext.pageType = "VIEW_MARKDOWN";
-        pageContext.markdownPage = markdownPage;
+        pageContext.markdownPages = [markdownPage];
         await pageContext.renderAsync();
     }
 }

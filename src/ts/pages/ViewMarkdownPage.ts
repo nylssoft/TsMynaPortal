@@ -1,6 +1,5 @@
-import { UserInfo } from "os";
 import { Page, PageContext } from "../PageContext";
-import { PageType, UserInfoResult } from "../TypeDefinitions";
+import { PageType } from "../TypeDefinitions";
 import { Controls } from "../utils/Controls";
 import { FetchHelper } from "../utils/FetchHelper";
 
@@ -28,10 +27,11 @@ export class ViewMarkdownPage implements Page {
         const card = Controls.createDiv(parent, "card p-4 shadow-sm");
         card.style.maxWidth = "600px";
         // read markdown
-        const md: string = await this.getMarkdownAsync(pageContext, pageContext.markdownPage);
-        console.log(md);
-        const plainHtml: string | undefined = this.extractPattern(md, "$plain");
-        this.setMarkdownHTML(card, plainHtml ? plainHtml : md);
+        const currentPage: string = pageContext.markdownPages[pageContext.markdownPages.length - 1];
+        const markdown: string = await this.getMarkdownAsync(pageContext, currentPage);
+        card.innerHTML = markdown;
+        const aLinks: NodeListOf<HTMLAnchorElement> = document.querySelectorAll('a[data-markdown]') as NodeListOf<HTMLAnchorElement>;
+        aLinks.forEach(a => a.addEventListener("click", async (e: Event) => await this.onShowMarkdownPageAsync(e, pageContext, a.getAttribute("data-markdown")!)));
         const h1 = document.querySelector("h1") as HTMLHeadingElement;
         if (h1) {
             document.title = h1.textContent;
@@ -55,72 +55,20 @@ export class ViewMarkdownPage implements Page {
         return markdownText;
     }
 
-    private extractPattern(html: string, pattern: string): string | undefined {
-        const idx: number = html.indexOf(pattern);
-        if (idx >= 0) {
-            return html.substring(0, idx) + html.substring(idx + pattern.length);
-        }
-        return undefined;
-    }
-
-    private setMarkdownHTML(div: HTMLElement, html: string, userInfo?: UserInfoResult): void {
-        let pattern = "$backbutton";
-        let sidx = html.indexOf(pattern);
-        let backButton = false;
-        if (sidx >= 0) {
-            html = html.substring(0, sidx) + html.substring(sidx + pattern.length);
-            backButton = true;
-        }
-        pattern = "$background(";
-        sidx = html.indexOf(pattern);
-        if (sidx >= 0) {
-            const eidx = html.indexOf(")", sidx + pattern.length + 1);
-            if (eidx > sidx) {
-                const url = html.substring(sidx + pattern.length + 1, eidx);
-                const prefix = html.substring(0, sidx);
-                const suffix = html.substring(eidx + 1);
-                const nonce = document.body.getAttribute("markdown-nonce");
-                html = `${prefix}<style nonce="${nonce}">body { background-image: url(${url}) }</style>\n${suffix}`;
-            }
-        }
-        while (true) {
-            const startPattern = "$role-begin(";
-            const sidx1 = html.indexOf(startPattern);
-            if (sidx1 < 0) break;
-            const eidx1 = html.indexOf(")", sidx1 + startPattern.length + 1);
-            if (eidx1 < 0) {
-                console.error("Missing closing bracket for $role-begin");
-                break;
-            }
-            const endPattern = "$role-end";
-            const sidx2 = html.indexOf(endPattern, eidx1 + 1);
-            if (sidx2 < 0) {
-                console.error("Missing $role-end");
-                break;
-            }
-            const role = html.substring(sidx1 + pattern.length, eidx1);
-            const prefix = html.substring(0, sidx1);
-            const suffix = html.substring(sidx2 + endPattern.length);
-            let content = "";
-            if (userInfo && userInfo.roles && userInfo.roles.includes(role)) {
-                content = html.substring(eidx1 + 1, sidx2);
-            }
-            html = prefix + content + suffix;
-        }
-        div.innerHTML = html;
-        /*
-        if (backButton && history.length > 1) {
-            controls.createButton(div, _T("BUTTON_BACK"), () => history.back());
-        }
-        */
-    };
-
     // event callbacks
 
     private async onBackAsync(e: Event, pageContext: PageContext): Promise<void> {
         e.preventDefault();
-        pageContext.pageType = "ABOUT";
-        pageContext.markdownPage = "";
+        pageContext.markdownPages.pop();
+        if (pageContext.markdownPages.length == 0) {
+            pageContext.pageType = "ABOUT";
+        }
+        await pageContext.renderAsync();            
+    }
+
+    private async onShowMarkdownPageAsync(e: Event, pageContext: PageContext, markdownPage: string): Promise<void> {
+        e.preventDefault();
+        pageContext.markdownPages.push(markdownPage);
         await pageContext.renderAsync();
     }
 }

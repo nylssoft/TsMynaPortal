@@ -55,7 +55,7 @@ export class PageContext {
     // email address for password reset request or registration request
     dataEmail: string = "";
     // markdown page
-    markdownPage: string = "";
+    markdownPages: string[] = [];
     // current page
     pageType: PageType = "LOGIN_USERNAME_PASSWORD";
     // all page registrations
