@@ -3,7 +3,6 @@ import { ShowAboutPageAction } from "../actions/ShowAboutPageAction";
 import { ShowDataProtectionPageAction } from "../actions/ShowDataProtectionPageAction";
 import { ShowDesktopPageAction } from "../actions/ShowDesktopPageAction";
 import { ShowLoginPageAction } from "../actions/ShowLoginPageAction";
-import { ToggleLanguageAction } from "../actions/ToggleLanguageAction";
 import { Controls } from "../utils/Controls";
 import { PageContext, Page } from "../PageContext";
 import { PageType } from "../TypeDefinitions";
@@ -71,7 +70,6 @@ export class NavigationBarPage implements Page {
         const li: HTMLLIElement = Controls.createElement(parent, "li", "nav-item") as HTMLLIElement;
         const a: HTMLAnchorElement = Controls.createElement(li, "a", "nav-link", pageContext.locale.translate(label)) as HTMLAnchorElement;
         a.setAttribute("role", "button");
-        // a.href = "";
         a.addEventListener("click", async (e: MouseEvent) => action.runAsync(e, pageContext));
         if (action.isActive(pageContext)) {
             a.classList.add("active");
@@ -88,22 +86,19 @@ export class NavigationBarPage implements Page {
         a.setAttribute("aria-expanded", "false");
         a.href = "#";
         const ul: HTMLUListElement = Controls.createElement(li, "ul", "dropdown-menu") as HTMLUListElement;
-        const baseurl: string = window.location.hostname == "localhost" ? "https://www.stockfleth.eu" : "";
-        this.createExternalUrl(ul, pageContext, "ARKANOID", `${baseurl}/arkanoid?nomenu=true`);
-        this.createExternalUrl(ul, pageContext, "BACKGAMMON", `${baseurl}/backgammon?nomenu=true`);
-        this.createExternalUrl(ul, pageContext, "CHESS", `${baseurl}/chess?nomenu=true`);
-        this.createExternalUrl(ul, pageContext, "SKAT", `${baseurl}/skat?nomenu=true`);
-        this.createExternalUrl(ul, pageContext, "TETRIS_ARCADE", `${baseurl}/webpack/tstetris`);
-        this.createExternalUrl(ul, pageContext, "TETRIS", `${baseurl}/tetris?nomenu=true`);
+        this.createGamesLink(ul, pageContext, "ARKANOID", "/arkanoid?nomenu=true");
+        this.createGamesLink(ul, pageContext, "BACKGAMMON", "/backgammon?nomenu=true");
+        this.createGamesLink(ul, pageContext, "CHESS", "/chess?nomenu=true");
+        this.createGamesLink(ul, pageContext, "SKAT", "/skat?nomenu=true");
+        this.createGamesLink(ul, pageContext, "TETRIS_ARCADE", "/webpack/tstetris");
+        this.createGamesLink(ul, pageContext, "TETRIS", "/tetris?nomenu=true");
         return li;
     }
 
-    private createExternalUrl(parent: HTMLElement, pageContext: PageContext, label: string, url: string): HTMLLIElement {
+    private createGamesLink(parent: HTMLElement, pageContext: PageContext, label: string, url: string): HTMLLIElement {
         const li: HTMLLIElement = Controls.createElement(parent, "li") as HTMLLIElement;
         const a: HTMLAnchorElement = Controls.createElement(li, "a", "dropdown-item", pageContext.locale.translate(label)) as HTMLAnchorElement;
         a.href = url;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
         return li;
     }
 }

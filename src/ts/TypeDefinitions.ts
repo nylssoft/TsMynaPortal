@@ -23,6 +23,15 @@ export type AuthResult = {
 }
 
 /**
+ * Store pwdman-state in session storage to use older applications and games if logged-in.
+ */
+export type PwdManState = {
+  token: string;
+  userName: string;
+  requiresPass2: boolean;
+}
+
+/**
  * ErrorResult represents an error response from the API.
  * It includes properties such as type, title, status, and traceId.
  * This type is used to handle errors in the application.
@@ -252,4 +261,4 @@ export type PageType = "LOGIN_USERNAME_PASSWORD" | "LOGIN_PIN" | "LOGIN_PASS2" |
 
 export type DesktopTab = "BIRTHDAYS" | "CONTACTS" | "NOTES" | "PASSWORD_MANAGER" | "DIARY" | "DOCUMENTS" | "APPOINTMENTS";
 
-export const Version: string = "1.4.9";
+export const Version: string = "1.5.0";

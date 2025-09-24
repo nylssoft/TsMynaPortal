@@ -1,6 +1,6 @@
 import { FetchHelper } from "./utils/FetchHelper";
 import { Security } from "./utils/Security";
-import { AuthResult, ClientInfo, UserInfoResult, AuditResult, TwoFactorResult, ResetPassword } from "./TypeDefinitions";
+import { AuthResult, ClientInfo, UserInfoResult, AuditResult, TwoFactorResult, ResetPassword, PwdManState } from "./TypeDefinitions";
 
 /**
  * Provides methods for managing authentication of the current user.
@@ -134,6 +134,7 @@ export class AuthenticationClient {
         this.userInfo = null;
         this.lastLoginDate = null;
         window.sessionStorage.removeItem("authresult");
+        window.sessionStorage.removeItem("pwdman-state");
         window.localStorage.removeItem("pwdman-lltoken");
     }
 
@@ -156,11 +157,24 @@ export class AuthenticationClient {
         const resp: Response = await FetchHelper.fetchAsync(`/api/pwdman/auth?locale=${language}`, requestInit);
         this.authResult = await resp.json() as AuthResult;
         this.lltoken = this.IsUseLongLivedToken() ? this.authResult.longLivedToken : null;
-        window.sessionStorage.setItem("authresult", JSON.stringify(this.authResult));
+        this.setAuthResult();
         if (this.lltoken == null) {
             window.localStorage.removeItem("pwdman-lltoken");
         } else {
             window.localStorage.setItem("pwdman-lltoken", this.lltoken);
+        }
+    }
+
+    private setAuthResult() {
+        window.sessionStorage.setItem("authresult", JSON.stringify(this.authResult));
+        if (this.authResult != null && this.authResult.token != null && this.authResult.username != null) {
+            // set pwdman-state for backward compatibility
+            const pwdManState: PwdManState = {
+                token: this.authResult.token,
+                userName: this.authResult.username,
+                requiresPass2: this.authResult.requiresPass2
+            };
+            window.sessionStorage.setItem("pwdman-state", JSON.stringify(pwdManState));
         }
     }
 
@@ -187,7 +201,7 @@ export class AuthenticationClient {
             this.authResult = await resp.json() as AuthResult;
             this.authResult.requiresPass2 = false; // Reset pass2 requirement after successful login
             this.lltoken = this.IsUseLongLivedToken() ? this.authResult.longLivedToken : null;
-            window.sessionStorage.setItem("authresult", JSON.stringify(this.authResult));
+            this.setAuthResult();
             if (this.lltoken != null) {
                 window.localStorage.setItem("pwdman-lltoken", this.lltoken);
             }
@@ -225,7 +239,7 @@ export class AuthenticationClient {
             if (this.lltoken != null) {
                 window.localStorage.setItem("pwdman-lltoken", this.lltoken);
             }
-            window.sessionStorage.setItem("authresult", JSON.stringify(this.authResult));
+            this.setAuthResult();
         }
         catch (err: Error | unknown) {
             if (err instanceof Error && err.message == "ERROR_INVALID_TOKEN") {
@@ -249,7 +263,7 @@ export class AuthenticationClient {
                     this.lltoken = this.authResult.longLivedToken;
                     window.localStorage.setItem("pwdman-lltoken", this.lltoken);
                 }
-                window.sessionStorage.setItem("authresult", JSON.stringify(this.authResult));
+                this.setAuthResult();
             }
             catch (error: Error | unknown) {
                 console.error("Login with long-lived token failed:", error);

@@ -10,7 +10,6 @@ export class AboutPage implements Page {
     pageType: PageType = "ABOUT";
 
     async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
-        const baseUrl: string = window.location.hostname == "localhost" ? "https://www.nielsi.de" : "";
         const card: HTMLDivElement = Controls.createDiv(parent, "card p-4 shadow-sm");
         card.style.maxWidth = "400px";
         card.setAttribute("data-bs-theme", "light");
@@ -31,31 +30,31 @@ export class AboutPage implements Page {
         }
         const carouselInner: HTMLDivElement = Controls.createDiv(carouselDiv, "carousel-inner");
         const item1: HTMLDivElement = this.createCarouselItem(pageContext, carouselInner,
-            `${baseUrl}/images/markdown/welcome/restaurants-preview.png`,
+            "/images/markdown/welcome/restaurants-preview.png",
             "CAROUSEL_TITLE_RESTAURANTS",
             "CAROUSEL_TEXT_RESTAURANTS",
             true);
         item1.addEventListener("click", async (e: Event) => await this.showMarkdownPageAsync(pageContext, e, "restaurants"));
         const item2: HTMLDivElement = this.createCarouselItem(pageContext, carouselInner,
-            `${baseUrl}/images/markdown/welcome/bildergalerie-preview.png`,
+            "/images/markdown/welcome/bildergalerie-preview.png",
             "CAROUSEL_TITLE_IMAGE_GALLERY",
             "CAROUSEL_TEXT_IMAGE_GALLERY");
-        item2.addEventListener("click", () => window.open(`${baseUrl}/slideshow?shuffle=false&nomenu=true`, "_blank"));
+        item2.addEventListener("click", () => window.location.href = "/slideshow?shuffle=false&nomenu=true");
         const item3: HTMLDivElement = this.createCarouselItem(pageContext, carouselInner,
-            `${baseUrl}/images/markdown/welcome/concerts-preview.png`,
+            "/images/markdown/welcome/concerts-preview.png",
             "CAROUSEL_TITLE_CONCERTS",
             "CAROUSEL_TEXT_CONCERTS");
         item3.addEventListener("click", async (e: Event) => await this.showMarkdownPageAsync(pageContext, e, "concerts"));
         const item4: HTMLDivElement = this.createCarouselItem(pageContext, carouselInner,
-            `${baseUrl}/images/markdown/welcome/bilderrahmen-preview.png`,
+            "/images/markdown/welcome/bilderrahmen-preview.png",
             "CAROUSEL_TITLE_PICTURE_FRAMES",
             "CAROUSEL_TEXT_PICTURE_FRAMES");
-        item4.addEventListener("click", () => window.open(`${baseUrl}/webpack/tsphotoframe`, "_blank"));
+        item4.addEventListener("click", () => window.location.href = "/webpack/tsphotoframe");
         const item5: HTMLDivElement = this.createCarouselItem(pageContext, carouselInner,
-            `${baseUrl}/images/markdown/welcome/baerbel-preview.png`,
+            "/images/markdown/welcome/baerbel-preview.png",
             "CAROUSEL_TITLE_PAINTER",
             "CAROUSEL_TEXT_PAINTER");
-        item5.addEventListener("click", () => window.open("https://www.baerbel-jentz.de", "_blank"));
+        item5.addEventListener("click", () => window.location.href = "https://www.baerbel-jentz.de");
         const buttonPrev: HTMLButtonElement = Controls.createButton(carouselDiv, "button", "", "carousel-control-prev");
         buttonPrev.setAttribute("data-bs-target", "#carousel-id");
         buttonPrev.setAttribute("data-bs-slide", "prev");
