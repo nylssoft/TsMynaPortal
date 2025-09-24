@@ -24,7 +24,7 @@ export class ViewMarkdownPage implements Page {
         const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
         iBack.setAttribute("role", "button");
         iBack.addEventListener("click", async (e: Event) => await this.onBackAsync(e, pageContext));
-        const card = Controls.createDiv(parent, "card p-4 shadow-sm");
+        const card = Controls.createDiv(parent, "container");
         card.style.maxWidth = "600px";
         // read markdown
         const currentPage: string = pageContext.markdownPages[pageContext.markdownPages.length - 1];
