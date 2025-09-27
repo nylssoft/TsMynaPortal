@@ -205,6 +205,7 @@ export class DocumentTab implements Tab {
 
     private async uploadFilesAsync(pageContext: PageContext, curFiles: File[]): Promise<void> {
         if (curFiles.length == 0) {
+            pageContext.authenticationClient.resetUserInfo();
             await pageContext.renderAsync();
             return;
         }
@@ -285,6 +286,7 @@ export class DocumentTab implements Tab {
                 const token: string = pageContext.authenticationClient.getToken()!;
                 const ids: number[] = selected.map(item => item.id);
                 await DocumentService.deleteItemsAsync(token, pageContext.documentItem.containerId!, ids);
+                pageContext.authenticationClient.resetUserInfo();
                 await pageContext.renderAsync();
             }
             catch (error: Error | unknown) {

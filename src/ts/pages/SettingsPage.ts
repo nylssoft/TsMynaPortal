@@ -27,10 +27,7 @@ export class SettingsPage implements Page {
     }
 
     private async renderEditAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
-        let userDetails: UserInfoResult | null = null;
-        if (pageContext.authenticationClient.isLoggedIn()) {
-            userDetails = await pageContext.authenticationClient.getUserInfoWithDetailsAsync();
-        }
+        const userDetails: UserInfoResult | null = await pageContext.authenticationClient.getUserInfoAsync();
         const grid: HTMLDivElement = Controls.createDiv(parent, "card p-4 shadow-sm");
         grid.style.maxWidth = "400px";
         // select theme
@@ -85,20 +82,6 @@ export class SettingsPage implements Page {
         }
         if (userDetails != null) {
             this.renderUserSettings(pageContext, parent, grid, userDetails);
-        }
-        if (pageContext.authenticationClient.isLoggedIn() || pageContext.authenticationClient.isRequiresPin() || pageContext.authenticationClient.isRequiresPass2()) {
-            // logout button
-            const divRowLogout: HTMLDivElement = Controls.createDiv(grid, "row mt-3 align-items-center");
-            const divColLogout: HTMLDivElement = Controls.createDiv(divRowLogout, "col");
-            const buttonLogout: HTMLButtonElement = Controls.createButton(divColLogout, "button", pageContext.locale.translate("BUTTON_LOGOUT"), "btn btn-primary");
-            buttonLogout.addEventListener("click", async (e: Event) => {
-                e.preventDefault();
-                await pageContext.authenticationClient.logoutAsync();
-                pageContext.pageType = "LOGIN_USERNAME_PASSWORD";
-                await pageContext.renderAsync();
-                const alertDiv: HTMLDivElement = document.getElementById("alertdiv-id") as HTMLDivElement;
-                Controls.createAlert(alertDiv, pageContext.locale.translate("INFO_LOGOUT_SUCCESS"), "alert-success");
-            });
         }
     }
 
@@ -168,10 +151,19 @@ export class SettingsPage implements Page {
             await pageContext.authenticationClient.updateAllowPasswordResetAsync(inputAllowPwdReset.checked);
             await pageContext.renderAsync();
         });
+        // switch allow delete account
+        const divRowAllowDeleteAccount: HTMLDivElement = Controls.createDiv(grid, "row mt-3");
+        const divColAllowDeleteAccount: HTMLDivElement = Controls.createDiv(divRowAllowDeleteAccount, "col");
+        const divSwitchAllowDeleteAccount: HTMLDivElement = Controls.createDiv(divColAllowDeleteAccount, "form-check form-switch");
+        const inputAlloweDeleteAccount: HTMLInputElement = Controls.createInput(divSwitchAllowDeleteAccount, "checkbox", "switch-allow-deleteaccount-id", "form-check-input");
+        inputAlloweDeleteAccount.role = "switch";
+        Controls.createLabel(divSwitchAllowDeleteAccount, "switch-allow-deleteaccount-id", "form-check-label", pageContext.locale.translate("OPTION_ALLOW_DELETE_ACCOUNT"));
+        inputAlloweDeleteAccount.addEventListener("click", async (e: Event) => {
+            Controls.showElemById("button-delete-account-id", inputAlloweDeleteAccount.checked);
+            Controls.showElemById("button-changepwd-id", !inputAlloweDeleteAccount.checked);
+        });
         // change password button
-        const divRowChangePwd: HTMLDivElement = Controls.createDiv(grid, "row mt-3 align-items-center");
-        const divColChangePwd: HTMLDivElement = Controls.createDiv(divRowChangePwd, "col");
-        const buttonChangePwd: HTMLButtonElement = Controls.createButton(divColChangePwd, "button", pageContext.locale.translate("BUTTON_CHANGE_PWD"), "btn btn-primary");
+        const buttonChangePwd: HTMLButtonElement = Controls.createButton(divRowAllowDeleteAccount, "button", pageContext.locale.translate("BUTTON_CHANGE_PWD"), "btn btn-primary mt-3", "button-changepwd-id");
         buttonChangePwd.addEventListener("click", async (e: Event) => {
             e.preventDefault();
             pageContext.settings.passwordChanged = false;
@@ -179,18 +171,9 @@ export class SettingsPage implements Page {
             await pageContext.renderAsync();
         });
         // delete account button
-        const divRowDeleteAccount: HTMLDivElement = Controls.createDiv(grid, "row mt-3 align-items-center");
-        const divColDeleteAccount: HTMLDivElement = Controls.createDiv(divRowDeleteAccount, "col");
-        const buttonDeleteAccount: HTMLButtonElement = Controls.createButton(divColDeleteAccount, "button", pageContext.locale.translate("BUTTON_DELETE_ACCOUNT"), "btn btn-danger");
+        const buttonDeleteAccount: HTMLButtonElement = Controls.createButton(divRowAllowDeleteAccount, "button", pageContext.locale.translate("BUTTON_DELETE_ACCOUNT"), "btn btn-danger mt-3 d-none", "button-delete-account-id");
         buttonDeleteAccount.setAttribute("data-bs-target", "#confirmationdialog-id_deleteaccount");
         buttonDeleteAccount.setAttribute("data-bs-toggle", "modal");
-        // storage info
-        const divRowStorage: HTMLDivElement = Controls.createDiv(grid, "row mt-4 align-items-center");
-        const divColStorage: HTMLDivElement = Controls.createDiv(divRowStorage, "col");
-        const storageMsg: string = pageContext.locale.translateWithArgs("INFO_STORAGE_1_2", [DocumentService.formatSize(userDetails.usedStorage), DocumentService.formatSize(userDetails.storageQuota)]);
-        const infoElem: HTMLDivElement = Controls.createDiv(divColStorage, "alert alert-success");
-        infoElem.setAttribute("role", "alert");
-        Controls.createParagraph(infoElem, undefined, storageMsg);
         // render disable two factor confirmation dialog
         Controls.createConfirmationDialog(
             parent,
@@ -199,7 +182,7 @@ export class SettingsPage implements Page {
             pageContext.locale.translate("BUTTON_YES"),
             pageContext.locale.translate("BUTTON_NO"));
         document.getElementById("confirmationyesbutton-id")!.addEventListener("click", async (e: Event) => await this.onDisable2FA(e, pageContext));
-        // render deleta account confirmation dialog
+        // render delete account confirmation dialog
         Controls.createConfirmationDialog(
             parent,
             pageContext.locale.translate("BUTTON_DELETE_ACCOUNT"),

@@ -42,7 +42,6 @@ export class PasswordChangePage implements Page {
         const inputOldPwd: HTMLInputElement = Controls.createInput(divOldPwd, "password", "oldpwd-id", "form-control");
         inputOldPwd.setAttribute("autocomplete", "off");
         inputOldPwd.setAttribute("spellcheck", "false");
-        inputOldPwd.focus();
         // new password
         const divNewPwdRow: HTMLDivElement = Controls.createDiv(formElement, "row align-items-center");
         const divNewPwd: HTMLDivElement = Controls.createDiv(divNewPwdRow, "mb-3");

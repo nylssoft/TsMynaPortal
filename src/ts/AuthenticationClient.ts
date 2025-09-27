@@ -282,17 +282,14 @@ export class AuthenticationClient {
         if (this.userInfo == null) {
             const token: string | null = this.getToken();
             if (token == null) throw new Error("ERROR_INVALID_PARAMETERS");
-            const resp = await FetchHelper.fetchAsync('/api/pwdman/user', { headers: { 'token': token } });
+            const resp = await FetchHelper.fetchAsync('/api/pwdman/user?details=true', { headers: { 'token': token } });
             this.userInfo = await resp.json() as UserInfoResult;
         }
         return this.userInfo;
     }
 
-    public async getUserInfoWithDetailsAsync(): Promise<UserInfoResult> {
-        const token: string | null = this.getToken();
-        if (token == null) throw new Error("ERROR_INVALID_PARAMETERS");
-        const resp = await FetchHelper.fetchAsync('/api/pwdman/user?details=true', { headers: { 'token': token } });
-        return await resp.json() as UserInfoResult;
+    public resetUserInfo() {
+        this.userInfo = null;
     }
 
     /**

@@ -16,9 +16,6 @@ export class AboutPage implements Page {
         const aboutMessage: HTMLDivElement = Controls.createDiv(card, "alert alert-success");
         Controls.createParagraph(aboutMessage, "", pageContext.locale.translate("WEBSITE_INFO"));
         Controls.createParagraph(aboutMessage, "", `${Version} ${pageContext.locale.translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.locale.translate("COPYRIGHT")}`);
-        const aGithub: HTMLAnchorElement = Controls.createAnchor(aboutMessage, "https://github.com/nylssoft/TsMynaPortal", pageContext.locale.translate("INFO_SOURCE_CODE"));
-        aGithub.setAttribute("target", "_blank");
-        aGithub.setAttribute("rel", "noopener noreferrer");
         const divLegal: HTMLDivElement = Controls.createDiv(aboutMessage, "mt-2");
         const aLegal: HTMLAnchorElement = Controls.createAnchor(divLegal, "/legal", pageContext.locale.translate("INFO_LEGAL_NOTICE"));
         aLegal.addEventListener("click", async (e: Event) => await this.showMarkdownPageAsync(pageContext, e, "legal"));

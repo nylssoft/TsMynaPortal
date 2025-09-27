@@ -9,7 +9,7 @@ export class Locale {
 
     private german = {
         "APP_NAME": "Myna Portal",
-        "MESSAGE_WELCOME_1_2_3": "Hallo {0}, willkommen im Myna Portal! Heute ist der {1}. Es ist {2}.",
+        "MESSAGE_WELCOME_1_2_3": "Hallo {0}! Heute ist der {1}. Es ist {2}.",
         "MESSAGE_LAST_LOGIN_1": "Deine letzte Anmeldung war am {0}.",
         "LANGUAGE": "Sprache",
         "ABOUT": "Über",
@@ -69,6 +69,7 @@ export class Locale {
         "INFO_LEGAL_NOTICE": "Impressum",
         "INFO_SOURCE_CODE": "Quellcode",
         "INFO_ACCOUNT_DELETED": "Dein Konto wurde erfolgreich gelöscht.",
+        "OPTION_ALLOW_DELETE_ACCOUNT": "Konto löschen aktivieren",
 
         "ERROR_FILE_TOO_LARGE_1_2": "Die Datei {0} ist zu groß. Die Dateigröße ist {1}, aber höchstens 20MB sind erlaubt.",
         "ERROR_WRONG_DATA_PROTECTION_KEY": "Der Schlüssel zum Entschlüsseln der Daten ist ungültig oder fehlt. Bitte überprüfe deinen Schlüssel auf der Seite 'Datenschutz'.",
@@ -80,7 +81,7 @@ export class Locale {
 
     private englisch = {
         "APP_NAME": "Myna Portal",
-        "MESSAGE_WELCOME_1_2_3": "Hello {0}, welcome to the Myna Portal! Today is {1}. It is {2}.",
+        "MESSAGE_WELCOME_1_2_3": "Hello {0}! Today is {1}. It is {2}.",
         "MESSAGE_LAST_LOGIN_1": "Your last login was on {0}.",
         "LANGUAGE": "Language",
         "ABOUT": "About",
@@ -140,6 +141,7 @@ export class Locale {
         "INFO_LEGAL_NOTICE": "Legal Notice",
         "INFO_SOURCE_CODE": "Source Code",
         "INFO_ACCOUNT_DELETED": "Your account has been deleted successfully.",
+        "OPTION_ALLOW_DELETE_ACCOUNT": "Activate account deletion",
 
         "ERROR_FILE_TOO_LARGE_1_2": "The file {0} is too large. The file size is {1} but at most 20MB are allowed.",
         "ERROR_WRONG_DATA_PROTECTION_KEY": "The key to decrypt the data is invalid or missing. Please check your key on the 'Data Protection' page.",

@@ -9,6 +9,7 @@ import { PageType } from "../TypeDefinitions";
 import { ShowVotePageAction } from "../actions/ShowVotePageAction";
 import { ShowSettingsPageAction } from "../actions/ShowSettingsPageAction";
 import { ShowRegisterPageAction } from "../actions/ShowRegisterPageAction";
+import { LogoutAction } from "../actions/LogoutAction";
 
 /**
  * Page implementation for the navigation bar.
@@ -36,6 +37,23 @@ export class NavigationBarPage implements Page {
         this.createGamesDropdown(ul, pageContext);
         this.createNavItem(ul, pageContext, "SETTINGS", new ShowSettingsPageAction());
         this.createNavItem(ul, pageContext, "ABOUT", new ShowAboutPageAction());
+        if (pageContext.authenticationClient.isLoggedIn() || pageContext.authenticationClient.isRequiresPin() || pageContext.authenticationClient.isRequiresPass2()) {
+            const logoutAction: LogoutAction = new LogoutAction();
+            const li: HTMLLIElement = Controls.createElement(ul, "li", "nav-item") as HTMLLIElement;
+            const a: HTMLAnchorElement = Controls.createElement(li, "a", "nav-link d-inline-block bg-primary text-light rounded p-2 ms-lg-2 mt-2 mt-lg-0", pageContext.locale.translate("BUTTON_LOGOUT")) as HTMLAnchorElement;
+            a.style.width = "auto";
+            a.setAttribute("role", "button");
+            a.setAttribute("data-bs-target", "#confirmationdialog-id_logout");
+            a.setAttribute("data-bs-toggle", "modal");
+            // render logout confirmation dialog
+            Controls.createConfirmationDialog(
+                parent,
+                pageContext.locale.translate("BUTTON_LOGOUT"),
+                pageContext.locale.translate("INFO_REALLY_LOGOUT"),
+                pageContext.locale.translate("BUTTON_YES"),
+                pageContext.locale.translate("BUTTON_NO"), "_logout");
+            document.getElementById("confirmationyesbutton-id_logout")!.addEventListener("click", async (e: MouseEvent) => logoutAction.runAsync(e, pageContext));
+        }
     }
 
     private createNavBar(parent: HTMLElement, pageContext: PageContext, label: string): HTMLUListElement {

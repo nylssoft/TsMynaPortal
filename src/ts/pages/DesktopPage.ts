@@ -9,6 +9,7 @@ import { DiaryTab } from "../tabs/DiaryTab";
 import { TabRenderer } from "../tabs/TabRenderer";
 import { DocumentTab } from "../tabs/DocumentTab";
 import { AppointmentTab } from "../tabs/AppointmentTab";
+import { DocumentService } from "../services/DocumentService";
 
 /**
  * Page implementation for the Desktop page.
@@ -52,13 +53,16 @@ export class DesktopPage implements Page {
         const welcomeElem: HTMLDivElement = Controls.createDiv(parent, "alert alert-success alert-dismissible");
         welcomeElem.setAttribute("role", "alert");
         Controls.createDiv(welcomeElem, "", pageContext.locale.translateWithArgs("MESSAGE_WELCOME_1_2_3", [userInfo.name, longDate, longTime]));
-        const welcomeCloseButton: HTMLButtonElement = Controls.createButton(welcomeElem, "button", "", "btn-close");
-        welcomeCloseButton.setAttribute("data-bs-dismiss", "alert");
-        welcomeCloseButton.setAttribute("aria-label", "Close");
         if (lastLoginDate != null) {
             const lastLoginStr: string = lastLoginDate.toLocaleString(pageContext.locale.getLanguage(), { dateStyle: "long", timeStyle: "long" });
             Controls.createDiv(welcomeElem, "mt-2", pageContext.locale.translateWithArgs("MESSAGE_LAST_LOGIN_1", [lastLoginStr]));
         }
+        if (userInfo.usedStorage > 0) {
+            Controls.createDiv(welcomeElem, "mt-2", pageContext.locale.translateWithArgs("INFO_STORAGE_1_2", [DocumentService.formatSize(userInfo.usedStorage), DocumentService.formatSize(userInfo.storageQuota)]));
+        }
+        const welcomeCloseButton: HTMLButtonElement = Controls.createButton(welcomeElem, "button", "", "btn-close");
+        welcomeCloseButton.setAttribute("data-bs-dismiss", "alert");
+        welcomeCloseButton.setAttribute("aria-label", "Close");
         welcomeElem.addEventListener('closed.bs.alert', _ => pageContext.desktop.welcomeClosed = true);
     }
 }
