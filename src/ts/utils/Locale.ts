@@ -150,7 +150,7 @@ export class Locale {
         "OPTION_ALLOW_DELETE_ACCOUNT": "Activate account deletion",
         "GAMES_SKAT": "Skat",
         "GAMES_BACKGAMMON": "Backgammon",
-        "GAMES_CHESS": "Schach",
+        "GAMES_CHESS": "Chess",
         "GAMES_ARKANOID": "Arkanoid",
         "GAMES_TETRIS_ARCADE": "Tetris (Arcade)",
         "GAMES_TETRIS_CLASSIC": "Tetris (Classic)",
