@@ -8,7 +8,7 @@ export class Locale {
     private language: string = window.localStorage.getItem("locale") || window.navigator.language.split("-")[0];
 
     private german = {
-        "APP_NAME": "Myna Portal",
+        "APP_NAME": "stockfleth.eu",
         "MESSAGE_WELCOME_1_2_3": "Hallo {0}! Heute ist der {1}. Es ist {2}.",
         "MESSAGE_LAST_LOGIN_1": "Deine letzte Anmeldung war am {0}.",
         "LANGUAGE": "Sprache",
@@ -86,7 +86,7 @@ export class Locale {
     }
 
     private englisch = {
-        "APP_NAME": "Myna Portal",
+        "APP_NAME": "stockfleth.eu",
         "MESSAGE_WELCOME_1_2_3": "Hello {0}! Today is {1}. It is {2}.",
         "MESSAGE_LAST_LOGIN_1": "Your last login was on {0}.",
         "LANGUAGE": "Language",
@@ -130,7 +130,7 @@ export class Locale {
         "ARKANOID": "Arkanoid",
         "TETRIS": "Tetris (Classic)",
         "TETRIS_ARCADE": "Tetris (Arcade)",
-        "CHESS": "Schach",
+        "CHESS": "Chess",
         "BACKGAMMON": "Backgammon",
         "SKAT": "Skat",
         "CARD_TITLE_PERSONAL": "Personal",

@@ -27,7 +27,7 @@ export type AuthResult = {
  */
 export type PwdManState = {
   token: string;
-  userName: string;
+  userName: string | null;
   requiresPass2: boolean;
 }
 
@@ -261,4 +261,4 @@ export type PageType = "LOGIN_USERNAME_PASSWORD" | "LOGIN_PIN" | "LOGIN_PASS2" |
 
 export type DesktopTab = "BIRTHDAYS" | "CONTACTS" | "NOTES" | "PASSWORD_MANAGER" | "DIARY" | "DOCUMENTS" | "APPOINTMENTS";
 
-export const Version: string = "1.5.3";
+export const Version: string = "1.5.4";

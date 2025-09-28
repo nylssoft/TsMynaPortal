@@ -167,7 +167,7 @@ export class AuthenticationClient {
 
     private setAuthResult() {
         window.sessionStorage.setItem("authresult", JSON.stringify(this.authResult));
-        if (this.authResult != null && this.authResult.token != null && this.authResult.username != null) {
+        if (this.authResult != null && this.authResult.token != null) {
             // set pwdman-state for backward compatibility
             const pwdManState: PwdManState = {
                 token: this.authResult.token,
