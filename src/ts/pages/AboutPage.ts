@@ -27,28 +27,28 @@ export class AboutPage implements Page {
         }
         const carouselInner: HTMLDivElement = Controls.createDiv(carouselDiv, "carousel-inner");
         const item1: HTMLDivElement = this.createCarouselItem(pageContext, carouselInner,
-            "/images/markdown/welcome/restaurants-preview.png",
+            "/images/markdown/welcome/restaurants-carousel.png",
             "CAROUSEL_TITLE_RESTAURANTS",
             "CAROUSEL_TEXT_RESTAURANTS",
             true);
         item1.addEventListener("click", async (e: Event) => await this.showMarkdownPageAsync(pageContext, e, "restaurants"));
         const item2: HTMLDivElement = this.createCarouselItem(pageContext, carouselInner,
-            "/images/markdown/welcome/bildergalerie-preview.png",
+            "/images/markdown/welcome/bildergalerie-carousel.png",
             "CAROUSEL_TITLE_IMAGE_GALLERY",
             "CAROUSEL_TEXT_IMAGE_GALLERY");
         item2.addEventListener("click", () => window.location.href = "/slideshow?shuffle=false&nomenu=true");
         const item3: HTMLDivElement = this.createCarouselItem(pageContext, carouselInner,
-            "/images/markdown/welcome/concerts-preview.png",
+            "/images/markdown/welcome/concerts-carousel.png",
             "CAROUSEL_TITLE_CONCERTS",
             "CAROUSEL_TEXT_CONCERTS");
         item3.addEventListener("click", async (e: Event) => await this.showMarkdownPageAsync(pageContext, e, "concerts"));
         const item4: HTMLDivElement = this.createCarouselItem(pageContext, carouselInner,
-            "/images/markdown/welcome/bilderrahmen-preview.png",
+            "/images/markdown/welcome/bilderrahmen-carousel.png",
             "CAROUSEL_TITLE_PICTURE_FRAMES",
             "CAROUSEL_TEXT_PICTURE_FRAMES");
         item4.addEventListener("click", () => window.location.href = "/webpack/tsphotoframe");
         const item5: HTMLDivElement = this.createCarouselItem(pageContext, carouselInner,
-            "/images/markdown/welcome/baerbel-preview.png",
+            "/images/markdown/welcome/baerbel-carousel.png",
             "CAROUSEL_TITLE_PAINTER",
             "CAROUSEL_TEXT_PAINTER");
         item5.addEventListener("click", () => window.location.href = "https://www.baerbel-jentz.de");
