@@ -27,7 +27,6 @@ export class SettingsPage implements Page {
     }
 
     private async renderEditAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
-        const userDetails: UserInfoResult | null = await pageContext.authenticationClient.getUserInfoAsync();
         const grid: HTMLDivElement = Controls.createDiv(parent, "card p-4 shadow-sm");
         grid.style.maxWidth = "400px";
         // select theme
@@ -80,7 +79,8 @@ export class SettingsPage implements Page {
         } else {
             radioEnglish.checked = true;
         }
-        if (userDetails != null) {
+        if (pageContext.authenticationClient.isLoggedIn()) {
+            const userDetails: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync()!;
             this.renderUserSettings(pageContext, parent, grid, userDetails);
         }
     }

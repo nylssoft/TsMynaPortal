@@ -10,6 +10,7 @@ import { ShowVotePageAction } from "../actions/ShowVotePageAction";
 import { ShowSettingsPageAction } from "../actions/ShowSettingsPageAction";
 import { ShowRegisterPageAction } from "../actions/ShowRegisterPageAction";
 import { LogoutAction } from "../actions/LogoutAction";
+import { ShowAGamesPageAction } from "../actions/ShowGamesPage";
 
 /**
  * Page implementation for the navigation bar.
@@ -34,7 +35,7 @@ export class NavigationBarPage implements Page {
                 this.createNavItem(ul, pageContext, "HEADER_REGISTER", new ShowRegisterPageAction());
             }
         }
-        this.createGamesDropdown(ul, pageContext);
+        this.createNavItem(ul, pageContext, "GAMES", new ShowAGamesPageAction());
         this.createNavItem(ul, pageContext, "SETTINGS", new ShowSettingsPageAction());
         this.createNavItem(ul, pageContext, "ABOUT", new ShowAboutPageAction());
         if (pageContext.authenticationClient.isLoggedIn() || pageContext.authenticationClient.isRequiresPin() || pageContext.authenticationClient.isRequiresPass2()) {
@@ -94,23 +95,6 @@ export class NavigationBarPage implements Page {
             a.setAttribute("aria-current", "page");
         }
         return a;
-    }
-
-    private createGamesDropdown(parent: HTMLElement, pageContext: PageContext): HTMLLIElement {
-        const li: HTMLLIElement = Controls.createElement(parent, "li", "nav-item dropdown") as HTMLLIElement;
-        const a: HTMLAnchorElement = Controls.createElement(li, "a", "nav-link dropdown-toggle", pageContext.locale.translate("GAMES")) as HTMLAnchorElement;
-        a.setAttribute("role", "button");
-        a.setAttribute("data-bs-toggle", "dropdown");
-        a.setAttribute("aria-expanded", "false");
-        a.href = "#";
-        const ul: HTMLUListElement = Controls.createElement(li, "ul", "dropdown-menu") as HTMLUListElement;
-        this.createGamesLink(ul, pageContext, "ARKANOID", "/arkanoid?nomenu=true");
-        this.createGamesLink(ul, pageContext, "BACKGAMMON", "/backgammon?nomenu=true");
-        this.createGamesLink(ul, pageContext, "CHESS", "/chess?nomenu=true");
-        this.createGamesLink(ul, pageContext, "SKAT", "/skat?nomenu=true");
-        this.createGamesLink(ul, pageContext, "TETRIS_ARCADE", "/webpack/tstetris");
-        this.createGamesLink(ul, pageContext, "TETRIS", "/tetris?nomenu=true");
-        return li;
     }
 
     private createGamesLink(parent: HTMLElement, pageContext: PageContext, label: string, url: string): HTMLLIElement {
