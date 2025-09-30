@@ -86,6 +86,7 @@ export class SettingsPage implements Page {
     }
 
     private renderUserSettings(pageContext: PageContext, parent: HTMLElement, grid: HTMLElement, userDetails: UserInfoResult): void {
+        this.renderProfilPhoto(pageContext, grid, userDetails);
         // switch keep login
         const divRowKeepLogin: HTMLDivElement = Controls.createDiv(grid, "row mt-3");
         const divColKeepLogin: HTMLDivElement = Controls.createDiv(divRowKeepLogin, "col");
@@ -194,6 +195,73 @@ export class SettingsPage implements Page {
             await this.onDeleteAccount(e, pageContext);
         });
     }
+
+    private renderProfilPhoto(pageContext: PageContext, grid: HTMLElement, userDetails: UserInfoResult) {
+        const divRowPhoto: HTMLDivElement = Controls.createDiv(grid, "row mt-3 align-items-center");
+        const divCol1Photo: HTMLDivElement = Controls.createDiv(divRowPhoto, "col-4 text-start");
+        Controls.createLabel(divCol1Photo, "upload-photo-input-id", "form-label", pageContext.locale.translate("LABEL_PROFILE_PHOTO"));
+        const divCol2Photo: HTMLDivElement = Controls.createDiv(divRowPhoto, "col-4");
+        const photoImg: HTMLImageElement = Controls.createElement(divCol2Photo, "img", "img-thumbnail") as HTMLImageElement;
+        photoImg.id = "profile-photo-id";
+        photoImg.width = 90;
+        photoImg.height = 90;
+        photoImg.title = pageContext.locale.translate("INFO_PROFILE_PHOTO");
+        photoImg.addEventListener("click", _ => this.onSelectPhoto());
+        photoImg.setAttribute("role", "button");
+        if (userDetails.photo == null) {
+            photoImg.src = "/images/buttons/user-new-3.png";
+        }
+        else {
+            photoImg.src = userDetails.photo;
+            const divCol3Photo: HTMLDivElement = Controls.createDiv(divRowPhoto, "col-4");
+            const iMinus: HTMLElement = Controls.createElement(divCol3Photo, "i", "bi bi-person-x fs-3 ms-2");
+            iMinus.setAttribute("role", "button");
+            iMinus.addEventListener("click", async (e: Event) => await this.onRemovePhotoAsync(e, pageContext));
+        }
+        // hidden form
+        const formElement: HTMLFormElement = Controls.createForm(divRowPhoto, "d-none");
+        formElement.id = "upload-photo-form-id";
+        formElement.method = "post";
+        formElement.enctype = "multipart/form-data";
+        const inputPhoto: HTMLInputElement = Controls.createInput(formElement, "file", "upload-photo-input-id");
+        inputPhoto.name = "photo-file";
+        inputPhoto.accept = "image/jpeg,image/png";
+        inputPhoto.addEventListener("change", async (e: Event) => this.onUpdatePhotoAsync(e, pageContext));
+
+    }
+
+    private async onUpdatePhotoAsync(e: Event, pageContext: PageContext): Promise<void> {
+        e.preventDefault();
+        try {
+            const form: HTMLFormElement = document.getElementById("upload-photo-form-id") as HTMLFormElement;
+            const input: HTMLInputElement = document.getElementById("upload-photo-input-id") as HTMLInputElement;
+            await pageContext.authenticationClient.updatePhotoAsync(input, form);
+            await pageContext.renderAsync();
+        }
+        catch (error: Error | unknown) {
+            this.handleError(error, pageContext);
+            return;
+        }
+    }
+
+    private async onRemovePhotoAsync(e: Event, pageContext: PageContext): Promise<void> {
+        e.preventDefault();
+        try {
+            await pageContext.authenticationClient.removePhotoAsync();
+            await pageContext.renderAsync();
+        }
+        catch (error: Error | unknown) {
+            this.handleError(error, pageContext);
+            return;
+        }
+    }
+
+    private onSelectPhoto() {
+        const inputFile = document.getElementById("upload-photo-input-id");
+        if (inputFile) {
+            inputFile.click();
+        }
+    };
 
     private async onDisable2FA(e: Event, pageContext: PageContext): Promise<void> {
         e.preventDefault();

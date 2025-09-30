@@ -5,7 +5,7 @@ import { ShowDesktopPageAction } from "../actions/ShowDesktopPageAction";
 import { ShowLoginPageAction } from "../actions/ShowLoginPageAction";
 import { Controls } from "../utils/Controls";
 import { PageContext, Page } from "../PageContext";
-import { PageType } from "../TypeDefinitions";
+import { PageType, UserInfoResult } from "../TypeDefinitions";
 import { ShowVotePageAction } from "../actions/ShowVotePageAction";
 import { ShowSettingsPageAction } from "../actions/ShowSettingsPageAction";
 import { ShowRegisterPageAction } from "../actions/ShowRegisterPageAction";
@@ -23,7 +23,11 @@ export class NavigationBarPage implements Page {
     pageType: PageType = "NAVIGATION_BAR";
 
     async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
-        const ul: HTMLUListElement = this.createNavBar(parent, pageContext, "APP_NAME");
+        let user: UserInfoResult | null = null;
+        if (pageContext.authenticationClient.isLoggedIn()) {
+            user = await pageContext.authenticationClient.getUserInfoAsync()!;
+        }
+        const ul: HTMLUListElement = this.createNavBar(parent, pageContext, user);
         if (pageContext.vote.vid != null) {
             this.createNavItem(ul, pageContext, "HEADER_APPOINTMENTS", new ShowVotePageAction());
         } else {
@@ -57,10 +61,23 @@ export class NavigationBarPage implements Page {
         }
     }
 
-    private createNavBar(parent: HTMLElement, pageContext: PageContext, label: string): HTMLUListElement {
+    private createNavBar(parent: HTMLElement, pageContext: PageContext, user: UserInfoResult | null): HTMLUListElement {
         const nav: HTMLElement = Controls.createElement(parent, "nav", "navbar navbar-expand-lg");
         const container: HTMLDivElement = Controls.createDiv(nav, "container");
-        const aBrand: HTMLAnchorElement = Controls.createElement(container, "a", "navbar-brand", pageContext.locale.translate(label)) as HTMLAnchorElement;
+        let aBrand: HTMLAnchorElement
+        if (user == null) {
+            aBrand = Controls.createElement(container, "a", "navbar-brand", pageContext.locale.translate("APP_NAME")) as HTMLAnchorElement;
+        }
+        else {
+            aBrand = Controls.createElement(container, "a", "navbar-brand", user.name) as HTMLAnchorElement;
+            if (user.photo != null) {
+                const img: HTMLImageElement = Controls.createElement(aBrand, "img", "img-thumbnail ms-1") as HTMLImageElement;
+                img.width = 32;
+                img.height = 32;
+                img.src = user.photo;
+                img.alt = user.name;
+            }
+        }
         aBrand.setAttribute("role", "button");
         aBrand.addEventListener("click", async (e: MouseEvent) => {
             e.preventDefault();

@@ -489,6 +489,40 @@ export class AuthenticationClient {
         await this.logoutAsync();
     }
 
+    public async updatePhotoAsync(inputFile: HTMLInputElement, form: HTMLFormElement): Promise<void> {
+        const token: string | null = this.getToken();
+        if (token == null) throw new Error("ERROR_INVALID_PARAMETERS");
+        if (inputFile.files?.length == 1) {
+            const curFile: File = inputFile.files[0];
+            const mimeTypes: string[] = ["image/jpeg", "image/png"];
+            if (mimeTypes.includes(curFile.type) && curFile.size < 10 * 1024 * 1024) {
+                const resp: Response = await FetchHelper.fetchAsync("/api/pwdman/photo", {
+                    method: "POST",
+                    headers: { "token": token },
+                    body: new FormData(form)
+                });
+                const photo: string = await resp.json() as string;
+                if (this.userInfo != null) {
+                    this.userInfo.photo = photo;
+                }
+                return; // success
+            }
+        }
+        throw new Error("ERROR_INVALID_PROFILE_PHOTO");
+    }
+
+    public async removePhotoAsync(): Promise<void> {
+        const token: string | null = this.getToken();
+        if (token == null) throw new Error("ERROR_INVALID_PARAMETERS");
+        await FetchHelper.fetchAsync("/api/pwdman/photo", {
+            method: "DELETE",
+            headers: { "Accept": "application/json", "Content-Type": "application/json", "token": token }
+        });
+        if (this.userInfo != null) {
+            this.userInfo.photo = null;
+        }
+    }
+
     public verifyPasswordStrength(pwd: string): boolean {
         if (pwd.length >= 8) {
             const cntSymbols: number = this.countCharacters(pwd, "!@$()=+-,:.");
