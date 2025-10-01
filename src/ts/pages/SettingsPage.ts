@@ -86,7 +86,7 @@ export class SettingsPage implements Page {
     }
 
     private renderUserSettings(pageContext: PageContext, parent: HTMLElement, grid: HTMLElement, userDetails: UserInfoResult): void {
-        this.renderProfilPhoto(pageContext, grid, userDetails);
+        this.renderProfilPhoto(pageContext, parent, grid, userDetails);
         // switch keep login
         const divRowKeepLogin: HTMLDivElement = Controls.createDiv(grid, "row mt-3");
         const divColKeepLogin: HTMLDivElement = Controls.createDiv(divRowKeepLogin, "col");
@@ -196,7 +196,7 @@ export class SettingsPage implements Page {
         });
     }
 
-    private renderProfilPhoto(pageContext: PageContext, grid: HTMLElement, userDetails: UserInfoResult) {
+    private renderProfilPhoto(pageContext: PageContext, parent: HTMLElement, grid: HTMLElement, userDetails: UserInfoResult) {
         const divRowPhoto: HTMLDivElement = Controls.createDiv(grid, "row mt-3 align-items-center");
         const divCol1Photo: HTMLDivElement = Controls.createDiv(divRowPhoto, "col-4 text-start");
         Controls.createLabel(divCol1Photo, "upload-photo-input-id", "form-label", pageContext.locale.translate("LABEL_PROFILE_PHOTO"));
@@ -216,7 +216,8 @@ export class SettingsPage implements Page {
             const divCol3Photo: HTMLDivElement = Controls.createDiv(divRowPhoto, "col-4");
             const iMinus: HTMLElement = Controls.createElement(divCol3Photo, "i", "bi bi-person-x fs-3 ms-2");
             iMinus.setAttribute("role", "button");
-            iMinus.addEventListener("click", async (e: Event) => await this.onRemovePhotoAsync(e, pageContext));
+            iMinus.setAttribute("data-bs-target", "#confirmationdialog-id_removephoto");
+            iMinus.setAttribute("data-bs-toggle", "modal");
         }
         // hidden form
         const formElement: HTMLFormElement = Controls.createForm(divRowPhoto, "d-none");
@@ -227,7 +228,17 @@ export class SettingsPage implements Page {
         inputPhoto.name = "photo-file";
         inputPhoto.accept = "image/jpeg,image/png";
         inputPhoto.addEventListener("change", async (e: Event) => this.onUpdatePhotoAsync(e, pageContext));
-
+        // render remove profile picture confirmation dialog
+        Controls.createConfirmationDialog(
+            parent,
+            pageContext.locale.translate("BUTTON_REMOVE_PROFILE_PHOTO"),
+            pageContext.locale.translate("INFO_REALLY_REMOVE_PROFILE_PICTURE"),
+            pageContext.locale.translate("BUTTON_YES"),
+            pageContext.locale.translate("BUTTON_NO"), "_removephoto");
+        document.getElementById("confirmationyesbutton-id_removephoto")!.addEventListener("click", async (e: Event) => {
+            e.preventDefault();
+            await this.onRemovePhotoAsync(e, pageContext);
+        });
     }
 
     private async onUpdatePhotoAsync(e: Event, pageContext: PageContext): Promise<void> {

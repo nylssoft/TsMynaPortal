@@ -13,6 +13,7 @@ export default {
       '/api': 'http://localhost:5000',
       '/locale/de.json': 'http://localhost:5000',
       '/locale/en.json': 'http://localhost:5000',
+      '/images/profiles/': 'http://localhost:5000'
     },    
   },
   // Optional: Silence Sass deprecation warnings. See note below.
