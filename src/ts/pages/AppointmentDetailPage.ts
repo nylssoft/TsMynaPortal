@@ -80,9 +80,8 @@ export class AppointmentDetailPage implements Page {
         Controls.createElement(divCol21, "i", "bi bi-link-45deg");
         const divCol22: HTMLDivElement = Controls.createDiv(divRow2, "col-10");
         const url: string = AppointmentService.buildAppointmentUrl(item);
-        const textarea: HTMLTextAreaElement = Controls.createElement(divCol22, "textarea", "form-control-plaintext", url) as HTMLTextAreaElement;
-        textarea.style.height = "100px";
-        textarea.readOnly = true;
+        const aUrl = Controls.createAnchor(divCol22, url, url);
+        aUrl.target = "_blank";
         const divCol23: HTMLDivElement = Controls.createDiv(divRow2, "col-1 mt-2");
         const iconCopy: HTMLElement = Controls.createElement(divCol23, "i", "bi bi-clipboard");
         iconCopy.setAttribute("role", "button");
@@ -122,7 +121,6 @@ export class AppointmentDetailPage implements Page {
         const inputDescription: HTMLInputElement = Controls.createInput(divDescription, "text", "description-id", "form-control", item?.definition?.description);
         inputDescription.setAttribute("autocomplete", "off");
         inputDescription.setAttribute("spellcheck", "false");
-        inputDescription.focus();
         inputDescription.addEventListener("input", (e: Event) => this.onInput(e, pageContext));
         const participantNames: string = AppointmentService.getParticipantNames(item);
         const divParticipants: HTMLDivElement = Controls.createDiv(divRows, "mb-3");
