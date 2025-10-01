@@ -61,7 +61,6 @@ export class TwoFactorEditPage implements Page {
         const inputCode: HTMLInputElement = Controls.createInput(divCode, "text", "code-id", "form-control");
         inputCode.setAttribute("autocomplete", "off");
         inputCode.setAttribute("spellcheck", "false");
-        inputCode.focus();
         inputCode.addEventListener("input", (e: Event) => this.onInput(e, pageContext));
         // save button
         const buttonSave: HTMLButtonElement = Controls.createButton(divCodeRow, "submit", pageContext.locale.translate("BUTTON_SAVE"), "btn btn-primary");

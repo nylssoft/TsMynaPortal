@@ -122,13 +122,12 @@ export class ContactDetailPage implements Page {
         const contact: ContactResult | null = pageContext.contact.result;
         const formElement: HTMLFormElement = Controls.createForm(cardBody, "align-items-center");
         const divRows: HTMLDivElement = Controls.createDiv(formElement, "row align-items-center");
-        const inputName: HTMLInputElement = this.createInput(divRows, pageContext, "LABEL_NAME", "name-id", contact?.name);
+        this.createInput(divRows, pageContext, "LABEL_NAME", "name-id", contact?.name);
         this.createInput(divRows, pageContext, "LABEL_PHONE", "phone-id", contact?.phone);
         this.createInput(divRows, pageContext, "LABEL_ADDRESS", "address-id", contact?.address);
         this.createInput(divRows, pageContext, "LABEL_EMAIL_ADDRESS", "email-id", contact?.email);
         this.createInput(divRows, pageContext, "LABEL_BIRTHDAY", "birthday-id", contact?.birthday);
         this.createTextarea(divRows, pageContext, "LABEL_NOTE", "note-id", "100px", contact?.note);
-        inputName.focus();
         const saveButton: HTMLButtonElement = Controls.createButton(divRows, "submit", pageContext.locale.translate("BUTTON_SAVE"), "btn btn-primary", "savebutton-id");
         saveButton.addEventListener("click", async (e: Event) => await this.onSaveAsync(e, pageContext));
         // render back confirmation dialog

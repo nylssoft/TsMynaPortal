@@ -107,7 +107,6 @@ export class NoteDetailPage implements Page {
         const inputTitle: HTMLInputElement = Controls.createInput(divTitle, "text", "title-id", "form-control", note?.title);
         inputTitle.setAttribute("autocomplete", "off");
         inputTitle.setAttribute("spellcheck", "false");
-        inputTitle.focus();
         inputTitle.addEventListener("input", (e: Event) => this.onInput(e, pageContext));
         const divNote: HTMLDivElement = Controls.createDiv(divRows, "mb-3");
         Controls.createLabel(divNote, "note-id", "form-label", pageContext.locale.translate("LABEL_NOTE"));

@@ -136,12 +136,11 @@ export class PasswordItemDetailPage implements Page {
         const cardBody: HTMLDivElement = Controls.createDiv(card, "card-body");
         const formElement: HTMLFormElement = Controls.createForm(cardBody, "align-items-center");
         const divRows: HTMLDivElement = Controls.createDiv(formElement, "row align-items-center");
-        const inputName: HTMLInputElement = this.createInput(divRows, pageContext, "LABEL_NAME", "name-id", passwordItem?.Name);
+        this.createInput(divRows, pageContext, "LABEL_NAME", "name-id", passwordItem?.Name);
         this.createInput(divRows, pageContext, "LABEL_LOGIN", "login-id", passwordItem?.Login);
         this.createPassword(divRows, pageContext, "LABEL_PASSWORD", "password-id", pwd);
         this.createInput(divRows, pageContext, "LABEL_URL", "url-id", passwordItem?.Url);
         this.createTextarea(divRows, pageContext, "LABEL_DESCRIPTION", "description-id", "100px", passwordItem?.Description);
-        inputName.focus();
         const saveButton: HTMLButtonElement = Controls.createButton(divRows, "submit", pageContext.locale.translate("BUTTON_SAVE"), "btn btn-primary", "savebutton-id");
         saveButton.addEventListener("click", async (e: Event) => await this.onSaveAsync(e, pageContext));
         // render back confirmation dialog

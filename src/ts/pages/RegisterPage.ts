@@ -44,7 +44,6 @@ export class RegisterPage implements Page {
         inputSecKey.setAttribute("autocomplete", "off");
         inputSecKey.setAttribute("spellcheck", "false");
         inputSecKey.addEventListener("input", (e: Event) => this.onInput(e, pageContext));
-        inputSecKey.focus();
         // username
         const divUsernameRow: HTMLDivElement = Controls.createDiv(formElement, "row align-items-center");
         const divUsername: HTMLDivElement = Controls.createDiv(divUsernameRow, "mb-3");

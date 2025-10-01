@@ -44,7 +44,6 @@ export class ResetPasswordPage implements Page {
         inputSecKey.setAttribute("autocomplete", "off");
         inputSecKey.setAttribute("spellcheck", "false");
         inputSecKey.addEventListener("input", (e: Event) => this.onInput(e, pageContext));
-        inputSecKey.focus();
         // new password
         const divNewPwdRow: HTMLDivElement = Controls.createDiv(formElement, "row align-items-center");
         const divNewPwd: HTMLDivElement = Controls.createDiv(divNewPwdRow, "mb-3");
