@@ -114,7 +114,7 @@ export class Locale {
         "LABEL_DIARY_ENTRY": "Diary entry:",
         "INFO_REALLY_DELETE_CONTACT": "Do you really want to delete the contact?",
         "INFO_REALLY_DELETE_PASSWORD": "Do you really want to delete the password?",
-        "INFO_REALLY_REMOVE_PROFILE_PICTURE": "Do you really want to remove you profile picture?",
+        "INFO_REALLY_REMOVE_PROFILE_PICTURE": "Do you really want to remove your profile picture?",
         "LABEL_DESTINATION_FOLDER": "Destination folder:",
         "FILE_DOWNLOADED_1": "The file {0} has been downloaded.",
         "LABEL_DARK": "Dark",

@@ -87,6 +87,16 @@ export class SettingsPage implements Page {
 
     private renderUserSettings(pageContext: PageContext, parent: HTMLElement, grid: HTMLElement, userDetails: UserInfoResult): void {
         this.renderProfilPhoto(pageContext, parent, grid, userDetails);
+        // email
+        const divRowEmail: HTMLDivElement = Controls.createDiv(grid, "row mt-3");
+        const divColEmail: HTMLDivElement = Controls.createDiv(divRowEmail, "col");
+        Controls.createLabel(divColEmail, "email-id", "form-check-label", pageContext.locale.translate("LABEL_EMAIL_ADDRESS"));
+        const divRowEmailInput: HTMLDivElement = Controls.createDiv(grid, "row mt-1");
+        const divColEmailInput: HTMLDivElement = Controls.createDiv(divRowEmailInput, "col");
+        const inputEmail: HTMLInputElement = Controls.createInput(divColEmailInput, "text", "email-id", "form-control", userDetails.email);
+        inputEmail.setAttribute("autocomplete", "off");
+        inputEmail.setAttribute("spellcheck", "false");
+        inputEmail.addEventListener("change", async (e: Event) => this.onChangeEmailAsync(e, pageContext));
         // switch keep login
         const divRowKeepLogin: HTMLDivElement = Controls.createDiv(grid, "row mt-3");
         const divColKeepLogin: HTMLDivElement = Controls.createDiv(divRowKeepLogin, "col");
@@ -239,6 +249,19 @@ export class SettingsPage implements Page {
             e.preventDefault();
             await this.onRemovePhotoAsync(e, pageContext);
         });
+    }
+
+    private async onChangeEmailAsync(e: Event, pageContext: PageContext): Promise<void> {
+        try {
+            const emailInput: HTMLInputElement = document.getElementById("email-id") as HTMLInputElement;
+            const email: string = emailInput.value.trim();
+            await pageContext.authenticationClient.updateEmailAsync(email);
+            emailInput.value = email;
+        }
+        catch (error: Error | unknown) {
+            this.handleError(error, pageContext);
+            return;
+        }
     }
 
     private async onUpdatePhotoAsync(e: Event, pageContext: PageContext): Promise<void> {

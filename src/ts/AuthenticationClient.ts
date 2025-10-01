@@ -523,6 +523,20 @@ export class AuthenticationClient {
         }
     }
 
+    public async updateEmailAsync(email: string): Promise<void> {
+        const token: string | null = this.getToken();
+        if (token == null) throw new Error("ERROR_INVALID_PARAMETERS");
+        const resp: Response = await FetchHelper.fetchAsync("/api/pwdman/user/email", {
+            method: "PUT",
+            headers: { "Accept": "application/json", "Content-Type": "application/json", "token": token },
+            body: JSON.stringify(email.trim())
+        });
+        const changed: boolean = await resp.json() as boolean;
+        if (changed && this.userInfo != null) {
+            this.userInfo.email = email;
+        }
+    }
+
     public verifyPasswordStrength(pwd: string): boolean {
         if (pwd.length >= 8) {
             const cntSymbols: number = this.countCharacters(pwd, "!@$()=+-,:.");
