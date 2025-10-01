@@ -225,9 +225,9 @@ export class AppointmentVotePage implements Page {
             if (acceptedUsernames.length > 0) {
                 acceptedUsernames.sort();
                 const row: HTMLDivElement = Controls.createDiv(grid, "row");
-                const col1: HTMLDivElement = Controls.createDiv(row, "col-4");
+                const col1: HTMLDivElement = Controls.createDiv(row, "col-5");
                 Controls.createSpan(col1, "", datestr);
-                const col2: HTMLDivElement = Controls.createDiv(row, "col-8");
+                const col2: HTMLDivElement = Controls.createDiv(row, "col-7");
                 Controls.createSpan(col2, "", acceptedUsernames.join(', '));
             }
         }
