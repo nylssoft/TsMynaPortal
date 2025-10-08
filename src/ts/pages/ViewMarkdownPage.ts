@@ -32,6 +32,8 @@ export class ViewMarkdownPage implements Page {
         card.innerHTML = markdown;
         const aLinks: NodeListOf<HTMLAnchorElement> = document.querySelectorAll('a[data-markdown]') as NodeListOf<HTMLAnchorElement>;
         aLinks.forEach(a => a.addEventListener("click", async (e: Event) => await this.onShowMarkdownPageAsync(e, pageContext, a.getAttribute("data-markdown")!)));
+        const aExternals: NodeListOf<HTMLAnchorElement> = document.querySelectorAll('a[data-external]') as NodeListOf<HTMLAnchorElement>;
+        aExternals.forEach(a => this.convertToExternalLink(a));
         const h1: HTMLElement | null = document.querySelector("h1");
         h1?.parentNode?.removeChild(h1);
     }
@@ -52,6 +54,13 @@ export class ViewMarkdownPage implements Page {
         return markdownText;
     }
 
+    private convertToExternalLink(a: HTMLAnchorElement) {
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.classList.add('icon-link', 'icon-link-hover');
+        Controls.createElement(a, "i", "bi bi-box-arrow-up-right");
+    }
+    
     // event callbacks
 
     private async onBackAsync(e: Event, pageContext: PageContext): Promise<void> {
