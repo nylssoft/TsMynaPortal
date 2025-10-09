@@ -24,12 +24,10 @@ export class ViewMarkdownPage implements Page {
         const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
         iBack.setAttribute("role", "button");
         iBack.addEventListener("click", async (e: Event) => await this.onBackAsync(e, pageContext));
-        const card = Controls.createDiv(parent, "container");
-        card.style.maxWidth = "600px";
-        // read markdown
+        const container = Controls.createDiv(parent, "container");
         const currentPage: string = pageContext.markdownPages[pageContext.markdownPages.length - 1];
         const markdown: string = await this.getMarkdownAsync(pageContext, currentPage);
-        card.innerHTML = markdown;
+        container.innerHTML = markdown;
         const aLinks: NodeListOf<HTMLAnchorElement> = document.querySelectorAll('a[data-markdown]') as NodeListOf<HTMLAnchorElement>;
         aLinks.forEach(a => a.addEventListener("click", async (e: Event) => await this.onShowMarkdownPageAsync(e, pageContext, a.getAttribute("data-markdown")!)));
         const aExternals: NodeListOf<HTMLAnchorElement> = document.querySelectorAll('a[data-external]') as NodeListOf<HTMLAnchorElement>;

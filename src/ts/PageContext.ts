@@ -85,7 +85,7 @@ export class PageContext {
             if (!page.hideNavBar) {
                 await navBar.renderAsync(main, this);
             }
-            const content: HTMLDivElement = Controls.createDiv(main, "container py-4 px-3 mx-auto");
+            const content: HTMLDivElement = Controls.createDiv(main, "container py-2 mx-auto");
             await page.renderAsync(content, this);
             Controls.createDiv(main, "mt-4");
         }
