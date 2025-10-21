@@ -366,6 +366,9 @@ export class AuthenticationClient {
             },
             body: JSON.stringify(pin)
         });
+        if (this.userInfo != null) {
+            this.userInfo.usePin = pin.length > 0;
+        }
     }
 
     public async updatePasswordAsync(oldPwd: string, newPwd: string): Promise<void> {
