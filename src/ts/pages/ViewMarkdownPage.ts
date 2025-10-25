@@ -20,7 +20,7 @@ export class ViewMarkdownPage implements Page {
 
     private async renderViewAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         // render action toolbar
-        const headingActions: HTMLHeadingElement = Controls.createHeading(parent, 4);
+        const headingActions: HTMLHeadingElement = Controls.createHeading(parent, 4, "my-2");
         const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
         iBack.setAttribute("role", "button");
         iBack.addEventListener("click", async (e: Event) => await this.onBackAsync(e, pageContext));

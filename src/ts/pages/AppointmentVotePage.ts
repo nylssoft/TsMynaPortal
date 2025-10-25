@@ -192,7 +192,7 @@ export class AppointmentVotePage implements Page {
         if (pageContext.vote.voteShowList) {
             this.renderList(parent, pageContext);
         } else {
-            const iList: HTMLElement = Controls.createElement(parent, "i", "bi bi-list-ul");
+            const iList: HTMLElement = Controls.createElement(parent, "i", "bi bi-list-ul fs-3");
             iList.setAttribute("role", "button");
             iList.addEventListener("click", () => {
                 parent.removeChild(iList);
@@ -203,7 +203,7 @@ export class AppointmentVotePage implements Page {
     }
 
     private renderList(parent: HTMLElement, pageContext: PageContext) {
-        const iClose: HTMLElement = Controls.createElement(parent, "i", "bi bi-x-lg");
+        const iClose: HTMLElement = Controls.createElement(parent, "i", "bi bi-x-lg fs-3");
         iClose.setAttribute("role", "button");
         iClose.addEventListener("click", () => {
             pageContext.vote.voteShowList = false;

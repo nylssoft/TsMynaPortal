@@ -38,7 +38,7 @@ export class PasswordItemDetailPage implements Page {
         const user: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
         const pwd: string = await PasswordManagerService.getPasswordAsync(user, passwordItem);
         // render action toolbar
-        const headingActions: HTMLHeadingElement = Controls.createHeading(parent, 4);
+        const headingActions: HTMLHeadingElement = Controls.createHeading(parent, 4, "my-2");
         const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
         iBack.setAttribute("role", "button");
         iBack.addEventListener("click", async (e: Event) => await this.onBackAsync(e, pageContext));
@@ -124,7 +124,7 @@ export class PasswordItemDetailPage implements Page {
             pwd = await PasswordManagerService.getPasswordAsync(user, passwordItem);
         }
         // render action toolbar
-        const headingActions: HTMLHeadingElement = Controls.createHeading(parent, 4);
+        const headingActions: HTMLHeadingElement = Controls.createHeading(parent, 4, "my-2");
         const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
         iBack.setAttribute("role", "button");
         iBack.setAttribute("data-bs-target", "#confirmationdialog-id");

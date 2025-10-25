@@ -46,7 +46,7 @@ export class AppointmentDetailPage implements Page {
     private async renderViewAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const item: AppointmentResult = pageContext.appointment.result!;
         // render action toolbar
-        const headingActions: HTMLHeadingElement = Controls.createHeading(parent, 4);
+        const headingActions: HTMLHeadingElement = Controls.createHeading(parent, 4, "my-2");
         const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
         iBack.setAttribute("role", "button");
         iBack.addEventListener("click", async (e: Event) => await this.onBackViewAsync(e, pageContext));
@@ -104,7 +104,7 @@ export class AppointmentDetailPage implements Page {
     private async renderEditAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         const item: AppointmentResult | null = pageContext.appointment.result;
         // render action toolbar
-        const headingActions: HTMLHeadingElement = Controls.createHeading(parent, 4);
+        const headingActions: HTMLHeadingElement = Controls.createHeading(parent, 4, "my-2");
         const iBack: HTMLElement = Controls.createElement(headingActions, "i", "bi bi-arrow-left", undefined, "backbutton-id");
         iBack.setAttribute("role", "button");
         iBack.setAttribute("data-bs-target", "#confirmationdialog-id");
