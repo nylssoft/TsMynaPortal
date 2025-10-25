@@ -15,7 +15,7 @@ export class TabRenderer {
         const tabs: HTMLUListElement = Controls.createElement(parent, "ul", "nav nav-pills") as HTMLUListElement;
         this.tabRegistrations.forEach(tab => {
             const tabElement: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
-            const aTab: HTMLAnchorElement = Controls.createAnchor(tabElement, tab.href, "", "nav-link", currentTab === tab.desktopTab);
+            const aTab: HTMLAnchorElement = Controls.createAnchor(tabElement, `?tab=${tab.desktopTab}`, "", "nav-link", currentTab === tab.desktopTab);
             Controls.createSpan(aTab, `bi ${tab.bootstrapIcon}`);
             tabElement.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, tab.desktopTab));
         });

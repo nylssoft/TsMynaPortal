@@ -6,7 +6,6 @@ import { Tab } from "./Tab";
 
 export class DocumentTab implements Tab {
     desktopTab: DesktopTab = "DOCUMENTS";
-    href: string = "documents";
     bootstrapIcon: string = "bi-files";
 
     async renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {

@@ -17,7 +17,7 @@ export class AboutPage implements Page {
         Controls.createParagraph(aboutMessage, "", pageContext.locale.translate("WEBSITE_INFO"));
         Controls.createParagraph(aboutMessage, "", `${Version} ${pageContext.locale.translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.locale.translate("COPYRIGHT")}`);
         const divLegal: HTMLDivElement = Controls.createDiv(aboutMessage, "mt-2");
-        const aLegal: HTMLAnchorElement = Controls.createAnchor(divLegal, "/legal", pageContext.locale.translate("INFO_LEGAL_NOTICE"));
+        const aLegal: HTMLAnchorElement = Controls.createAnchor(divLegal, "?page=legal", pageContext.locale.translate("INFO_LEGAL_NOTICE"));
         aLegal.addEventListener("click", async (e: Event) => await this.showMarkdownPageAsync(pageContext, e, "legal"));
         Controls.createHeading(card, 5, "card-title", pageContext.locale.translate("CARD_TITLE_PERSONAL"));
         const carouselDiv: HTMLDivElement = Controls.createDiv(card, "carousel slide", undefined, "carousel-id");

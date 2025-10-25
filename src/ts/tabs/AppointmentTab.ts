@@ -6,7 +6,6 @@ import { Tab } from "./Tab";
 
 export class AppointmentTab implements Tab {
     desktopTab: DesktopTab = "APPOINTMENTS";
-    href: string = "appointments";
     bootstrapIcon: string = "bi-calendar-heart";
 
     async renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
@@ -48,7 +47,8 @@ export class AppointmentTab implements Tab {
         const listGroup: HTMLElement = document.getElementById("list-group-id")!;
         Controls.removeAllChildren(listGroup);
         filteredItems.forEach(item => {
-            const a: HTMLAnchorElement = Controls.createAnchor(listGroup, "appointmentdetails", "", "list-group-item");
+            const a: HTMLElement = Controls.createSpan(listGroup, "list-group-item");
+            a.setAttribute("role", "button");
             Controls.createSpan(a, `bi ${this.bootstrapIcon}`);
             Controls.createSpan(a, "ms-2", item.definition!.description!);
             a.addEventListener("click", async (e: MouseEvent) => {

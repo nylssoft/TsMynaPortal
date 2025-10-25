@@ -9,7 +9,7 @@ export class Desktop {
     getLastUsedDesktopTab() {
         if (this.tab == null) {
             const currentTab: DesktopTab = window.localStorage.getItem("desktop-tab") as DesktopTab;
-            if (["BIRTHDAYS", "CONTACTS", "NOTES", "PASSWORD_MANAGER", "DIARY", "DOCUMENTS", "APPOINTMENTS"].includes(currentTab)) {
+            if (this.isValidDesktopTab(currentTab)) {
                 this.tab = currentTab;
             } else {
                 this.tab = "BIRTHDAYS";
@@ -21,5 +21,9 @@ export class Desktop {
     setLastUsedDestopTab(tab: DesktopTab) {
         this.tab = tab;
         window.localStorage.setItem("desktop-tab", tab);
+    }
+
+    isValidDesktopTab(tab: string): tab is DesktopTab {
+        return ["BIRTHDAYS", "CONTACTS", "NOTES", "PASSWORD_MANAGER", "DIARY", "DOCUMENTS", "APPOINTMENTS"].includes(tab);
     }
 }

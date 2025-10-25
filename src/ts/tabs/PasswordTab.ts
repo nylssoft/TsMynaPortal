@@ -6,7 +6,6 @@ import { Tab } from "./Tab";
 
 export class PasswordTab implements Tab {
     desktopTab: DesktopTab = "PASSWORD_MANAGER";
-    href: string = "passwords";
     bootstrapIcon: string = "bi-lock";
 
     async renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
@@ -47,7 +46,8 @@ export class PasswordTab implements Tab {
         const listGroup: HTMLElement = document.getElementById("list-group-id")!;
         Controls.removeAllChildren(listGroup);
         filteredItems.forEach(item => {
-            const a: HTMLAnchorElement = Controls.createAnchor(listGroup, "passworddetails", "", "list-group-item");
+            const a: HTMLElement = Controls.createSpan(listGroup, "list-group-item");
+            a.setAttribute("role", "button");
             Controls.createSpan(a, `bi ${this.bootstrapIcon}`);
             Controls.createSpan(a, "ms-2", item.Name);
             a.addEventListener("click", async (e: MouseEvent) => {

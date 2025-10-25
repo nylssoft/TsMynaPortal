@@ -6,7 +6,6 @@ import { Tab } from "./Tab";
 
 export class BirthdayTab implements Tab {
     desktopTab: DesktopTab = "BIRTHDAYS";
-    href: string = "birthdays";
     bootstrapIcon: string = "bi-cake";
 
     async renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
@@ -26,7 +25,8 @@ export class BirthdayTab implements Tab {
                 birthdays.sort((a, b) => a.daysUntilBirthday! - b.daysUntilBirthday!);
                 const listGroup: HTMLDivElement = Controls.createDiv(parent, "list-group");
                 birthdays.forEach(contact => {
-                    const a: HTMLAnchorElement = Controls.createAnchor(listGroup, "contactdetails", "", "list-group-item");
+                    const a: HTMLElement = Controls.createSpan(listGroup, "list-group-item");
+                    a.setAttribute("role", "button");
                     Controls.createSpan(a, "bi bi-person");
                     Controls.createSpan(a, "ms-2", contact.name);
                     Controls.createSpan(a, `ms-2 bi ${this.bootstrapIcon}`);

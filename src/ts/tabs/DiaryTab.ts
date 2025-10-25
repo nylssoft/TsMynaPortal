@@ -6,7 +6,6 @@ import { Tab } from "./Tab";
 
 export class DiaryTab implements Tab {
     desktopTab: DesktopTab = "DIARY";
-    href: string = "diary";
     bootstrapIcon: string = "bi-calendar";
 
     async renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {

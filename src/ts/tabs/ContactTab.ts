@@ -6,7 +6,6 @@ import { Tab } from "./Tab";
 
 export class ContactTab implements Tab {
     desktopTab: DesktopTab = "CONTACTS";
-    href: string = "contacts";
     bootstrapIcon: string = "bi-person";
 
     async renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
@@ -48,7 +47,8 @@ export class ContactTab implements Tab {
         const listGroup: HTMLElement = document.getElementById("list-group-id")!;
         Controls.removeAllChildren(listGroup);
         filteredItems.forEach(item => {
-            const a: HTMLAnchorElement = Controls.createAnchor(listGroup, "contactdetails", "", "list-group-item");
+            const a: HTMLElement = Controls.createSpan(listGroup, "list-group-item");
+            a.setAttribute("role", "button");
             Controls.createSpan(a, `bi ${this.bootstrapIcon}`);
             Controls.createSpan(a, "ms-2", item.name);
             a.addEventListener("click", async (e: MouseEvent) => {

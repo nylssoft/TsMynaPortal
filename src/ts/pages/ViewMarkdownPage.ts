@@ -58,7 +58,7 @@ export class ViewMarkdownPage implements Page {
         a.classList.add('icon-link', 'icon-link-hover');
         Controls.createElement(a, "i", "bi bi-box-arrow-up-right");
     }
-    
+
     // event callbacks
 
     private async onBackAsync(e: Event, pageContext: PageContext): Promise<void> {
@@ -67,7 +67,7 @@ export class ViewMarkdownPage implements Page {
         if (pageContext.markdownPages.length == 0) {
             pageContext.pageType = "ABOUT";
         }
-        await pageContext.renderAsync();            
+        await pageContext.renderAsync();
     }
 
     private async onShowMarkdownPageAsync(e: Event, pageContext: PageContext, markdownPage: string): Promise<void> {
