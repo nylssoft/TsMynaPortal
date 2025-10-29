@@ -66,6 +66,7 @@ export class DocumentTab implements Tab {
             // download success
             const downloadAlert: HTMLDivElement = Controls.createDiv(parent, "text-center fixed-bottom alert alert-success fade", undefined, "download-alert-id");
             downloadAlert.setAttribute("role", "alert");
+            downloadAlert.style.pointerEvents = "none";
             Controls.createDiv(downloadAlert, undefined, undefined, "download-alert-text-id");
         }
         catch (error: Error | unknown) {
