@@ -239,6 +239,7 @@ export class PasswordItemDetailPage implements Page {
 
     private onInputChange(e: Event, pageContext: PageContext) {
         e.preventDefault();
+        pageContext.updateActivity();
         if (!pageContext.passwordItem.changed) {
             pageContext.passwordItem.changed = true;
             document.getElementById("backbutton-id")!.setAttribute("data-bs-toggle", "modal");
@@ -247,6 +248,7 @@ export class PasswordItemDetailPage implements Page {
 
     private onPasswordChange(e: Event, pageContext: PageContext) {
         e.preventDefault();
+        pageContext.updateActivity();
         if (!pageContext.passwordItem.changed) {
             pageContext.passwordItem.changed = true;
             document.getElementById("backbutton-id")!.setAttribute("data-bs-toggle", "modal");

@@ -154,6 +154,7 @@ export class AppointmentDetailPage implements Page {
             iLeft.setAttribute("role", "button");
             iLeft.addEventListener("click", async (e: MouseEvent) => {
                 e.preventDefault();
+                pageContext.updateActivity();
                 pageContext.appointment.previousMonth();
                 this.renderCalendar(pageContext, parent);
             });
@@ -168,6 +169,7 @@ export class AppointmentDetailPage implements Page {
             iRight.setAttribute("role", "button");
             iRight.addEventListener("click", async (e: MouseEvent) => {
                 e.preventDefault();
+                pageContext.updateActivity();
                 pageContext.appointment.nextMonth();
                 this.renderCalendar(pageContext, parent);
             });
@@ -216,6 +218,7 @@ export class AppointmentDetailPage implements Page {
                         td.setAttribute("role", "button");
                         const constDay: number = day; // bind to const for the following capture
                         td.addEventListener("click", (e: MouseEvent) => {
+                            pageContext.updateActivity();
                             pageContext.appointment.toggleOption(constDay);
                             if (!pageContext.appointment.changed) {
                                 pageContext.appointment.changed = true;
@@ -252,6 +255,7 @@ export class AppointmentDetailPage implements Page {
 
     private onInput(e: Event, pageContext: PageContext) {
         e.preventDefault();
+        pageContext.updateActivity();
         if (!pageContext.appointment.changed) {
             pageContext.appointment.changed = true;
             document.getElementById("backbutton-id")!.setAttribute("data-bs-toggle", "modal");

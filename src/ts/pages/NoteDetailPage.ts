@@ -160,6 +160,7 @@ export class NoteDetailPage implements Page {
 
     private onInput(e: Event, pageContext: PageContext) {
         e.preventDefault();
+        pageContext.updateActivity();
         if (!pageContext.note.changed) {
             pageContext.note.changed = true;
             document.getElementById("backbutton-id")!.setAttribute("data-bs-toggle", "modal");

@@ -6,6 +6,9 @@ import { ErrorResult } from "../TypeDefinitions";
  */
 export class FetchHelper {
 
+    /** Timestamp of the last activity, e.g. updated on each fetch call */
+    static lastActivityDateTime: number = Date.now();
+
     /**
      * Fetches data from the specified URL and returns the response.
      * If the response is not ok, it throws an error with the message from the response
@@ -17,6 +20,7 @@ export class FetchHelper {
      * @returns response object.
      */
     static async fetchAsync(url: string, options?: RequestInit): Promise<Response> {
+        this.lastActivityDateTime = Date.now();
         const resp: Response = await window.fetch(url, options);
         if (!resp.ok) {
             const errorResult: ErrorResult | null = await resp.json() as ErrorResult;

@@ -2,7 +2,7 @@ import { Locale } from "./utils/Locale";
 import { Theme } from "./utils/Theme";
 import { AuthenticationClient } from "./AuthenticationClient";
 import { Controls } from "./utils/Controls";
-import { PageType } from "./TypeDefinitions";
+import { PageType, UserInfoResult } from "./TypeDefinitions";
 import { Diary } from "./models/Diary";
 import { Contact } from "./models/Contact";
 import { Desktop } from "./models/Desktop";
@@ -11,6 +11,7 @@ import { PasswordItem } from "./models/PasswordItem";
 import { DocumentItem } from "./models/DocumentItem";
 import { Appointment } from "./models/Appointment";
 import { Settings } from "./models/Settings";
+import { FetchHelper } from "./utils/FetchHelper";
 
 /**
  * Interface for a page that can be rendered in the application.
@@ -60,6 +61,9 @@ export class PageContext {
     pageType: PageType = "LOGIN_USERNAME_PASSWORD";
     // all page registrations
     private readonly pageRegistrations = new Map<PageType, Page>();
+    // auto logout settings
+    readonly autoLogoutWarningSeconds: number = 540;
+    readonly autoLogoutInactiveSeconds: number = 600;
 
     /**
      * Registers a page implementation.
@@ -76,6 +80,7 @@ export class PageContext {
      * It also renders the navigation bar if available.
      */
     async renderAsync(): Promise<void> {
+        this.updateActivity();
         Controls.showElemById("loading-progress-id", true);
         const page: Page | undefined = this.pageRegistrations.get(this.pageType);
         const navBar: Page | undefined = this.pageRegistrations.get("NAVIGATION_BAR");
@@ -87,8 +92,52 @@ export class PageContext {
             }
             const content: HTMLDivElement = Controls.createDiv(main, "container");
             await page.renderAsync(content, this);
+            await this.logoutIfInactiveAsync(content);
             Controls.createDiv(main, "mt-4");
         }
         Controls.showElemById("loading-progress-id", false);
+    }
+
+    updateActivity(): void {
+        FetchHelper.lastActivityDateTime = Date.now();
+    }
+
+    private async logoutIfInactiveAsync(parent: HTMLElement): Promise<void> {
+        if (this.authenticationClient.isLoggedIn()) {
+            const userInfo: UserInfoResult = await this.authenticationClient.getUserInfoAsync();
+            if (userInfo.usePin || !userInfo.useLongLivedToken) {
+                const toastContainer: HTMLDivElement = Controls.createDiv(parent, "position-fixed top-0 start-50 translate-middle-x");
+                const toast: HTMLDivElement = Controls.createDiv(toastContainer, "toast text-bg-primary", undefined, "toast-logout-id");
+                toast.setAttribute("role", "alert");
+                toast.setAttribute("data-bs-autohide", "false");
+                const toastHeader: HTMLDivElement = Controls.createDiv(toast, "toast-header");
+                Controls.createElement(toastHeader, "strong", "me-auto", this.locale.translate("ATTENTION"));
+                Controls.createElement(toastHeader, "small", "", "", "toast-logout-timer-id");
+                const closeButton: HTMLButtonElement = Controls.createButton(toastHeader, "button", "", "btn-close");
+                closeButton.setAttribute("data-bs-dismiss", "toast");
+                closeButton.addEventListener("click", () => this.updateActivity());
+                Controls.createDiv(toast, "toast-body", this.locale.translate("LOGOUT_IF_NOT_ACTIVE"));
+                setInterval(() => this.autoLogoutIfInactive(this), 1000);
+            }
+        }
+    }
+
+    private autoLogoutIfInactive(pageContext: PageContext): void {
+        const now: number = Date.now();
+        const diff: number = Math.floor((now - FetchHelper.lastActivityDateTime) / 1000);
+        if (diff >= pageContext.autoLogoutWarningSeconds) {
+            const toast: HTMLDivElement = document.getElementById("toast-logout-id") as HTMLDivElement;
+            const bsToast = (window as any).bootstrap?.Toast?.getOrCreateInstance(toast)!;
+            if (!bsToast.isShown()) {
+                bsToast.show();
+            }
+            const remain: number = Math.max(0, pageContext.autoLogoutInactiveSeconds - diff);
+            const timerElem: HTMLElement = document.getElementById("toast-logout-timer-id") as HTMLElement;
+            timerElem.textContent = pageContext.locale.translateWithArgs("SECONDS_LEFT_1", [`${remain}`]);
+            if (remain == 0) {
+                window.sessionStorage.clear();
+                window.location.reload();
+            }
+        }
     }
 }

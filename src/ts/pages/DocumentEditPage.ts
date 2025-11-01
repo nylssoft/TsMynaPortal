@@ -76,6 +76,7 @@ export class DocumentEditPage implements Page {
 
     private onInput(e: Event, pageContext: PageContext) {
         e.preventDefault();
+        pageContext.updateActivity();
         if (!pageContext.documentItem.changed) {
             pageContext.documentItem.changed = true;
             document.getElementById("backbutton-id")!.setAttribute("data-bs-toggle", "modal");

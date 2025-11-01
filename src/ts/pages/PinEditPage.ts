@@ -80,6 +80,7 @@ export class PinEditPage implements Page {
 
     private onInput(e: Event, pageContext: PageContext) {
         e.preventDefault();
+        pageContext.updateActivity();
         if (!pageContext.settings.pinChanged) {
             pageContext.settings.pinChanged = true;
             document.getElementById("backbutton-id")!.setAttribute("data-bs-toggle", "modal");

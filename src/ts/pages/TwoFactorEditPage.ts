@@ -98,6 +98,7 @@ export class TwoFactorEditPage implements Page {
 
     private onInput(e: Event, pageContext: PageContext) {
         e.preventDefault();
+        pageContext.updateActivity();
         if (!pageContext.settings.twoFactorChanged) {
             pageContext.settings.twoFactorChanged = true;
             document.getElementById("backbutton-id")!.setAttribute("data-bs-toggle", "modal");

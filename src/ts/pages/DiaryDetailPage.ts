@@ -145,6 +145,7 @@ export class DiaryDetailPage implements Page {
 
     private onInput(e: Event, pageContext: PageContext) {
         e.preventDefault();
+        pageContext.updateActivity();
         if (!pageContext.diary.changed) {
             pageContext.diary.changed = true;
             document.getElementById("backbutton-id")!.setAttribute("data-bs-toggle", "modal");
