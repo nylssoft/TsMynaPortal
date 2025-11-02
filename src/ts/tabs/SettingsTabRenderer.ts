@@ -11,17 +11,26 @@ export class SettingsTabRenderer {
     }
 
     async renderTabsAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
-        const currentTabType: SettingsTabType = pageContext.settings.getLastUsedTabType();
+        const isAuthenticated: boolean = pageContext.authenticationClient.isLoggedIn();
+        let currentTabType: SettingsTabType = pageContext.settings.getLastUsedTabType();
+        let currentTab: SettingsTab | undefined = this.tabRegistrations.find(tab => tab.tabType == currentTabType);
+        if (currentTab && currentTab.requiresAuthentication && !isAuthenticated) {
+            currentTab = this.tabRegistrations.find(tab => !tab.requiresAuthentication);
+            if (currentTab) {
+                currentTabType = currentTab.tabType;
+            }
+        }
         const tabs: HTMLUListElement = Controls.createElement(parent, "ul", "nav nav-pills") as HTMLUListElement;
-        this.tabRegistrations.forEach(tab => {
-            const tabElement: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
-            const aTab: HTMLAnchorElement = Controls.createAnchor(tabElement, `?tab=${tab.tabType}`, "", "nav-link", currentTabType === tab.tabType);
-            Controls.createSpan(aTab, `bi ${tab.bootstrapIcon}`);
-            tabElement.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, tab.tabType));
-        });
-        const tab: SettingsTab | undefined = this.tabRegistrations.find(tab => tab.tabType == currentTabType);
-        if (tab) {
-            await tab.renderAsync(pageContext, parent, alertDiv);
+        this.tabRegistrations
+            .filter(tab => !tab.requiresAuthentication || isAuthenticated)
+            .forEach(tab => {
+                const tabElement: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
+                const aTab: HTMLAnchorElement = Controls.createAnchor(tabElement, `?tab=${tab.tabType}`, "", "nav-link", currentTabType === tab.tabType);
+                Controls.createSpan(aTab, `bi ${tab.bootstrapIcon}`);
+                tabElement.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, tab.tabType));
+            });
+        if (currentTab) {
+            await currentTab.renderAsync(pageContext, parent, alertDiv);
         }
     }
 

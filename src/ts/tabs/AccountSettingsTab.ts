@@ -6,6 +6,7 @@ import { SettingsTab } from "./SettingsTab";
 export class AccountSettingsTab implements SettingsTab {
     tabType: SettingsTabType = "ACCOUNT_SETTINGS";
     bootstrapIcon: string = "bi-person-gear";
+    requiresAuthentication: boolean = true;
 
     async renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
         try {
@@ -23,12 +24,10 @@ export class AccountSettingsTab implements SettingsTab {
 
     private async renderEditAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
         Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.locale.translate("ACCOUNT_SETTINGS"));
-        if (pageContext.authenticationClient.isLoggedIn()) {
-            const grid: HTMLDivElement = Controls.createDiv(parent, "card p-4 shadow-sm");
-            grid.style.maxWidth = "400px";
-            const userDetails: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync()!;
-            this.renderUserSettings(pageContext, parent, grid, userDetails);
-        }
+        const grid: HTMLDivElement = Controls.createDiv(parent, "card p-4 shadow-sm");
+        grid.style.maxWidth = "400px";
+        const userDetails: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync()!;
+        this.renderUserSettings(pageContext, parent, grid, userDetails);
     }
 
     private renderUserSettings(pageContext: PageContext, parent: HTMLElement, grid: HTMLElement, userDetails: UserInfoResult): void {

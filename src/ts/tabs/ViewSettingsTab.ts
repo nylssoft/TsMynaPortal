@@ -14,6 +14,7 @@ import { SettingsTab } from "./SettingsTab";
 export class ViewSettingsTab implements SettingsTab {
     tabType: SettingsTabType = "VIEW_SETTINGS";
     bootstrapIcon: string = "bi-sliders";
+    requiresAuthentication: boolean = false;
 
     async renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
         try {
