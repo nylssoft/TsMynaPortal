@@ -1,11 +1,11 @@
 import { PageContext } from "../PageContext";
 import { DocumentService } from "../services/DocumentService";
-import { DesktopTab, DocumentItemResult, UserInfoResult } from "../TypeDefinitions";
+import { DesktopTabType, DocumentItemResult, UserInfoResult } from "../TypeDefinitions";
 import { Controls } from "../utils/Controls";
-import { Tab } from "./Tab";
+import { DesktopTab } from "./DesktopTab";
 
-export class DocumentTab implements Tab {
-    desktopTab: DesktopTab = "DOCUMENTS";
+export class DocumentTab implements DesktopTab {
+    tabType: DesktopTabType = "DOCUMENTS";
     bootstrapIcon: string = "bi-files";
 
     async renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {

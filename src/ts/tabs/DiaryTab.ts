@@ -1,11 +1,11 @@
 import { PageContext } from "../PageContext";
 import { DiaryService } from "../services/DiaryService";
-import { DesktopTab } from "../TypeDefinitions";
+import { DesktopTabType } from "../TypeDefinitions";
 import { Controls } from "../utils/Controls";
-import { Tab } from "./Tab";
+import { DesktopTab } from "./DesktopTab";
 
-export class DiaryTab implements Tab {
-    desktopTab: DesktopTab = "DIARY";
+export class DiaryTab implements DesktopTab {
+    tabType: DesktopTabType = "DIARY";
     bootstrapIcon: string = "bi-calendar";
 
     async renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {

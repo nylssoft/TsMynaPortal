@@ -6,7 +6,7 @@ import { ContactTab } from "../tabs/ContactTab";
 import { NoteTab } from "../tabs/NoteTab";
 import { PasswordTab } from "../tabs/PasswordTab";
 import { DiaryTab } from "../tabs/DiaryTab";
-import { TabRenderer } from "../tabs/TabRenderer";
+import { DesktopTabRenderer } from "../tabs/DesktopTabRenderer";
 import { DocumentTab } from "../tabs/DocumentTab";
 import { AppointmentTab } from "../tabs/AppointmentTab";
 import { DocumentService } from "../services/DocumentService";
@@ -18,7 +18,7 @@ export class DesktopPage implements Page {
 
     pageType: PageType = "DESKTOP";
 
-    private readonly tabRenderer: TabRenderer = new TabRenderer();
+    private readonly tabRenderer: DesktopTabRenderer = new DesktopTabRenderer();
 
     constructor() {
         this.tabRenderer.registerTab(new BirthdayTab());

@@ -1,8 +1,8 @@
 import { PageContext } from "../PageContext";
-import { DesktopTab } from "../TypeDefinitions";
+import { DesktopTabType } from "../TypeDefinitions";
 
-export interface Tab {
-    desktopTab: DesktopTab;
+export interface DesktopTab {
+    tabType: DesktopTabType;
     bootstrapIcon: string;
 
     renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void>;

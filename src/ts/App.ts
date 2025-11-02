@@ -24,7 +24,7 @@ import { RequestRegisterPage } from "./pages/RequestRegisterPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ViewMarkdownPage } from "./pages/ViewMarkdownPage";
 import { GamesPage } from "./pages/GamesPage";
-import { DesktopTab } from "./TypeDefinitions";
+import { DesktopTabType } from "./TypeDefinitions";
 
 /**
  * Main application class that initializes the application, handles authentication, and renders the UI.
@@ -78,15 +78,15 @@ export class App {
         pageContext.registerPage(new ViewMarkdownPage());
         pageContext.registerPage(new GamesPage());
         await pageContext.locale.setLanguageAsync();
-        const params = new URLSearchParams(window.location.search);
+        const params: URLSearchParams = new URLSearchParams(window.location.search);
         if (params.has("vid")) {
             pageContext.vote.vid = params.get("vid");
             pageContext.pageType = "APPOINTMENT_VOTE";
         } else if (params.has("page")) {
             pageContext.pageType = "VIEW_MARKDOWN";
             pageContext.markdownPages = [params.get("page")!];
-        } else if (params.has("tab") && pageContext.desktop.isValidDesktopTab(params.get("tab")!)) {
-            pageContext.desktop.setLastUsedDestopTab(params.get("tab") as DesktopTab);
+        } else if (params.has("tab") && pageContext.desktop.isValidTabType(params.get("tab"))) {
+            pageContext.desktop.setLastUsedTabType(params.get("tab") as DesktopTabType);
             location.replace(window.location.pathname);
             return;
         } else {

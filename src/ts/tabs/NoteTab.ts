@@ -1,11 +1,11 @@
 import { PageContext } from "../PageContext";
 import { NoteService } from "../services/NoteService";
-import { DesktopTab, NoteResult, UserInfoResult } from "../TypeDefinitions";
+import { DesktopTabType, NoteResult, UserInfoResult } from "../TypeDefinitions";
 import { Controls } from "../utils/Controls";
-import { Tab } from "./Tab";
+import { DesktopTab } from "./DesktopTab";
 
-export class NoteTab implements Tab {
-    desktopTab: DesktopTab = "NOTES";
+export class NoteTab implements DesktopTab {
+    tabType: DesktopTabType = "NOTES";
     bootstrapIcon: string = "bi-journal";
 
     async renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {

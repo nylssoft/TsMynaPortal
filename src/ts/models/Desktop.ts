@@ -1,29 +1,32 @@
-import { DesktopTab } from "../TypeDefinitions";
+import { DesktopTabType } from "../TypeDefinitions";
 
 export class Desktop {
     // welcome message closed
     welcomeClosed: boolean = false;
-    // selected tab in desktop page
-    tab: DesktopTab | null = null;
+    // selected tab type in desktop page
+    tabType: DesktopTabType | null = null;
 
-    getLastUsedDesktopTab() {
-        if (this.tab == null) {
-            const currentTab: DesktopTab = window.localStorage.getItem("desktop-tab") as DesktopTab;
-            if (this.isValidDesktopTab(currentTab)) {
-                this.tab = currentTab;
+    getLastUsedTabType() {
+        if (this.tabType == null) {
+            const currentTabType: string | null = window.localStorage.getItem("desktop-tab");
+            if (this.isValidTabType(currentTabType)) {
+                this.tabType = currentTabType;
             } else {
-                this.tab = "BIRTHDAYS";
+                this.tabType = "BIRTHDAYS";
             }
         }
-        return this.tab;
+        return this.tabType;
     }
 
-    setLastUsedDestopTab(tab: DesktopTab) {
-        this.tab = tab;
-        window.localStorage.setItem("desktop-tab", tab);
+    setLastUsedTabType(tabType: DesktopTabType) {
+        this.tabType = tabType;
+        window.localStorage.setItem("desktop-tab", tabType);
     }
 
-    isValidDesktopTab(tab: string): tab is DesktopTab {
-        return ["BIRTHDAYS", "CONTACTS", "NOTES", "PASSWORD_MANAGER", "DIARY", "DOCUMENTS", "APPOINTMENTS"].includes(tab);
+    isValidTabType(tabType: string | null): tabType is DesktopTabType {
+        if (tabType != null) {
+            return ["BIRTHDAYS", "CONTACTS", "NOTES", "PASSWORD_MANAGER", "DIARY", "DOCUMENTS", "APPOINTMENTS"].includes(tabType);
+        }
+        return false;
     }
 }

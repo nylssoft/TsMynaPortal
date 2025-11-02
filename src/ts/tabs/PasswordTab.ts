@@ -1,11 +1,11 @@
 import { PageContext } from "../PageContext";
 import { PasswordManagerService } from "../services/PasswordManagerService";
-import { DesktopTab, PasswordItemResult, PasswordItemsResult, UserInfoResult } from "../TypeDefinitions";
+import { DesktopTabType, PasswordItemResult, PasswordItemsResult, UserInfoResult } from "../TypeDefinitions";
 import { Controls } from "../utils/Controls";
-import { Tab } from "./Tab";
+import { DesktopTab } from "./DesktopTab";
 
-export class PasswordTab implements Tab {
-    desktopTab: DesktopTab = "PASSWORD_MANAGER";
+export class PasswordTab implements DesktopTab {
+    tabType: DesktopTabType = "PASSWORD_MANAGER";
     bootstrapIcon: string = "bi-lock";
 
     async renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {

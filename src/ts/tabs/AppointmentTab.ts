@@ -1,11 +1,11 @@
 import { PageContext } from "../PageContext";
 import { AppointmentService } from "../services/AppointmentService";
-import { AppointmentResult, DesktopTab, UserInfoResult } from "../TypeDefinitions";
+import { AppointmentResult, DesktopTabType, UserInfoResult } from "../TypeDefinitions";
 import { Controls } from "../utils/Controls";
-import { Tab } from "./Tab";
+import { DesktopTab } from "./DesktopTab";
 
-export class AppointmentTab implements Tab {
-    desktopTab: DesktopTab = "APPOINTMENTS";
+export class AppointmentTab implements DesktopTab {
+    tabType: DesktopTabType = "APPOINTMENTS";
     bootstrapIcon: string = "bi-calendar-heart";
 
     async renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {

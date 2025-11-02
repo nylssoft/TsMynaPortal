@@ -1,11 +1,11 @@
 import { PageContext } from "../PageContext";
 import { ContactService } from "../services/ContactService";
-import { ContactResult, ContactsResult, DesktopTab, UserInfoResult } from "../TypeDefinitions";
+import { ContactResult, ContactsResult, DesktopTabType, UserInfoResult } from "../TypeDefinitions";
 import { Controls } from "../utils/Controls";
-import { Tab } from "./Tab";
+import { DesktopTab } from "./DesktopTab";
 
-export class ContactTab implements Tab {
-    desktopTab: DesktopTab = "CONTACTS";
+export class ContactTab implements DesktopTab {
+    tabType: DesktopTabType = "CONTACTS";
     bootstrapIcon: string = "bi-person";
 
     async renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {

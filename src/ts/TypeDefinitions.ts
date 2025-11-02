@@ -259,6 +259,6 @@ export type PageType = "LOGIN_USERNAME_PASSWORD" | "LOGIN_PIN" | "LOGIN_PASS2" |
   | "SETTINGS" | "PIN_EDIT" | "PASSWORD_EDIT" | "TWO_FACTOR_EDIT" | "VIEW_MARKDOWN"
   | "REQUEST_RESET_PASSWORD" | "RESET_PASSWORD" | "REQUEST_REGISTER" | "REGISTER" | "GAMES";
 
-export type DesktopTab = "BIRTHDAYS" | "CONTACTS" | "NOTES" | "PASSWORD_MANAGER" | "DIARY" | "DOCUMENTS" | "APPOINTMENTS";
+export type DesktopTabType = "BIRTHDAYS" | "CONTACTS" | "NOTES" | "PASSWORD_MANAGER" | "DIARY" | "DOCUMENTS" | "APPOINTMENTS";
 
-export const Version: string = "1.6.6";
+export const Version: string = "1.6.7";
