@@ -7,13 +7,14 @@ import { DesktopTab } from "./DesktopTab";
 export class DiaryTab implements DesktopTab {
     tabType: DesktopTabType = "DIARY";
     bootstrapIcon: string = "bi-calendar";
+    titleKey: string = "DIARY";
 
     async renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
         try {
             const token: string = pageContext.authenticationClient.getToken()!;
             const date: Date = pageContext.diary.getDate();
             const days: number[] = await DiaryService.getDaysAsync(token, date);
-            Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.locale.translate("DIARY"));
+            Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.locale.translate(this.titleKey));
             const datestr: string = date.toLocaleDateString(pageContext.locale.getLanguage(), { year: "numeric", month: "long" });
             const calendarDiv: HTMLDivElement = Controls.createDiv(parent);
             calendarDiv.style.maxWidth = "400px";

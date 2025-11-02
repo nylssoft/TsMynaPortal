@@ -7,13 +7,14 @@ import { DesktopTab } from "./DesktopTab";
 export class PasswordTab implements DesktopTab {
     tabType: DesktopTabType = "PASSWORD_MANAGER";
     bootstrapIcon: string = "bi-lock";
+    titleKey: string = "PASSWORD_MANAGER";
 
     async renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
         try {
             const token: string = pageContext.authenticationClient.getToken()!;
             const userInfo: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
             const passwordItems: PasswordItemsResult = await PasswordManagerService.getPasswordFileAsync(token, userInfo);
-            const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.locale.translate("PASSWORD_MANAGER"));
+            const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.locale.translate(this.titleKey));
             passwordItems.items.sort((a, b) => a.Name.localeCompare(b.Name));
             if (passwordItems.items.length > 0) {
                 Controls.createSearch(heading, parent, pageContext.locale.translate("SEARCH"), pageContext.passwordItem.filter, (filter: string) => this.filterPasswordItemList(pageContext, filter, passwordItems.items));

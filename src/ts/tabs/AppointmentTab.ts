@@ -7,6 +7,7 @@ import { DesktopTab } from "./DesktopTab";
 export class AppointmentTab implements DesktopTab {
     tabType: DesktopTabType = "APPOINTMENTS";
     bootstrapIcon: string = "bi-calendar-heart";
+    titleKey: string = "HEADER_APPOINTMENTS";
 
     async renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
         try {
@@ -14,7 +15,7 @@ export class AppointmentTab implements DesktopTab {
             const userInfo: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
             const appointments: AppointmentResult[] = await AppointmentService.getAppointmentDetailsAsync(token, userInfo);
             appointments.sort((a, b) => a.definition!.description!.localeCompare(b.definition!.description!));
-            const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.locale.translate("HEADER_APPOINTMENTS"));
+            const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.locale.translate(this.titleKey));
             if (appointments.length > 0) {
                 Controls.createSearch(heading, parent, pageContext.locale.translate("SEARCH"), pageContext.appointment.filter, (filter: string) => this.filterAppointmentList(pageContext, filter, appointments));
                 const listGroup: HTMLDivElement = Controls.createDiv(parent, "list-group");

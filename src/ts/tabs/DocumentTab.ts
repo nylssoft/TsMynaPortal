@@ -7,6 +7,7 @@ import { DesktopTab } from "./DesktopTab";
 export class DocumentTab implements DesktopTab {
     tabType: DesktopTabType = "DOCUMENTS";
     bootstrapIcon: string = "bi-files";
+    titleKey: string = "HEADER_DOCUMENTS";
 
     async renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
         try {
@@ -20,7 +21,7 @@ export class DocumentTab implements DesktopTab {
             pageContext.documentItem.containerId = pageContext.documentItem.containerId || volume.id;
             const path: DocumentItemResult[] = DocumentService.getPath(pageContext.documentItem.containerId, pageContext.documentItem.all);
             const children: DocumentItemResult[] = DocumentService.getChildren(pageContext.documentItem.containerId, pageContext.documentItem.all);
-            const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.locale.translate("HEADER_DOCUMENTS"));
+            const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.locale.translate(this.titleKey));
             this.renderBreadcrump(parent, pageContext, path);
             if (children.length > 0) {
                 Controls.createSearch(heading, parent, pageContext.locale.translate("SEARCH"), pageContext.documentItem.filter, (filter: string) => this.filterDocItemList(pageContext, filter, children));

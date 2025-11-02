@@ -7,13 +7,14 @@ import { DesktopTab } from "./DesktopTab";
 export class ContactTab implements DesktopTab {
     tabType: DesktopTabType = "CONTACTS";
     bootstrapIcon: string = "bi-person";
+    titleKey: string = "CONTACTS";
 
     async renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
         try {
             const token: string = pageContext.authenticationClient.getToken()!;
             const userInfo: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
             const contacts: ContactsResult = await ContactService.getContactsAsync(token, userInfo);
-            const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.locale.translate("CONTACTS"));
+            const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.locale.translate(this.titleKey));
             contacts.items.sort((a, b) => a.name.localeCompare(b.name));
             if (contacts.items.length > 0) {
                 Controls.createSearch(heading, parent, pageContext.locale.translate("SEARCH"), pageContext.contact.filter, (filter: string) => this.filterContactItemList(pageContext, filter, contacts.items));

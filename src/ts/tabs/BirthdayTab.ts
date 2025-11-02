@@ -7,13 +7,14 @@ import { DesktopTab } from "./DesktopTab";
 export class BirthdayTab implements DesktopTab {
     tabType: DesktopTabType = "BIRTHDAYS";
     bootstrapIcon: string = "bi-cake";
+    titleKey: string = "BIRTHDAYS";
 
     async renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
         try {
             const token: string = pageContext.authenticationClient.getToken()!;
             const userInfo: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
             const contacts: ContactsResult = await ContactService.getContactsAsync(token, userInfo);
-            Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.locale.translate("BIRTHDAYS"));
+            Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.locale.translate(this.titleKey));
             const birthdays: ContactResult[] = [];
             contacts.items.forEach((contact) => {
                 contact.daysUntilBirthday = ContactService.getDaysUntilBirthday(contact);

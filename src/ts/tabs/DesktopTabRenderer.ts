@@ -11,13 +11,22 @@ export class DesktopTabRenderer {
     }
 
     async renderTabsAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
-        const currentTabType: DesktopTabType = pageContext.desktop.getLastUsedTabType();
+        let currentTabType: DesktopTabType = pageContext.desktop.getLastUsedTabType();
+        const visibleApps: string[] | null = pageContext.settings.getDesktopApplications();
+        if (visibleApps != null && !visibleApps.includes(currentTabType)) {
+            if (visibleApps.length == 0 || !pageContext.desktop.isValidTabType(visibleApps[0])) {
+                return;
+            }
+            currentTabType = visibleApps[0] as DesktopTabType;
+        }
         const tabs: HTMLUListElement = Controls.createElement(parent, "ul", "nav nav-pills") as HTMLUListElement;
         this.tabRegistrations.forEach(tab => {
-            const tabElement: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
-            const aTab: HTMLAnchorElement = Controls.createAnchor(tabElement, `?tab=${tab.tabType}`, "", "nav-link", currentTabType === tab.tabType);
-            Controls.createSpan(aTab, `bi ${tab.bootstrapIcon}`);
-            tabElement.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, tab.tabType));
+            if (visibleApps == null || visibleApps.includes(tab.tabType)) {
+                const tabElement: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
+                const aTab: HTMLAnchorElement = Controls.createAnchor(tabElement, `?tab=${tab.tabType}`, "", "nav-link", currentTabType === tab.tabType);
+                Controls.createSpan(aTab, `bi ${tab.bootstrapIcon}`);
+                tabElement.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, tab.tabType));
+            }
         });
         const tab: DesktopTab | undefined = this.tabRegistrations.find(tab => tab.tabType == currentTabType);
         if (tab) {

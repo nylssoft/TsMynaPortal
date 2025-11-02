@@ -7,13 +7,14 @@ import { DesktopTab } from "./DesktopTab";
 export class NoteTab implements DesktopTab {
     tabType: DesktopTabType = "NOTES";
     bootstrapIcon: string = "bi-journal";
+    titleKey: string = "NOTES";
 
     async renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
         try {
             const token: string = pageContext.authenticationClient.getToken()!;
             const userInfo: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
             const notes: NoteResult[] = await NoteService.getNotesAsync(token, userInfo);
-            const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.locale.translate("NOTES"));
+            const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.locale.translate(this.titleKey));
             notes.sort((a, b) => a.title.localeCompare(b.title));
             if (notes.length > 0) {
                 Controls.createSearch(heading, parent, pageContext.locale.translate("SEARCH"), pageContext.note.filter, (filter: string) => this.filterNoteItemList(pageContext, filter, notes));
