@@ -24,7 +24,7 @@ import { RequestRegisterPage } from "./pages/RequestRegisterPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ViewMarkdownPage } from "./pages/ViewMarkdownPage";
 import { GamesPage } from "./pages/GamesPage";
-import { DesktopTabType } from "./TypeDefinitions";
+import { DesktopTabType, SettingsTabType } from "./TypeDefinitions";
 
 /**
  * Main application class that initializes the application, handles authentication, and renders the UI.
@@ -85,8 +85,13 @@ export class App {
         } else if (params.has("page")) {
             pageContext.pageType = "VIEW_MARKDOWN";
             pageContext.markdownPages = [params.get("page")!];
-        } else if (params.has("tab") && pageContext.desktop.isValidTabType(params.get("tab"))) {
-            pageContext.desktop.setLastUsedTabType(params.get("tab") as DesktopTabType);
+        } else if (params.has("tab")) {
+            const tabType: string | null = params.get("tab");
+            if (pageContext.desktop.isValidTabType(tabType)) {
+                pageContext.desktop.setLastUsedTabType(tabType);
+            } else if (pageContext.settings.isValidTabType(tabType)) {
+                pageContext.settings.setLastUsedTabType(tabType);
+            }
             location.replace(window.location.pathname);
             return;
         } else {

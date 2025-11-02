@@ -80,6 +80,8 @@ export class Locale {
         "ATTENTION": "Achtung",
         "LOGOUT_IF_NOT_ACTIVE": "Du wirst automatisch abgemeldet, wenn du nicht aktiv bist.",
         "SECONDS_LEFT_1": "in {0} Sekunden...",
+        "ACCOUNT_SETTINGS": "Kontoeinstellungen",
+        "VIEW_SETTINGS": "Anzeigeeinstellungen",
 
         "ERROR_FILE_TOO_LARGE_1_2": "Die Datei {0} ist zu groß. Die Dateigröße ist {1}, aber höchstens 20MB sind erlaubt.",
         "ERROR_WRONG_DATA_PROTECTION_KEY": "Der Schlüssel zum Entschlüsseln der Daten ist ungültig oder fehlt. Bitte überprüfe deinen Schlüssel auf der Seite 'Datenschutz'.",
@@ -162,6 +164,8 @@ export class Locale {
         "ATTENTION": "Attention",
         "LOGOUT_IF_NOT_ACTIVE": "You will be logged out automatically if you are not active.",
         "SECONDS_LEFT_1": "in {0} seconds...",
+        "ACCOUNT_SETTINGS": "Account Settings",
+        "VIEW_SETTINGS": "View Settings",
 
         "ERROR_FILE_TOO_LARGE_1_2": "The file {0} is too large. The file size is {1} but at most 20MB are allowed.",
         "ERROR_WRONG_DATA_PROTECTION_KEY": "The key to decrypt the data is invalid or missing. Please check your key on the 'Data Protection' page.",
