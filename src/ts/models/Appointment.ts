@@ -19,6 +19,8 @@ export class Appointment {
     vusername: string | null = null;
     // flag whether the list with the accepted days and users will be shown
     voteShowList: boolean = false;
+    // flag whether all days of the month should be displayed or only days that can be selected
+    voteShowAllDays: boolean = false;
 
     nextMonth() {
         this.monthAndYear.month += 1;

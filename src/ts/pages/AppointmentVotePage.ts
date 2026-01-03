@@ -120,7 +120,13 @@ export class AppointmentVotePage implements Page {
         }
         const date: Date = pageContext.vote.getDate()
         const datestr: string = date.toLocaleDateString(pageContext.locale.getLanguage(), { year: "numeric", month: "long" });
-        Controls.createSpan(heading, "mx-auto", datestr);
+        const headingSpan = Controls.createSpan(heading, "mx-auto", datestr);
+        headingSpan.setAttribute("role", "button");
+        headingSpan.addEventListener("click", async (e: MouseEvent) => {
+            e.preventDefault();
+            pageContext.vote.voteShowAllDays = !pageContext.vote.voteShowAllDays;
+            this.renderCalendar(pageContext, parent);
+        });
         const iRight: HTMLElement = Controls.createElement(heading, "i", "me-4 bi bi-chevron-right")
         if (pageContext.vote.hasNextMonth()) {
             iRight.setAttribute("role", "button");
@@ -146,43 +152,60 @@ export class AppointmentVotePage implements Page {
             { label: "COLUMN_SAT", title: "TEXT_SATURDAY" },
             { label: "COLUMN_SON", title: "TEXT_SUNDAY" }
         ];
-        headColumns.forEach(val => {
-            const th: HTMLTableCellElement = Controls.createElement(trhead, "th", "text-center", pageContext.locale.translate(val.label)) as HTMLTableCellElement;
-            th.title = pageContext.locale.translate(val.title);
+        const optionDays: number[] = pageContext.vote.getOptionDays();
+        const visibleRows: number[] = [];
+        const visibleColumns: number[] = [];
+        this.calculateVisibleRowsAndColumns(pageContext, firstDay, daysInMonth, optionDays, visibleRows, visibleColumns);
+        headColumns.forEach((val, idx) => {
+            if (visibleColumns.includes(idx)) {
+                const th: HTMLTableCellElement = Controls.createElement(trhead, "th", "text-center", pageContext.locale.translate(val.label)) as HTMLTableCellElement;
+                th.title = pageContext.locale.translate(val.title);
+                th.style.width = `${Math.abs(100 / visibleColumns.length)}%`; // equal width per visible column
+            }
         });
         let tbody: HTMLElement = Controls.createElement(table, "tbody");
         let day: number = 1;
         const now: Date = new Date();
-        const optionDays: number[] = pageContext.vote.getOptionDays();
         for (let i: number = 0; i < 6; i++) {
+            if (!visibleRows.includes(i)) {
+                for (let j: number = 0; j < 7; j++) {
+                    if (day <= daysInMonth && (i > 0 || j >= firstDay)) {
+                        day++;
+                    }
+                }
+                continue;
+            }
             const tr: HTMLTableRowElement = Controls.createElement(tbody, "tr") as HTMLTableRowElement;
             for (let j: number = 0; j < 7; j++) {
                 const dayConst: number = day;
                 const isBestVote: boolean = bestVotes.some(v => v.year == option.year && v.month == option.month && v.day == dayConst);
                 if (i === 0 && j < firstDay || day > daysInMonth) {
-                    Controls.createElement(tr, "td", "text-center py-2", "\u00A0");
+                    if (visibleColumns.includes(j)) {
+                        this.createDayTableCellElement(tr, "\u00A0");
+                    }
                 } else {
-                    const td: HTMLTableCellElement = Controls.createElement(tr, "td", "py-2 text-center position-relative", `${day}`) as HTMLTableCellElement;
-                    td.setAttribute("style", "width: 50px; height: 50px;");
-                    if (pageContext.vote.isBeforeToday(now, day) || !optionDays.includes(day)) {
-                        td.classList.add("text-secondary");
-                        if (pageContext.theme.isLight()) {
-                            td.classList.add("opacity-25");
-                        }
-                    } else {
-                        td.setAttribute("role", "button");
-                        td.addEventListener("click", async (e: Event) => this.onClickDayAsync(e, parent, pageContext, dayConst));
-                    }
-                    if (myAcceptedDays.has(day)) {
-                        td.classList.add("table-primary");
-                    }
-                    if (acceptedCount.has(day)) {
-                        const badge: HTMLSpanElement = Controls.createSpan(td, "position-absolute top-0 start-100 badge rounded-pill z-1", `${acceptedCount.get(day)}`);
-                        badge.setAttribute("style", "font-size: 0.6em; transform: translateX(-90%);");
-                        if (isBestVote) {
-                            badge.classList.add("text-bg-primary");
+                    if (visibleColumns.includes(j)) {
+                        const td: HTMLTableCellElement = this.createDayTableCellElement(tr, `${day}`);
+                        if (pageContext.vote.isBeforeToday(now, day) || !optionDays.includes(day)) {
+                            td.classList.add("text-secondary");
+                            if (pageContext.theme.isLight()) {
+                                td.classList.add("opacity-25");
+                            }
                         } else {
-                            badge.classList.add("text-bg-secondary");
+                            td.setAttribute("role", "button");
+                            td.addEventListener("click", async (e: Event) => this.onClickDayAsync(e, parent, pageContext, dayConst));
+                        }
+                        if (myAcceptedDays.has(day)) {
+                            td.classList.add("table-primary");
+                        }
+                        if (acceptedCount.has(day)) {
+                            const badge: HTMLSpanElement = Controls.createSpan(td, "position-absolute top-0 start-100 badge rounded-pill z-1", `${acceptedCount.get(day)}`);
+                            badge.setAttribute("style", "font-size: 0.6em; transform: translateX(-90%);");
+                            if (isBestVote) {
+                                badge.classList.add("text-bg-primary");
+                            } else {
+                                badge.classList.add("text-bg-secondary");
+                            }
                         }
                     }
                     day++;
@@ -200,6 +223,37 @@ export class AppointmentVotePage implements Page {
                 this.renderList(parent, pageContext);
             });
         }
+    }
+
+    private calculateVisibleRowsAndColumns(pageContext: PageContext, firstDay: number, daysInMonth: number, optionDays: number[], visibleRows: number[], visibleColumns: number[]) {
+        const showAllDays: boolean = pageContext.vote.voteShowAllDays;
+        let day: number = 1;
+        for (let i: number = 0; i < 6; i++) {
+            let addRow = showAllDays;
+            for (let j: number = 0; j < 7; j++) {
+                if (i === 0 && j < firstDay || day > daysInMonth) {
+                    continue;
+                }
+                if (showAllDays || optionDays.includes(day)) {
+                    addRow = true;
+                    if (!visibleColumns.includes(j)) {
+                        visibleColumns.push(j);
+                    }
+                }
+                day++;
+            }
+            if (addRow) {
+                visibleRows.push(i);
+            }
+        }
+    }
+
+    private createDayTableCellElement(parent: HTMLElement, txt: string): HTMLTableCellElement {
+        const td: HTMLTableCellElement = Controls.createElement(parent, "td", "py-2 text-center position-relative", txt) as HTMLTableCellElement;
+        td.style.height = `50px`;
+        td.style.borderLeft = '1px solid rgba(0,0,0,0.08)';
+        td.style.borderRight = '1px solid rgba(0,0,0,0.08)';
+        return td;
     }
 
     private renderList(parent: HTMLElement, pageContext: PageContext) {
