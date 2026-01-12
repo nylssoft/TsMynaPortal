@@ -263,4 +263,6 @@ export type DesktopTabType = "BIRTHDAYS" | "CONTACTS" | "NOTES" | "PASSWORD_MANA
 
 export type SettingsTabType = "VIEW_SETTINGS" | "ACCOUNT_SETTINGS";
 
-export const Version: string = "1.6.11";
+declare const __APP_VERSION__: string;
+
+export const Version: string = __APP_VERSION__;
