@@ -24,7 +24,6 @@ import { RequestRegisterPage } from "./pages/RequestRegisterPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ViewMarkdownPage } from "./pages/ViewMarkdownPage";
 import { GamesPage } from "./pages/GamesPage";
-import { DesktopTabType, SettingsTabType } from "./TypeDefinitions";
 
 /**
  * Main application class that initializes the application, handles authentication, and renders the UI.

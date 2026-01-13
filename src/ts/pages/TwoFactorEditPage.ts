@@ -1,4 +1,3 @@
-import { UserInfo } from "os";
 import { Page, PageContext } from "../PageContext";
 import { PageType, TwoFactorResult, UserInfoResult } from "../TypeDefinitions";
 import { Controls } from "../utils/Controls";

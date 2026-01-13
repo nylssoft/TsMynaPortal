@@ -1,6 +1,6 @@
 {
   "name": "tsmynaportal",
-  "version": "1.6.12",
+  "version": "1.6.13",
   "description": "Web client for stockfleth.eu",
   "main": "index.js",
   "scripts": {

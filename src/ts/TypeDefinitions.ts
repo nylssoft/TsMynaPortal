@@ -1,3 +1,5 @@
+declare const __APP_VERSION__: string;
+
 /**
  * ClientInfo represents information about a client.
  * It includes properties such as uuid and name.
@@ -262,7 +264,5 @@ export type PageType = "LOGIN_USERNAME_PASSWORD" | "LOGIN_PIN" | "LOGIN_PASS2" |
 export type DesktopTabType = "BIRTHDAYS" | "CONTACTS" | "NOTES" | "PASSWORD_MANAGER" | "DIARY" | "DOCUMENTS" | "APPOINTMENTS";
 
 export type SettingsTabType = "VIEW_SETTINGS" | "ACCOUNT_SETTINGS";
-
-declare const __APP_VERSION__: string;
 
 export const Version: string = __APP_VERSION__;
