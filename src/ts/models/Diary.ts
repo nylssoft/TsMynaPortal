@@ -38,9 +38,9 @@ export class Diary {
     nextDay() {
         if (this.day != null) {
             this.day += 1;
-            if (this.day >= this.getDaysInMonth()) {
+            if (this.day > this.getDaysInMonth()) {
                 this.nextMonth();
-                this.day = 0;
+                this.day = 1;
             }
         }
     }
@@ -48,9 +48,9 @@ export class Diary {
     previousDay() {
         if (this.day != null) {
             this.day -= 1;
-            if (this.day < 0) {
+            if (this.day < 1) {
                 this.previousMonth();
-                this.day = this.getDaysInMonth() - 1;
+                this.day = this.getDaysInMonth();
             }
         }
     }
