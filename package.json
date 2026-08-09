@@ -1,6 +1,6 @@
 {
   "name": "tsmynaportal",
-  "version": "1.6.14",
+  "version": "1.6.15",
   "description": "Web client for stockfleth.eu",
   "main": "index.js",
   "scripts": {
@@ -15,7 +15,7 @@
     "@types/node": "^24.1.0",
     "sass": "^1.89.2",
     "tsc-watch": "^7.2.0",
-    "typescript": "^5.9.2",
+    "typescript": "^7.0.2",
     "vite": "^7.0.6"
   },
   "dependencies": {

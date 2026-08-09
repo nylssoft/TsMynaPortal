@@ -60,10 +60,10 @@ export class AppointmentService {
         options.forEach(o => {
             definition.Options.push({ "Year": o.year, "Month": o.month, "Days": o.days });
         });
-        const resp: Response = await FetchHelper.fetchAsync(`/api/appointment/${uuid}/accesstoken`, { headers: { "token": token } })
+        const resp: Response = await FetchHelper.fetchAsync(`/api/appointment/${uuid}/accesstoken`, { headers: { "token": token } });
         const accessToken: string = await resp.json();
         const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
-        const cryptoKey: CryptoKey = await Security.createCryptoKeyAsync(encryptionKey!, user.passwordManagerSalt)
+        const cryptoKey: CryptoKey = await Security.createCryptoKeyAsync(encryptionKey!, user.passwordManagerSalt);
         const ownerKey = await Security.encodeMessageAsync(cryptoKey, accessToken);
         const appointment: AppointmentUpdate = { "OwnerKey": ownerKey, "Definition": definition };
         await FetchHelper.fetchAsync(`/api/appointment/${uuid}`, {
