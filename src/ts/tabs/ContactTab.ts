@@ -40,14 +40,10 @@ export class ContactTab implements DesktopTab {
     private filterContactItemList(pageContext: PageContext, filter: string, items: ContactResult[]) {
         pageContext.contact.filter = filter;
         const normalizedFilter: string = filter.toLocaleLowerCase();
-        const searchByPhone: boolean = /^\d/.test(filter);
-        const searchByEmail: boolean = filter.includes("@");
         const filteredItems: ContactResult[] = [];
         items.forEach(item => {
             if (filter.length == 0
-                || (searchByPhone && item.phone.toLocaleLowerCase().includes(normalizedFilter))
-                || (searchByEmail && item.email.toLocaleLowerCase().includes(normalizedFilter))
-                || (!searchByPhone && !searchByEmail && item.name.toLocaleLowerCase().includes(normalizedFilter))) {
+                || Object.values(item).some((value: unknown) => typeof value === "string" && value.toLocaleLowerCase().includes(normalizedFilter))) {
                 filteredItems.push(item);
             }
         });
