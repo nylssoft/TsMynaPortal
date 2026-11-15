@@ -230,7 +230,7 @@ export class Controls {
         return Controls.createElement(parent, "p", classname, txt) as HTMLParagraphElement;
     }
 
-    static createSearch(heading: HTMLHeadingElement, parent: HTMLElement, label: string, filter: string, renderItems: (filter: string) => void) {
+    static createSearch(heading: HTMLHeadingElement, parent: HTMLElement, label: string, filter: string, renderItems: (filter: string) => void): { form: HTMLFormElement; input: HTMLInputElement; toggle: HTMLElement } {
         const iconFilter: HTMLElement = Controls.createElement(heading, "i", "ms-2 bi bi-search");
         iconFilter.setAttribute("style", "cursor:pointer;");
         const formElement: HTMLFormElement = Controls.createForm(parent, "align-items-center");
@@ -256,6 +256,7 @@ export class Controls {
                 elem.classList.add("d-none");
             }
         });
+        return { form: formElement, input: inputFilter, toggle: iconFilter };
     }
 
     /**

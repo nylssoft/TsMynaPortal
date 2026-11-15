@@ -16,13 +16,14 @@ export class FetchHelper {
      * 
      * @param url The URL to fetch data from.
      * @param options request options, such as method, headers, body, etc.
+     * @param acceptedStatuses additional response statuses handled by the caller
      * @throws Error if the response is not ok or if there is an error in the
      * @returns response object.
      */
-    static async fetchAsync(url: string, options?: RequestInit): Promise<Response> {
+    static async fetchAsync(url: string, options?: RequestInit, acceptedStatuses: number[] = []): Promise<Response> {
         this.lastActivityDateTime = Date.now();
         const resp: Response = await window.fetch(url, options);
-        if (!resp.ok) {
+        if (!resp.ok && !acceptedStatuses.includes(resp.status)) {
             const errorResult: ErrorResult | null = await resp.json() as ErrorResult;
             const errorMessage: string | null = errorResult?.title;
             throw new Error(errorMessage || "ERROR_UNEXPECTED");

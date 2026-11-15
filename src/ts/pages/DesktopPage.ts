@@ -9,6 +9,7 @@ import { DiaryTab } from "../tabs/DiaryTab";
 import { DesktopTabRenderer } from "../tabs/DesktopTabRenderer";
 import { DocumentTab } from "../tabs/DocumentTab";
 import { AppointmentTab } from "../tabs/AppointmentTab";
+import { WeatherTab } from "../tabs/WeatherTab";
 import { DocumentService } from "../services/DocumentService";
 
 /**
@@ -28,6 +29,7 @@ export class DesktopPage implements Page {
         this.tabRenderer.registerTab(new DiaryTab());
         this.tabRenderer.registerTab(new DocumentTab())
         this.tabRenderer.registerTab(new AppointmentTab())
+        this.tabRenderer.registerTab(new WeatherTab());
     }
 
     async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {

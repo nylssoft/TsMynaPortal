@@ -25,7 +25,7 @@ export class Desktop {
 
     isValidTabType(tabType: string | null): tabType is DesktopTabType {
         if (tabType != null) {
-            return ["BIRTHDAYS", "CONTACTS", "NOTES", "PASSWORD_MANAGER", "DIARY", "DOCUMENTS", "APPOINTMENTS"].includes(tabType);
+            return ["BIRTHDAYS", "CONTACTS", "NOTES", "PASSWORD_MANAGER", "DIARY", "DOCUMENTS", "APPOINTMENTS", "WEATHER"].includes(tabType);
         }
         return false;
     }

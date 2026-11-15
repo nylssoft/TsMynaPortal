@@ -24,6 +24,8 @@ export class DesktopTabRenderer {
             if (visibleApps == null || visibleApps.includes(tab.tabType)) {
                 const tabElement: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
                 const aTab: HTMLAnchorElement = Controls.createAnchor(tabElement, `?tab=${tab.tabType}`, "", "nav-link", currentTabType === tab.tabType);
+                aTab.setAttribute("aria-label", pageContext.locale.translate(tab.titleKey));
+                aTab.title = pageContext.locale.translate(tab.titleKey);
                 Controls.createSpan(aTab, `bi ${tab.bootstrapIcon}`);
                 tabElement.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, tab.tabType));
             }

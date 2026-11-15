@@ -10,6 +10,7 @@ import { DocumentTab } from "./DocumentTab";
 import { NoteTab } from "./NoteTab";
 import { PasswordTab } from "./PasswordTab";
 import { SettingsTab } from "./SettingsTab";
+import { WeatherTab } from "./WeatherTab";
 
 export class ViewSettingsTab implements SettingsTab {
     tabType: SettingsTabType = "VIEW_SETTINGS";
@@ -94,7 +95,7 @@ export class ViewSettingsTab implements SettingsTab {
         listGroup.id = "list-group-id";
         const li: HTMLElement = Controls.createElement(listGroup, "li", "list-group-item");
         const checkBoxSelectAll: HTMLInputElement = Controls.createInput(li, "checkbox", "selectall-id", "form-check-input me-4 mt-2");
-        const desktopTabs: DesktopTab[] = [new BirthdayTab(), new ContactTab(), new NoteTab(), new PasswordTab(), new DiaryTab(), new DocumentTab(), new AppointmentTab()];
+        const desktopTabs: DesktopTab[] = [new BirthdayTab(), new ContactTab(), new NoteTab(), new PasswordTab(), new DiaryTab(), new DocumentTab(), new AppointmentTab(), new WeatherTab()];
         desktopTabs.forEach(desktopTab => {
             const li: HTMLElement = Controls.createElement(listGroup, "li", "list-group-item d-flex justify-content-between align-items-start");
             const checkBoxSelectItem: HTMLInputElement = Controls.createInput(li, "checkbox", `item-select-id-${desktopTab.tabType}`, "form-check-input me-2 mt-1 item-select");
