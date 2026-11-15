@@ -1,0 +1,25 @@
+name: Build TsMynaPortal
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: 24
+        cache: npm
+    - name: Install dependencies
+      run: npm ci
+    - name: Build client
+      run: npm run build
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v7
+      with:
+        name: tsmynaportal-${{ github.run_number }}
+        path: dist
+        if-no-files-found: error
