@@ -2,6 +2,7 @@ import { PageContext, Page } from "../PageContext";
 import { PageType } from "../TypeDefinitions";
 import { Controls } from "../utils/Controls";
 import { RegistrationRequests } from "./RegistrationRequests";
+import { ManagedUsers } from "./ManagedUsers";
 
 export class AdministrationPage implements Page {
 
@@ -24,5 +25,6 @@ export class AdministrationPage implements Page {
             return;
         }
         await new RegistrationRequests().renderAsync(parent, pageContext, token);
+        await new ManagedUsers().renderAsync(parent, pageContext, token, user.id);
     }
 }
