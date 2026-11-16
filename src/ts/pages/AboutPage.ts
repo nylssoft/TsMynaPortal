@@ -1,6 +1,7 @@
 import { Controls } from "../utils/Controls";
 import { PageContext, Page } from "../PageContext";
 import { PageType, Version } from "../TypeDefinitions";
+import { FetchHelper } from "../utils/FetchHelper";
 
 /**
  * Page implementation for the About page.
@@ -16,6 +17,7 @@ export class AboutPage implements Page {
         const aboutMessage: HTMLDivElement = Controls.createDiv(card, "alert alert-success");
         Controls.createParagraph(aboutMessage, "", pageContext.locale.translate("WEBSITE_INFO"));
         Controls.createParagraph(aboutMessage, "", `${Version} ${pageContext.locale.translate("TEXT_COPYRIGHT_YEAR")} ${pageContext.locale.translate("COPYRIGHT")}`);
+        const apiVersion = Controls.createParagraph(aboutMessage, "small");
         const divLegal: HTMLDivElement = Controls.createDiv(aboutMessage, "mt-2");
         const aLegal: HTMLAnchorElement = Controls.createAnchor(divLegal, "?page=legal", pageContext.locale.translate("INFO_LEGAL_NOTICE"));
         aLegal.addEventListener("click", async (e: Event) => await this.showMarkdownPageAsync(pageContext, e, "legal"));
@@ -60,6 +62,18 @@ export class AboutPage implements Page {
         buttonNext.setAttribute("data-bs-target", "#carousel-id");
         buttonNext.setAttribute("data-bs-slide", "next");
         Controls.createSpan(buttonNext, "carousel-control-next-icon");
+        try {
+            const response = await FetchHelper.fetchAsync("/api/version");
+            const result: unknown = await response.json();
+            if (typeof result !== "object" || result === null || !("version" in result) ||
+                typeof result.version !== "string" || result.version.trim().length === 0) {
+                throw new Error("ERROR_API_VERSION_RESPONSE");
+            }
+            apiVersion.textContent = pageContext.locale.translateWithArgs("ABOUT_API_VERSION_1", [result.version]);
+        } catch (error: unknown) {
+            apiVersion.textContent = pageContext.locale.translateWithArgs("ERROR_API_VERSION_1", [pageContext.locale.translateError(error)]);
+            apiVersion.setAttribute("role", "alert");
+        }
     }
 
     private createCarouselIndicator(parent: HTMLDivElement, index: number, active: boolean = false): HTMLButtonElement {

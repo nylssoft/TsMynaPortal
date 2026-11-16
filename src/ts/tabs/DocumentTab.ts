@@ -24,10 +24,27 @@ export class DocumentTab implements DesktopTab {
             const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.locale.translate(this.titleKey));
             this.renderBreadcrump(parent, pageContext, path);
             if (children.length > 0) {
-                Controls.createSearch(heading, parent, pageContext.locale.translate("SEARCH"), pageContext.documentItem.filter, (filter: string) => this.filterDocItemList(pageContext, filter, children));
+                let selectionEnabled = false;
+                Controls.createSearch(heading, parent, pageContext.locale.translate("SEARCH"), pageContext.documentItem.filter, (filter: string) => this.filterDocItemList(pageContext, filter, children, selectionEnabled));
+                const selectionToggle = Controls.createButton(heading, "button", "", "btn btn-link text-body fs-4 p-0 ms-4 align-baseline", "action-selection-id");
+                Controls.createSpan(selectionToggle, "bi bi-check2-square").setAttribute("aria-hidden", "true");
+                const updateToggle = (): void => {
+                    const label = pageContext.locale.translate(selectionEnabled ? "DOCUMENTS_CANCEL_SELECTION" : "DOCUMENTS_SELECT_ITEMS");
+                    selectionToggle.title = label;
+                    selectionToggle.setAttribute("aria-label", label);
+                    selectionToggle.setAttribute("aria-pressed", String(selectionEnabled));
+                    selectionToggle.classList.toggle("text-primary", selectionEnabled);
+                    selectionToggle.classList.toggle("text-body", !selectionEnabled);
+                };
+                updateToggle();
+                selectionToggle.addEventListener("click", () => {
+                    selectionEnabled = !selectionEnabled;
+                    updateToggle();
+                    this.filterDocItemList(pageContext, pageContext.documentItem.filter, children, selectionEnabled);
+                });
                 const listGroup: HTMLElement = Controls.createElement(parent, "ul", "list-group");
                 listGroup.id = "list-group-id";
-                this.filterDocItemList(pageContext, pageContext.documentItem.filter, children);
+                this.filterDocItemList(pageContext, pageContext.documentItem.filter, children, selectionEnabled);
             }
             const iAddFile: HTMLElement = Controls.createElement(heading, "i", "ms-4 bi bi-file-plus", undefined, "action-add-file-id");
             iAddFile.setAttribute("role", "button");
@@ -107,7 +124,7 @@ export class DocumentTab implements DesktopTab {
         });
     }
 
-    private filterDocItemList(pageContext: PageContext, filter: string, children: DocumentItemResult[]) {
+    private filterDocItemList(pageContext: PageContext, filter: string, children: DocumentItemResult[], selectionEnabled: boolean) {
         pageContext.documentItem.filter = filter;
         pageContext.documentItem.filtered = [];
         children.forEach(item => {
@@ -118,15 +135,21 @@ export class DocumentTab implements DesktopTab {
         const listGroup: HTMLElement = document.getElementById("list-group-id")!;
         Controls.removeAllChildren(listGroup);
         if (pageContext.documentItem.filtered.length > 0) {
-            const li: HTMLElement = Controls.createElement(listGroup, "li", "list-group-item");
-            const checkBoxSelectAll: HTMLInputElement = Controls.createInput(li, "checkbox", "selectall-id", "form-check-input me-4 mt-2");
-            checkBoxSelectAll.addEventListener("click", (e: Event) => this.onSelectAll(e, pageContext));
+            if (selectionEnabled) {
+                const li: HTMLElement = Controls.createElement(listGroup, "li", "list-group-item");
+                const checkBoxSelectAll: HTMLInputElement = Controls.createInput(li, "checkbox", "selectall-id", "form-check-input me-4 mt-2");
+                checkBoxSelectAll.setAttribute("aria-label", pageContext.locale.translate("DOCUMENTS_SELECT_ALL"));
+                checkBoxSelectAll.addEventListener("click", (e: Event) => this.onSelectAll(e, pageContext));
+            }
             pageContext.documentItem.filtered.forEach(item => {
                 const id: number = item.id;
                 const type: string = item.type;
                 const li: HTMLElement = Controls.createElement(listGroup, "li", "list-group-item d-flex justify-content-between align-items-start");
-                const checkBoxSelectItem: HTMLInputElement = Controls.createInput(li, "checkbox", `item-select-id-${id}`, "form-check-input me-2 mt-1 item-select");
-                checkBoxSelectItem.addEventListener("click", _ => this.updateActions(pageContext));
+                if (selectionEnabled) {
+                    const checkBoxSelectItem: HTMLInputElement = Controls.createInput(li, "checkbox", `item-select-id-${id}`, "form-check-input me-2 mt-1 item-select");
+                    checkBoxSelectItem.setAttribute("aria-label", pageContext.locale.translateWithArgs("DOCUMENTS_SELECT_ITEM_1", [item.name]));
+                    checkBoxSelectItem.addEventListener("click", _ => this.updateActions(pageContext));
+                }
                 const iconType: string = type == "Document" ? DocumentService.getFileIcon(item.name) : "bi-folder";
                 const iconElem: HTMLElement = Controls.createSpan(li, `bi ${iconType}`);
                 const nameElem: HTMLElement = Controls.createSpan(li, "ms-2 me-auto", item.name);
@@ -144,10 +167,16 @@ export class DocumentTab implements DesktopTab {
                 iconBadge.addEventListener("click", async (e: Event) => await this.onClickItemAsync(e, pageContext, type, id));
             });
         }
+        this.updateActions(pageContext);
     }
 
     private updateActions(pageContext: PageContext) {
         const selected: DocumentItemResult[] = this.getSelected(pageContext);
+        const selectAll = document.getElementById("selectall-id") as HTMLInputElement | null;
+        if (selectAll) {
+            selectAll.checked = selected.length > 0 && selected.length === pageContext.documentItem.filtered.length;
+            selectAll.indeterminate = selected.length > 0 && selected.length < pageContext.documentItem.filtered.length;
+        }
         Controls.showElemById("action-add-file-id", selected.length == 0);
         Controls.showElemById("action-add-folder-id", selected.length == 0);
         Controls.showElemById("action-delete-id", selected.length > 0);
