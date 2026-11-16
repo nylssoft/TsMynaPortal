@@ -25,6 +25,7 @@ export class DocumentMovePage implements Page {
         iBack.setAttribute("role", "button");
         iBack.addEventListener("click", async (e: Event) => await this.onBackAsync(e, pageContext));
         Controls.createSpan(headingActions, "ms-4", pageContext.locale.translate("HEADER_DOCUMENTS"));
+        Controls.createParagraph(parent, "alert alert-warning small", pageContext.locale.translate("DOCUMENTS_MOVE_WARNING"));
         // render card
         const card: HTMLDivElement = Controls.createDiv(parent, "card p-4 shadow-sm");
         card.style.maxWidth = "400px";

@@ -56,7 +56,33 @@ export class DocumentService {
         return await resp.json() as DocumentItemResult;
     }
 
+    static isShared(item: DocumentItemResult): boolean {
+        return !!item.accessRole;
+    }
+
+    static async setFolderAccessAsync(token: string, id: number, accessRole: "" | "family" | "everbody"): Promise<void> {
+        const response = await FetchHelper.fetchAsync(`/api/document/folder/${id}/accessrole`, {
+            method: "PUT",
+            headers: { token, "Content-Type": "application/json" },
+            body: JSON.stringify(accessRole)
+        });
+        if (await response.json() !== true) throw new Error("ERROR_DOCUMENT_UPDATE");
+    }
+
+    static async updateMarkdownAsync(token: string, id: number, markdown: string): Promise<void> {
+        const response = await FetchHelper.fetchAsync(`/api/document/updatemarkdown/${id}`, {
+            method: "PUT",
+            headers: { token, "Content-Type": "application/json" },
+            body: JSON.stringify(markdown)
+        });
+        if (await response.json() !== true) throw new Error("ERROR_DOCUMENT_UPDATE");
+    }
+
     static async downloadBlobAsync(token: string, user: UserInfoResult, item: DocumentItemResult): Promise<Blob> {
+        if (this.isShared(item)) {
+            const response = await FetchHelper.fetchAsync(`/api/document/download/${item.id}`, { headers: { token } });
+            return await response.blob();
+        }
         const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
         if (encryptionKey == null || encryptionKey.length === 0) {
             throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
@@ -73,7 +99,14 @@ export class DocumentService {
         }
     }
 
-    static async uploadFileAsync(token: string, user: UserInfoResult, parentId: number, filename: string, fileData: ArrayBuffer): Promise<void> {
+    static async uploadFileAsync(token: string, user: UserInfoResult, parent: DocumentItemResult, filename: string, fileData: ArrayBuffer): Promise<void> {
+        if (this.isShared(parent)) {
+            const formData = new FormData();
+            formData.append("document-file", new File([fileData], filename, { type: "application/octet-stream" }));
+            formData.append("overwrite", "false");
+            await FetchHelper.fetchAsync(`/api/document/upload/${parent.id}`, { method: "POST", headers: { token }, body: formData });
+            return;
+        }
         const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
         if (encryptionKey == null || encryptionKey.length === 0) {
             throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
@@ -88,13 +121,13 @@ export class DocumentService {
             console.error("Error encoding file data:", e);
             throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
         }
-        await FetchHelper.fetchAsync(`/api/document/upload/${parentId}`, { method: "POST", headers: { "token": token }, body: formData });
+        await FetchHelper.fetchAsync(`/api/document/upload/${parent.id}`, { method: "POST", headers: { "token": token }, body: formData });
     }
 
     static getChildren(parentId: number, docItems: DocumentItemResult[]): DocumentItemResult[] {
         const items: DocumentItemResult[] = [];
         docItems.forEach(item => {
-            if (item.parentId === parentId && item.accessRole == null) {
+            if (item.parentId === parentId) {
                 items.push(item);
             }
         });

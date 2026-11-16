@@ -23,6 +23,10 @@ export class DocumentTab implements DesktopTab {
             const children: DocumentItemResult[] = DocumentService.getChildren(pageContext.documentItem.containerId, pageContext.documentItem.all);
             const heading: HTMLHeadingElement = Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.locale.translate(this.titleKey));
             this.renderBreadcrump(parent, pageContext, path);
+            const currentFolder = DocumentService.getItem(pageContext.documentItem.containerId, pageContext.documentItem.all);
+            if (currentFolder && DocumentService.isShared(currentFolder)) {
+                Controls.createParagraph(parent, "alert alert-warning small", pageContext.locale.translate("DOCUMENTS_SHARED_UPLOAD"));
+            }
             if (children.length > 0) {
                 let selectionEnabled = false;
                 Controls.createSearch(heading, parent, pageContext.locale.translate("SEARCH"), pageContext.documentItem.filter, (filter: string) => this.filterDocItemList(pageContext, filter, children, selectionEnabled));
@@ -62,6 +66,26 @@ export class DocumentTab implements DesktopTab {
             const iMove: HTMLElement = Controls.createElement(heading, "i", "ms-4 bi bi-arrows-move d-none", undefined, "action-move-id");
             iMove.setAttribute("role", "button");
             iMove.addEventListener("click", async (e: Event) => await this.onMoveAsync(e, pageContext));
+            if (user.roles.includes("usermanager")) {
+                const createAction = (icon: string, key: string, id: string, page: "FOLDER_ACCESS" | "MARKDOWN_EDIT"): void => {
+                    const button = Controls.createButton(heading, "button", "", "btn btn-link text-body fs-4 p-0 ms-4 align-baseline d-none", id);
+                    button.title = pageContext.locale.translate(key);
+                    button.setAttribute("aria-label", button.title);
+                    Controls.createSpan(button, `bi ${icon}`).setAttribute("aria-hidden", "true");
+                    button.addEventListener("click", async () => {
+                        const selected = this.getSelected(pageContext);
+                        if (selected.length !== 1) return;
+                        pageContext.documentItem.edit = selected[0];
+                        pageContext.pageType = page;
+                        await pageContext.renderAsync();
+                    });
+                };
+                createAction("bi-share", "DOCUMENTS_VISIBILITY", "action-sharing-id", "FOLDER_ACCESS");
+                createAction("bi-file-earmark-code", "DOCUMENTS_EDIT_CONTENT", "action-markdown-id", "MARKDOWN_EDIT");
+            }
+            iEdit.title = pageContext.locale.translate("BUTTON_RENAME");
+            iEdit.setAttribute("aria-label", iEdit.title);
+            this.updateActions(pageContext);
             // render delete confirmation dialog
             Controls.createConfirmationDialog(
                 parent,
@@ -153,6 +177,13 @@ export class DocumentTab implements DesktopTab {
                 const iconType: string = type == "Document" ? DocumentService.getFileIcon(item.name) : "bi-folder";
                 const iconElem: HTMLElement = Controls.createSpan(li, `bi ${iconType}`);
                 const nameElem: HTMLElement = Controls.createSpan(li, "ms-2 me-auto", item.name);
+                if (DocumentService.isShared(item)) {
+                    const isPublic = item.accessRole === "everbody";
+                    const sharing = Controls.createSpan(li, `bi ${isPublic ? "bi-globe" : "bi-people"} mx-2`);
+                    sharing.title = pageContext.locale.translate(isPublic ? "DOCUMENTS_PUBLIC" : "DOCUMENTS_FAMILY");
+                    sharing.setAttribute("role", "img");
+                    sharing.setAttribute("aria-label", sharing.title);
+                }
                 let iconBadge: HTMLElement;
                 if (item.size > 0) {
                     iconBadge = Controls.createSpan(li, "badge text-bg-primary rounded-pill", `${DocumentService.formatSize(item.size)}`);
@@ -182,6 +213,9 @@ export class DocumentTab implements DesktopTab {
         Controls.showElemById("action-delete-id", selected.length > 0);
         Controls.showElemById("action-edit-id", selected.length == 1);
         Controls.showElemById("action-move-id", selected.length > 0);
+        Controls.showElemById("action-sharing-id", selected.length === 1 && selected[0].type === "Folder");
+        Controls.showElemById("action-markdown-id", selected.length === 1 && selected[0].type === "Document" &&
+            selected[0].name.endsWith(".md") && DocumentService.isShared(selected[0]));
     }
 
     private getSelected(pageContext: PageContext): DocumentItemResult[] {
@@ -253,7 +287,9 @@ export class DocumentTab implements DesktopTab {
     private async uploadFileAsync(pageContext: PageContext, data: ArrayBuffer, curFile: File, curFiles: File[]): Promise<void> {
         const token: string = pageContext.authenticationClient.getToken()!;
         const user: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
-        await DocumentService.uploadFileAsync(token, user, pageContext.documentItem.containerId!, curFile.name, data);
+        const parent = DocumentService.getItem(pageContext.documentItem.containerId!, pageContext.documentItem.all);
+        if (!parent) throw new Error("ERROR_INVALID_PARAMETERS");
+        await DocumentService.uploadFileAsync(token, user, parent, curFile.name, data);
         await this.uploadFilesAsync(pageContext, curFiles);
     }
 
