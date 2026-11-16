@@ -80,7 +80,7 @@ export class ManagedUsers {
             checkbox.setAttribute("aria-label", locale.translateWithArgs("ADMIN_USER_SELECT_1", [user.name]));
             selections.push({ user, input: checkbox });
             if (user.photo) {
-                const photo = Controls.createElement(row, "img", "rounded d-none d-sm-block") as HTMLImageElement;
+                const photo = Controls.createElement(row, "img", "rounded flex-shrink-0") as HTMLImageElement;
                 photo.src = user.photo;
                 photo.alt = "";
                 photo.width = 40;
