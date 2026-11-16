@@ -1,19 +1,2 @@
 // Import all of Bootstrap’s CSS
 @import "bootstrap/scss/bootstrap";
-
-.weather-panel {
-  max-width: 34rem;
-}
-
-.weather-hours {
-  display: flex;
-  gap: .5rem;
-  overflow-x: auto;
-  scroll-snap-type: x proximity;
-  padding-bottom: .5rem;
-}
-
-.weather-hour {
-  flex: 0 0 6.5rem;
-  scroll-snap-align: start;
-}

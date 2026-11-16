@@ -12,7 +12,7 @@ export class WeatherTab implements DesktopTab {
     async renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
         const locale = pageContext.locale;
         const heading = Controls.createHeading(parent, 4, "mt-3 mb-3", locale.translate(this.titleKey));
-        const panel = Controls.createDiv(parent, "weather-panel");
+        const panel = Controls.createDiv(parent, "w-100");
         const { form, input, toggle } = Controls.createSearch(heading, panel, locale.translate("SEARCH"), "", city => {
             if (city.length < 2) {
                 input.setCustomValidity(locale.translate("WEATHER_CITY_HINT"));
@@ -113,7 +113,17 @@ export class WeatherTab implements DesktopTab {
         const currentBody = Controls.createDiv(current, "card-body");
         Controls.createHeading(currentBody, 6, "card-title", locale.translate("WEATHER_CURRENT"));
         this.renderConditions(pageContext, currentBody, weather.current);
-        Controls.createDiv(currentBody, "small", locale.translateWithArgs("WEATHER_WIND_1", [this.value(weather.current.windSpeedKph, "km/h")]));
+        const wind = weather.current.windSpeedKph;
+        const windDisplay = Controls.createDiv(currentBody, "small");
+        Controls.createSpan(windDisplay, "", locale.translateWithArgs("WEATHER_WIND_1", [this.value(wind, "km/h")]));
+        const windIndicator = Controls.createSpan(windDisplay, "ms-2");
+        const [windIcon, windStrength, windColor] = this.windStrength(wind);
+        const windLabel = locale.translate(windStrength);
+        const windIconElement = Controls.createSpan(windIndicator, `bi ${windIcon} ${windColor}`);
+        windIconElement.title = windLabel;
+        windIconElement.setAttribute("aria-label", locale.translateWithArgs("WEATHER_WIND_STRENGTH_1", [windLabel]));
+        windIndicator.setAttribute("aria-hidden", "true");
+        Controls.createSpan(windDisplay, "visually-hidden", locale.translateWithArgs("WEATHER_WIND_STRENGTH_1", [windLabel]));
         Controls.createDiv(currentBody, "small text-body-secondary", locale.translateWithArgs("WEATHER_OBSERVED_1", [formatDate(weather.current.timeUtc)]));
 
         const titleRow = Controls.createDiv(parent, "d-flex align-items-center justify-content-between gap-2 mb-2");
@@ -127,14 +137,15 @@ export class WeatherTab implements DesktopTab {
         next.title = locale.translate("WEATHER_NEXT");
         Controls.createSpan(previous, "bi bi-chevron-left").setAttribute("aria-hidden", "true");
         Controls.createSpan(next, "bi bi-chevron-right").setAttribute("aria-hidden", "true");
-        const hours = Controls.createDiv(parent, "weather-hours");
+        const hours = Controls.createDiv(parent, "d-flex gap-2 overflow-x-auto pb-2");
         hours.setAttribute("role", "region");
         hours.setAttribute("aria-label", locale.translate("WEATHER_FORECAST"));
         hours.tabIndex = 0;
         previous.addEventListener("click", () => hours.scrollBy({ left: -hours.clientWidth, behavior: "smooth" }));
         next.addEventListener("click", () => hours.scrollBy({ left: hours.clientWidth, behavior: "smooth" }));
         weather.hourly.forEach(hour => {
-            const card = Controls.createDiv(hours, "weather-hour card text-center");
+            const card = Controls.createDiv(hours, "card flex-shrink-0 text-center");
+            card.style.width = "7.5rem";
             const body = Controls.createDiv(card, "card-body px-2 py-3");
             Controls.createDiv(body, "small text-body-secondary", formatDate(hour.timeUtc));
             this.renderConditions(pageContext, body, hour);
@@ -158,7 +169,7 @@ export class WeatherTab implements DesktopTab {
         const line = Controls.createDiv(parent, "my-2");
         const iconElement = Controls.createSpan(line, `bi ${icon} fs-3 me-2`);
         iconElement.setAttribute("aria-hidden", "true");
-        Controls.createSpan(line, "fs-5", this.value(conditions.temperatureC, "°C"));
+        Controls.createSpan(line, "fs-5 text-nowrap", this.value(conditions.temperatureC, "°C"));
         Controls.createDiv(parent, "small", label);
     }
 
@@ -172,6 +183,15 @@ export class WeatherTab implements DesktopTab {
         if (code !== null && [80, 81, 82].includes(code)) return ["bi-cloud-rain-heavy", "WEATHER_SHOWERS"];
         if (code !== null && [95, 96, 99].includes(code)) return ["bi-cloud-lightning-rain", "WEATHER_THUNDERSTORM"];
         return ["bi-question-circle", "WEATHER_UNKNOWN"];
+    }
+
+    private windStrength(speedKph: number | null): [string, string, string] {
+        if (speedKph === null || !Number.isFinite(speedKph)) return ["bi-question-circle", "WEATHER_UNKNOWN", "text-body-secondary"];
+        if (speedKph <= 1) return ["bi-wind", "WEATHER_WIND_CALM", "text-body-secondary"];
+        if (speedKph <= 11) return ["bi-wind", "WEATHER_WIND_LIGHT", "text-success"];
+        if (speedKph <= 28) return ["bi-wind", "WEATHER_WIND_MODERATE", "text-info"];
+        if (speedKph <= 38) return ["bi-wind", "WEATHER_WIND_FRESH", "text-warning"];
+        return ["bi-wind", "WEATHER_WIND_STRONG", "text-danger"];
     }
 
     private value(value: number | null, unit: string): string {
