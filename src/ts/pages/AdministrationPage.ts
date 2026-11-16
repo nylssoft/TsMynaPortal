@@ -1,6 +1,7 @@
 import { PageContext, Page } from "../PageContext";
 import { PageType } from "../TypeDefinitions";
 import { Controls } from "../utils/Controls";
+import { RegistrationRequests } from "./RegistrationRequests";
 
 export class AdministrationPage implements Page {
 
@@ -17,6 +18,11 @@ export class AdministrationPage implements Page {
             return;
         }
         Controls.createHeading(parent, 4, "mt-3 mb-3", pageContext.locale.translate("ADMINISTRATION"));
-        Controls.createParagraph(parent, "", pageContext.locale.translate("ADMINISTRATION_INTRO"));
+        const token = pageContext.authenticationClient.getToken();
+        if (!token) {
+            Controls.createAlert(parent, pageContext.locale.translate("ERROR_ADMINISTRATION_ACCESS"));
+            return;
+        }
+        await new RegistrationRequests().renderAsync(parent, pageContext, token);
     }
 }
