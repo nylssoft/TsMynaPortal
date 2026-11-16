@@ -24,6 +24,7 @@ import { RequestRegisterPage } from "./pages/RequestRegisterPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ViewMarkdownPage } from "./pages/ViewMarkdownPage";
 import { GamesPage } from "./pages/GamesPage";
+import { AdministrationPage } from "./pages/AdministrationPage";
 
 /**
  * Main application class that initializes the application, handles authentication, and renders the UI.
@@ -76,6 +77,7 @@ export class App {
         pageContext.registerPage(new RegisterPage());
         pageContext.registerPage(new ViewMarkdownPage());
         pageContext.registerPage(new GamesPage());
+        pageContext.registerPage(new AdministrationPage());
         await pageContext.locale.setLanguageAsync();
         const params: URLSearchParams = new URLSearchParams(window.location.search);
         if (params.has("vid")) {

@@ -11,6 +11,7 @@ import { ShowSettingsPageAction } from "../actions/ShowSettingsPageAction";
 import { ShowRegisterPageAction } from "../actions/ShowRegisterPageAction";
 import { LogoutAction } from "../actions/LogoutAction";
 import { ShowAGamesPageAction } from "../actions/ShowGamesPage";
+import { ShowAdministrationPageAction } from "../actions/ShowAdministrationPageAction";
 
 /**
  * Page implementation for the navigation bar.
@@ -34,6 +35,9 @@ export class NavigationBarPage implements Page {
             if (pageContext.authenticationClient.isLoggedIn()) {
                 this.createNavItem(ul, pageContext, "DESKTOP", new ShowDesktopPageAction());
                 this.createNavItem(ul, pageContext, "DATA_PROTECTION", new ShowDataProtectionPageAction());
+                if (user?.roles.includes("usermanager")) {
+                    this.createNavItem(ul, pageContext, "ADMINISTRATION", new ShowAdministrationPageAction());
+                }
             } else {
                 this.createNavItem(ul, pageContext, "BUTTON_LOGIN", new ShowLoginPageAction());
                 this.createNavItem(ul, pageContext, "HEADER_REGISTER", new ShowRegisterPageAction());
