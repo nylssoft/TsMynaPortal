@@ -26,6 +26,8 @@ export class SettingsTabRenderer {
             .forEach(tab => {
                 const tabElement: HTMLLIElement = Controls.createElement(tabs, "li", "nav-item") as HTMLLIElement;
                 const aTab: HTMLAnchorElement = Controls.createAnchor(tabElement, `?tab=${tab.tabType}`, "", "nav-link", currentTabType === tab.tabType);
+                aTab.title = pageContext.locale.translate(tab.tabType);
+                aTab.setAttribute("aria-label", aTab.title);
                 Controls.createSpan(aTab, `bi ${tab.bootstrapIcon}`);
                 tabElement.addEventListener("click", async (e: MouseEvent) => await this.switchTabAsync(e, pageContext, tab.tabType));
             });

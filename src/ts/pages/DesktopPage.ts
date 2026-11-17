@@ -1,6 +1,6 @@
 import { Controls } from "../utils/Controls";
 import { PageContext, Page } from "../PageContext";
-import { PageType, UserInfoResult } from "../TypeDefinitions";
+import { PageType } from "../TypeDefinitions";
 import { BirthdayTab } from "../tabs/BirthdayTab";
 import { ContactTab } from "../tabs/ContactTab";
 import { NoteTab } from "../tabs/NoteTab";
@@ -10,7 +10,6 @@ import { DesktopTabRenderer } from "../tabs/DesktopTabRenderer";
 import { DocumentTab } from "../tabs/DocumentTab";
 import { AppointmentTab } from "../tabs/AppointmentTab";
 import { WeatherTab } from "../tabs/WeatherTab";
-import { DocumentService } from "../services/DocumentService";
 
 /**
  * Page implementation for the Desktop page.
@@ -36,35 +35,10 @@ export class DesktopPage implements Page {
         const alertDiv: HTMLDivElement = Controls.createDiv(parent);
         alertDiv.id = "alertdiv-id";
         try {
-            if (!pageContext.desktop.welcomeClosed) {
-                await this.renderWelcomeMessageAsync(parent, pageContext);
-            }
             await this.tabRenderer.renderTabsAsync(pageContext, parent, alertDiv);
         }
         catch (error: Error | unknown) {
             Controls.createAlert(alertDiv, pageContext.locale.translateError(error));
         }
-    }
-
-    private async renderWelcomeMessageAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {
-        const userInfo: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
-        const lastLoginDate: Date | null = await pageContext.authenticationClient.getLastLoginDateAsync();
-        const now: Date = new Date();
-        const longDate: string = now.toLocaleDateString(pageContext.locale.getLanguage(), { dateStyle: "long" });
-        const longTime: string = now.toLocaleTimeString(pageContext.locale.getLanguage(), { timeStyle: "long" });
-        const welcomeElem: HTMLDivElement = Controls.createDiv(parent, "alert alert-success alert-dismissible");
-        welcomeElem.setAttribute("role", "alert");
-        Controls.createDiv(welcomeElem, "", pageContext.locale.translateWithArgs("MESSAGE_WELCOME_1_2_3", [userInfo.name, longDate, longTime]));
-        if (lastLoginDate != null) {
-            const lastLoginStr: string = lastLoginDate.toLocaleString(pageContext.locale.getLanguage(), { dateStyle: "long", timeStyle: "long" });
-            Controls.createDiv(welcomeElem, "mt-2", pageContext.locale.translateWithArgs("MESSAGE_LAST_LOGIN_1", [lastLoginStr]));
-        }
-        if (userInfo.usedStorage > 0) {
-            Controls.createDiv(welcomeElem, "mt-2", pageContext.locale.translateWithArgs("INFO_STORAGE_1_2", [DocumentService.formatSize(userInfo.usedStorage), DocumentService.formatSize(userInfo.storageQuota)]));
-        }
-        const welcomeCloseButton: HTMLButtonElement = Controls.createButton(welcomeElem, "button", "", "btn-close");
-        welcomeCloseButton.setAttribute("data-bs-dismiss", "alert");
-        welcomeCloseButton.setAttribute("aria-label", "Close");
-        welcomeElem.addEventListener('closed.bs.alert', _ => pageContext.desktop.welcomeClosed = true);
     }
 }

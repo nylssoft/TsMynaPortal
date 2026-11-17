@@ -141,7 +141,7 @@ export class Locale {
         "LABEL_LANGUAGE": "Sprache:",
         "LABEL_DESIGN": "Design:",
         "SETTINGS": "Einstellungen",
-        "INFO_STORAGE_1_2": "Es werden {0} von {1} Could-Speicher verwendet.",
+        "INFO_STORAGE_1_2": "Es werden {0} von {1} Cloud-Speicher verwendet.",
         "BUTTON_SET_PIN": "PIN festlegen",
         "INFO_PIN": "Lege eine 4-6 stellige PIN fest, um dich zukünftig schneller anzumelden.",
         "INFO_LOGOUT_SUCCESS": "Du wurdest erfolgreich abgemeldet.",
@@ -177,6 +177,8 @@ export class Locale {
         "LOGOUT_IF_NOT_ACTIVE": "Du wirst automatisch abgemeldet, wenn du nicht aktiv bist.",
         "SECONDS_LEFT_1": "in {0} Sekunden...",
         "ACCOUNT_SETTINGS": "Kontoeinstellungen",
+        "ACCOUNT_INFORMATION": "Kontoinformationen",
+        "ACCOUNT_LAST_LOGIN_UNAVAILABLE": "Keine frühere Anmeldung verfügbar.",
         "VIEW_SETTINGS": "Anzeigeeinstellungen",
         "LABEL_APPLICATIONS": "Anwendungen:",
 
@@ -358,6 +360,8 @@ export class Locale {
         "LOGOUT_IF_NOT_ACTIVE": "You will be logged out automatically if you are not active.",
         "SECONDS_LEFT_1": "in {0} seconds...",
         "ACCOUNT_SETTINGS": "Account Settings",
+        "ACCOUNT_INFORMATION": "Account information",
+        "ACCOUNT_LAST_LOGIN_UNAVAILABLE": "No previous login available.",
         "VIEW_SETTINGS": "View Settings",
         "LABEL_APPLICATIONS": "Applications:",
 

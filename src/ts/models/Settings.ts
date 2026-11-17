@@ -46,7 +46,7 @@ export class Settings {
 
     isValidTabType(tabType: string | null): tabType is SettingsTabType {
         if (tabType != null) {
-            return ["VIEW_SETTINGS", "ACCOUNT_SETTINGS"].includes(tabType);
+            return ["VIEW_SETTINGS", "ACCOUNT_SETTINGS", "ACCOUNT_INFORMATION"].includes(tabType);
         }
         return false;
     }

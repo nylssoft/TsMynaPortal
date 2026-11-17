@@ -1,8 +1,6 @@
 import { DesktopTabType } from "../TypeDefinitions";
 
 export class Desktop {
-    // welcome message closed
-    welcomeClosed: boolean = false;
     // selected tab type in desktop page
     tabType: DesktopTabType | null = null;
 

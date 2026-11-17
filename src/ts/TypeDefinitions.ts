@@ -263,6 +263,6 @@ export type PageType = "LOGIN_USERNAME_PASSWORD" | "LOGIN_PIN" | "LOGIN_PASS2" |
 
 export type DesktopTabType = "BIRTHDAYS" | "CONTACTS" | "NOTES" | "PASSWORD_MANAGER" | "DIARY" | "DOCUMENTS" | "APPOINTMENTS" | "WEATHER";
 
-export type SettingsTabType = "VIEW_SETTINGS" | "ACCOUNT_SETTINGS";
+export type SettingsTabType = "VIEW_SETTINGS" | "ACCOUNT_SETTINGS" | "ACCOUNT_INFORMATION";
 
 export const Version: string = __APP_VERSION__;

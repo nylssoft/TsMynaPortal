@@ -10,6 +10,10 @@ Use Node.js 24 and run `npm ci` followed by `npm run build`. The production clie
 
 On GitHub, select **Actions > Build TsMynaPortal > Run workflow** to build the client. The workflow runs on Ubuntu and uploads the contents of `dist` as the downloadable `tsmynaportal-<run number>` artifact.
 
+## Settings
+
+Signed-in users can open the Account information tab (info icon) in Settings to view their previous login date and time and storage usage versus quota, including zero usage. The desktop no longer displays the welcome information panel.
+
 ## Documents
 
 The Documents tab opens in browsing mode without selection checkboxes. Use the selection icon beside the heading to show item checkboxes and select-all. Selected items enable rename, move and delete actions. Turning selection mode off clears the selection; navigating to another folder or reopening the tab returns to browsing mode. Names still open documents and folders while selection mode is enabled.
