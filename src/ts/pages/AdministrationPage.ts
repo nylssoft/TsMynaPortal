@@ -24,7 +24,28 @@ export class AdministrationPage implements Page {
             Controls.createAlert(parent, pageContext.locale.translate("ERROR_ADMINISTRATION_ACCESS"));
             return;
         }
-        await new RegistrationRequests().renderAsync(parent, pageContext, token);
-        await new ManagedUsers().renderAsync(parent, pageContext, token, user.id);
+        const tabs = Controls.createElement(parent, "ul", "nav nav-pills");
+        const tasks = [
+            { type: "REGISTRATIONS", title: "ADMIN_REGISTRATIONS", icon: "bi-person-plus" },
+            { type: "USERS", title: "ADMIN_USERS", icon: "bi-people" }
+        ] as const;
+        tasks.forEach(task => {
+            const item = Controls.createElement(tabs, "li", "nav-item");
+            const active = pageContext.administrationTab === task.type;
+            const button = Controls.createButton(item, "button", "", `nav-link${active ? " active" : ""}`);
+            button.setAttribute("aria-pressed", String(active));
+            button.title = pageContext.locale.translate(task.title);
+            button.setAttribute("aria-label", button.title);
+            Controls.createSpan(button, `bi ${task.icon}`);
+            button.addEventListener("click", async () => {
+                pageContext.administrationTab = task.type;
+                await pageContext.renderAsync();
+            });
+        });
+        if (pageContext.administrationTab === "REGISTRATIONS") {
+            await new RegistrationRequests().renderAsync(parent, pageContext, token);
+        } else {
+            await new ManagedUsers().renderAsync(parent, pageContext, token, user.id);
+        }
     }
 }

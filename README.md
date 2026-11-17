@@ -24,9 +24,9 @@ Select one shared `.md` file and use Edit Markdown content to open the full-widt
 
 ## Administration
 
-Signed-in users with the `usermanager` role can open Administration from the navigation menu. Under Registration requests, select one or more requests to approve or reject them, optionally sending email notifications. Approval displays the registration code. Approved requests remain listed until the applicant registers and can be approved again to retrieve the existing code. Results are shown per request; if an operation fails, check its state before retrying because the server may have saved the change before a notification failed.
+Signed-in users with the `usermanager` role can open Administration from the navigation menu. Registration requests and Registered users have separate tabs; selecting either tab reloads its data, including selecting the active tab. Under Registration requests, select one or more requests to approve or reject them, optionally sending email notifications. Approval displays the registration code. Approved requests remain listed until the applicant registers and can be approved again to retrieve the existing code. Results are shown per request; if an operation fails, check its state before retrying because the server may have saved the change before a notification failed.
 
-Under Registered users, open an account to see its details and storage usage, change its quota, login permission or roles, or unlock it. Select accounts to delete them after confirmation; the result is reported for each account. To delete your own account, use Account Settings instead. The server enforces administrator permissions and its account-protection rules.
+Under Registered users, open an account in its own details page to see its profile image and storage usage, change its quota, login permission or roles, or unlock it. The back arrow returns to the refreshed Registered users tab. Select accounts to delete them after confirmation; the result is reported for each account. To delete your own account, use Account Settings instead. The server enforces administrator permissions and its account-protection rules.
 
 ## Weather
 

@@ -51,6 +51,8 @@ export class PageContext {
     readonly appointment: Appointment = new Appointment();
     readonly vote: Appointment = new Appointment();
     readonly settings: Settings = new Settings();
+    administrationTab: "REGISTRATIONS" | "USERS" = "REGISTRATIONS";
+    managedUserId: number | null = null;
     // flag whether a page with a back button has changed data
     dataChanged: boolean = false;
     // email address for password reset request or registration request

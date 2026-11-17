@@ -16,7 +16,6 @@ export class RegistrationRequests {
         const actions = Controls.createDiv(parent, "d-flex flex-wrap gap-2");
         const approve = Controls.createButton(actions, "button", locale.translate("ADMIN_REGISTRATION_APPROVE"), "btn btn-primary");
         const reject = Controls.createButton(actions, "button", locale.translate("ADMIN_REGISTRATION_REJECT"), "btn btn-outline-danger");
-        const refresh = Controls.createButton(actions, "button", locale.translate("ADMIN_REGISTRATION_REFRESH"), "btn btn-outline-secondary");
         let selected: { request: RegistrationRequest; checkbox: HTMLInputElement }[] = [];
         let busy = false;
 
@@ -24,7 +23,6 @@ export class RegistrationRequests {
             const hasSelection = selected.some(item => item.checkbox.checked);
             approve.disabled = busy || !hasSelection;
             reject.disabled = busy || !hasSelection;
-            refresh.disabled = busy;
             notification.disabled = busy;
             selected.forEach(item => item.checkbox.disabled = busy);
         };
@@ -80,15 +78,6 @@ export class RegistrationRequests {
 
         approve.addEventListener("click", () => { void process(false); });
         reject.addEventListener("click", () => { void process(true); });
-        refresh.addEventListener("click", async () => {
-            if (busy) return;
-            busy = true;
-            updateControls();
-            Controls.removeAllChildren(alerts);
-            await load();
-            busy = false;
-            updateControls();
-        });
         busy = true;
         updateControls();
         await load();

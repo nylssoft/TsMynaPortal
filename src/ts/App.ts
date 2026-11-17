@@ -27,6 +27,7 @@ import { GamesPage } from "./pages/GamesPage";
 import { AdministrationPage } from "./pages/AdministrationPage";
 import { FolderAccessPage } from "./pages/FolderAccessPage";
 import { MarkdownEditPage } from "./pages/MarkdownEditPage";
+import { ManagedUserDetailPage } from "./pages/ManagedUserDetailPage";
 
 /**
  * Main application class that initializes the application, handles authentication, and renders the UI.
@@ -82,6 +83,7 @@ export class App {
         pageContext.registerPage(new AdministrationPage());
         pageContext.registerPage(new FolderAccessPage());
         pageContext.registerPage(new MarkdownEditPage());
+        pageContext.registerPage(new ManagedUserDetailPage());
         await pageContext.locale.setLanguageAsync();
         const params: URLSearchParams = new URLSearchParams(window.location.search);
         if (params.has("vid")) {
