@@ -28,7 +28,7 @@ export class DocumentTab implements DesktopTab {
                 Controls.createParagraph(parent, "alert alert-warning small", pageContext.locale.translate("DOCUMENTS_SHARED_UPLOAD"));
             }
             if (children.length > 0) {
-                let selectionEnabled = false;
+                let selectionEnabled = pageContext.documentItem.selectionEnabled;
                 Controls.createSearch(heading, parent, pageContext.locale.translate("SEARCH"), pageContext.documentItem.filter, (filter: string) => this.filterDocItemList(pageContext, filter, children, selectionEnabled));
                 const selectionToggle = Controls.createButton(heading, "button", "", "btn btn-link text-body fs-4 p-0 ms-4 align-baseline", "action-selection-id");
                 Controls.createSpan(selectionToggle, "bi bi-check2-square").setAttribute("aria-hidden", "true");
@@ -43,6 +43,7 @@ export class DocumentTab implements DesktopTab {
                 updateToggle();
                 selectionToggle.addEventListener("click", () => {
                     selectionEnabled = !selectionEnabled;
+                    pageContext.documentItem.selectionEnabled = selectionEnabled;
                     updateToggle();
                     this.filterDocItemList(pageContext, pageContext.documentItem.filter, children, selectionEnabled);
                 });
@@ -170,25 +171,27 @@ export class DocumentTab implements DesktopTab {
                 const type: string = item.type;
                 const li: HTMLElement = Controls.createElement(listGroup, "li", "list-group-item d-flex justify-content-between align-items-start");
                 if (selectionEnabled) {
-                    const checkBoxSelectItem: HTMLInputElement = Controls.createInput(li, "checkbox", `item-select-id-${id}`, "form-check-input me-2 mt-1 item-select");
+                    const checkBoxSelectItem: HTMLInputElement = Controls.createInput(li, "checkbox", `item-select-id-${id}`, "form-check-input flex-shrink-0 me-2 mt-1 item-select");
                     checkBoxSelectItem.setAttribute("aria-label", pageContext.locale.translateWithArgs("DOCUMENTS_SELECT_ITEM_1", [item.name]));
                     checkBoxSelectItem.addEventListener("click", _ => this.updateActions(pageContext));
                 }
                 const iconType: string = type == "Document" ? DocumentService.getFileIcon(item.name) : "bi-folder";
-                const iconElem: HTMLElement = Controls.createSpan(li, `bi ${iconType}`);
-                const nameElem: HTMLElement = Controls.createSpan(li, "ms-2 me-auto", item.name);
+                const iconElem: HTMLElement = Controls.createSpan(li, `bi ${iconType} flex-shrink-0`);
+                const nameElem: HTMLElement = Controls.createSpan(li, "ms-2 me-auto text-truncate", item.name);
+                nameElem.style.minWidth = "0";
+                nameElem.title = item.name;
                 if (DocumentService.isShared(item)) {
                     const isPublic = item.accessRole === "everbody";
-                    const sharing = Controls.createSpan(li, `bi ${isPublic ? "bi-globe" : "bi-people"} mx-2`);
+                    const sharing = Controls.createSpan(li, `bi ${isPublic ? "bi-globe" : "bi-people"} flex-shrink-0 mx-2`);
                     sharing.title = pageContext.locale.translate(isPublic ? "DOCUMENTS_PUBLIC" : "DOCUMENTS_FAMILY");
                     sharing.setAttribute("role", "img");
                     sharing.setAttribute("aria-label", sharing.title);
                 }
                 let iconBadge: HTMLElement;
                 if (item.size > 0) {
-                    iconBadge = Controls.createSpan(li, "badge text-bg-primary rounded-pill", `${DocumentService.formatSize(item.size)}`);
+                    iconBadge = Controls.createSpan(li, "badge text-bg-primary rounded-pill flex-shrink-0", `${DocumentService.formatSize(item.size)}`);
                 } else {
-                    iconBadge = Controls.createSpan(li, "badge text-bg-secondary", `${item.children}`);
+                    iconBadge = Controls.createSpan(li, "badge text-bg-secondary flex-shrink-0", `${item.children}`);
                 }
                 nameElem.setAttribute("role", "button");
                 nameElem.addEventListener("click", async (e: Event) => await this.onClickItemAsync(e, pageContext, type, id));

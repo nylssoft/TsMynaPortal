@@ -5,6 +5,7 @@ export class DocumentItem {
     containerId: number | null = null;
     // filter
     filter: string = "";
+    selectionEnabled: boolean = false;
     // flag whether the document item has changed
     changed: boolean = false;
     // edit item

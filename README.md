@@ -16,7 +16,7 @@ Signed-in users can open the Account information tab (info icon) in Settings to 
 
 ## Documents
 
-The Documents tab opens in browsing mode without selection checkboxes. Use the selection icon beside the heading to show item checkboxes and select-all. Selected items enable rename, move and delete actions. Turning selection mode off clears the selection; navigating to another folder or reopening the tab returns to browsing mode. Names still open documents and folders while selection mode is enabled.
+The Documents tab opens in browsing mode without selection checkboxes. Use the selection icon beside the heading to show item checkboxes and select-all. Selected items enable rename, move and delete actions. Selection mode remains enabled when navigating folders or reopening the tab during the current session, but selected items are cleared when the list reloads. Turning selection mode off clears the selection. The mode is kept only in memory and resets when the page is reloaded. Names still open documents and folders while selection mode is enabled.
 
 Administrators (`usermanager`) can select one owned folder and use the sharing icon to choose Private, Family or Public, then Save. People/globe icons identify shared items. Public files require no login to download; family files require the `family` role. New uploads directly into shared folders are unencrypted and inherit the folder's visibility; private uploads remain encrypted. Changing folder visibility does not change existing files or subfolders, and moving items does not change their visibility or encryption. New subfolders are private.
 
