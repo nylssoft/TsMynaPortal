@@ -18,7 +18,15 @@ export type WeatherResult = {
     location: WeatherLocation;
     asOfUtc: string;
     current: WeatherConditions & { windSpeedKph: number | null };
-    hourly: (WeatherConditions & { precipitationProbabilityPercent: number | null })[];
+    hourly: (WeatherConditions & { precipitationProbabilityPercent: number | null; windSpeedKph: number | null })[];
+    daily: {
+        date: string;
+        temperatureMinC: number | null;
+        temperatureMaxC: number | null;
+        weatherCode: number | null;
+        precipitationProbabilityMaxPercent: number | null;
+        windSpeedMaxKph: number | null;
+    }[];
 };
 
 export type WeatherLookup =
@@ -43,7 +51,7 @@ export class WeatherService {
             return { kind: "candidates", candidates: body.candidates };
         }
         const weather: WeatherResult = await response.json();
-        if (!weather.location || !weather.current || !Array.isArray(weather.hourly) || weather.hourly.length !== 24) {
+        if (!weather.location || !weather.current || !Array.isArray(weather.hourly) || weather.hourly.length !== 24 || !Array.isArray(weather.daily) || weather.daily.length !== 7) {
             throw new Error("ERROR_WEATHER_RESPONSE");
         }
         return { kind: "weather", weather };

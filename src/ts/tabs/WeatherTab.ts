@@ -8,6 +8,7 @@ export class WeatherTab implements DesktopTab {
     tabType: DesktopTabType = "WEATHER";
     bootstrapIcon: string = "bi-cloud-sun";
     titleKey: string = "WEATHER";
+    private dailyForecast = false;
 
     async renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
         const locale = pageContext.locale;
@@ -113,21 +114,15 @@ export class WeatherTab implements DesktopTab {
         const currentBody = Controls.createDiv(current, "card-body");
         Controls.createHeading(currentBody, 6, "card-title", locale.translate("WEATHER_CURRENT"));
         this.renderConditions(pageContext, currentBody, weather.current);
-        const wind = weather.current.windSpeedKph;
-        const windDisplay = Controls.createDiv(currentBody, "small");
-        Controls.createSpan(windDisplay, "", locale.translateWithArgs("WEATHER_WIND_1", [this.value(wind, "km/h")]));
-        const windIndicator = Controls.createSpan(windDisplay, "ms-2");
-        const [windIcon, windStrength, windColor] = this.windStrength(wind);
-        const windLabel = locale.translate(windStrength);
-        const windIconElement = Controls.createSpan(windIndicator, `bi ${windIcon} ${windColor}`);
-        windIconElement.title = windLabel;
-        windIconElement.setAttribute("aria-label", locale.translateWithArgs("WEATHER_WIND_STRENGTH_1", [windLabel]));
-        windIndicator.setAttribute("aria-hidden", "true");
-        Controls.createSpan(windDisplay, "visually-hidden", locale.translateWithArgs("WEATHER_WIND_STRENGTH_1", [windLabel]));
+        this.renderWind(pageContext, currentBody, weather.current.windSpeedKph);
         Controls.createDiv(currentBody, "small text-body-secondary", locale.translateWithArgs("WEATHER_OBSERVED_1", [formatDate(weather.current.timeUtc)]));
 
         const titleRow = Controls.createDiv(parent, "d-flex align-items-center justify-content-between gap-2 mb-2");
-        Controls.createHeading(titleRow, 6, "mb-0", locale.translate("WEATHER_FORECAST"));
+        const periods = Controls.createDiv(titleRow, "btn-group btn-group-sm");
+        periods.setAttribute("role", "group");
+        periods.setAttribute("aria-label", locale.translate("WEATHER_PERIOD"));
+        const hourlyButton = Controls.createButton(periods, "button", locale.translate("WEATHER_FORECAST"), "btn btn-outline-primary");
+        const dailyButton = Controls.createButton(periods, "button", locale.translate("WEATHER_DAILY"), "btn btn-outline-primary");
         const buttons = Controls.createDiv(titleRow, "btn-group btn-group-sm");
         const previous = Controls.createButton(buttons, "button", "", "btn btn-outline-secondary");
         const next = Controls.createButton(buttons, "button", "", "btn btn-outline-secondary");
@@ -143,24 +138,62 @@ export class WeatherTab implements DesktopTab {
         hours.tabIndex = 0;
         previous.addEventListener("click", () => hours.scrollBy({ left: -hours.clientWidth, behavior: "smooth" }));
         next.addEventListener("click", () => hours.scrollBy({ left: hours.clientWidth, behavior: "smooth" }));
-        weather.hourly.forEach(hour => {
-            const card = Controls.createDiv(hours, "card flex-shrink-0 text-center");
-            card.style.width = "7.5rem";
-            const body = Controls.createDiv(card, "card-body px-2 py-3");
-            Controls.createDiv(body, "small text-body-secondary", formatDate(hour.timeUtc));
-            this.renderConditions(pageContext, body, hour);
-            const precipitation = this.value(hour.precipitationProbabilityPercent, "%");
-            const probability = Controls.createDiv(body, "small text-nowrap");
-            const label = locale.translateWithArgs("WEATHER_PRECIPITATION_1", [precipitation]);
-            probability.title = label;
-            Controls.createSpan(probability, "bi bi-droplet me-1").setAttribute("aria-hidden", "true");
-            Controls.createSpan(probability, "", precipitation).setAttribute("aria-hidden", "true");
-            Controls.createSpan(probability, "visually-hidden", label);
-        });
+        const renderForecast = (): void => {
+            Controls.removeAllChildren(hours);
+            hours.scrollLeft = 0;
+            hours.setAttribute("aria-label", locale.translate(this.dailyForecast ? "WEATHER_DAILY" : "WEATHER_FORECAST"));
+            hourlyButton.classList.toggle("active", !this.dailyForecast);
+            dailyButton.classList.toggle("active", this.dailyForecast);
+            hourlyButton.setAttribute("aria-pressed", String(!this.dailyForecast));
+            dailyButton.setAttribute("aria-pressed", String(this.dailyForecast));
+            const createCard = (date: string): HTMLDivElement => {
+                const card = Controls.createDiv(hours, "card flex-shrink-0 text-center");
+                card.style.width = "7.5rem";
+                const body = Controls.createDiv(card, "card-body px-2 py-3");
+                Controls.createDiv(body, "small text-body-secondary", date);
+                return body;
+            };
+            if (this.dailyForecast) {
+                weather.daily.forEach(day => {
+                    const date = new Date(`${day.date}T12:00:00Z`).toLocaleDateString(locale.getLanguage(), {
+                        timeZone: "UTC", weekday: "short", day: "numeric", month: "short"
+                    });
+                    const body = createCard(date);
+                    this.renderConditions(pageContext, body, { timeUtc: `${day.date}T12:00:00Z`, temperatureC: day.temperatureMaxC, weatherCode: day.weatherCode });
+                    Controls.createDiv(body, "small", locale.translateWithArgs("WEATHER_MIN_1", [this.value(day.temperatureMinC, "°C")]));
+                    Controls.createDiv(body, "small", locale.translateWithArgs("WEATHER_MAX_1", [this.value(day.temperatureMaxC, "°C")]));
+                    this.renderPrecipitation(pageContext, body, day.precipitationProbabilityMaxPercent);
+                    const wind = Controls.createDiv(body);
+                    Controls.createSpan(wind, "visually-hidden", locale.translate("WEATHER_DAILY_WIND"));
+                    this.renderWind(pageContext, wind, day.windSpeedMaxKph, true);
+                    wind.title = locale.translate("WEATHER_DAILY_WIND");
+                });
+            } else {
+                weather.hourly.forEach(hour => {
+                    const body = createCard(formatDate(hour.timeUtc));
+                    this.renderConditions(pageContext, body, hour);
+                    this.renderPrecipitation(pageContext, body, hour.precipitationProbabilityPercent);
+                    this.renderWind(pageContext, body, hour.windSpeedKph, true);
+                });
+            }
+        };
+        hourlyButton.addEventListener("click", () => { this.dailyForecast = false; renderForecast(); });
+        dailyButton.addEventListener("click", () => { this.dailyForecast = true; renderForecast(); });
+        renderForecast();
         const credit = Controls.createDiv(parent, "small text-body-secondary mt-2");
         Controls.createAnchor(credit, "https://open-meteo.com/", locale.translate("WEATHER_CREDIT"), "link-secondary");
         Controls.createSpan(credit, "", " · ");
         Controls.createAnchor(credit, "https://creativecommons.org/licenses/by/4.0/", "CC BY 4.0", "link-secondary");
+    }
+
+    private renderPrecipitation(pageContext: PageContext, parent: HTMLElement, percent: number | null): void {
+        const precipitation = this.value(percent, "%");
+        const probability = Controls.createDiv(parent, "small text-nowrap");
+        const label = pageContext.locale.translateWithArgs("WEATHER_PRECIPITATION_1", [precipitation]);
+        probability.title = label;
+        Controls.createSpan(probability, "bi bi-droplet me-1").setAttribute("aria-hidden", "true");
+        Controls.createSpan(probability, "", precipitation).setAttribute("aria-hidden", "true");
+        Controls.createSpan(probability, "visually-hidden", label);
     }
 
     private renderConditions(pageContext: PageContext, parent: HTMLElement, conditions: WeatherConditions): void {
@@ -183,6 +216,22 @@ export class WeatherTab implements DesktopTab {
         if (code !== null && [80, 81, 82].includes(code)) return ["bi-cloud-rain-heavy", "WEATHER_SHOWERS"];
         if (code !== null && [95, 96, 99].includes(code)) return ["bi-cloud-lightning-rain", "WEATHER_THUNDERSTORM"];
         return ["bi-question-circle", "WEATHER_UNKNOWN"];
+    }
+
+    private renderWind(pageContext: PageContext, parent: HTMLElement, speedKph: number | null, compact: boolean = false): void {
+        const locale = pageContext.locale;
+        const speed = this.value(speedKph, "km/h");
+        const description = locale.translateWithArgs("WEATHER_WIND_1", [speed]);
+        const [icon, strength, color] = this.windStrength(speedKph);
+        const strengthLabel = locale.translate(strength);
+        const label = `${description}. ${locale.translateWithArgs("WEATHER_WIND_STRENGTH_1", [strengthLabel])}`;
+        const line = Controls.createDiv(parent, "small text-nowrap");
+        line.title = label;
+        Controls.createSpan(line, "", compact ? speed : description).setAttribute("aria-hidden", "true");
+        const indicator = Controls.createSpan(line, `bi ${icon} ${color} ms-2`);
+        indicator.title = strengthLabel;
+        indicator.setAttribute("aria-hidden", "true");
+        Controls.createSpan(line, "visually-hidden", label);
     }
 
     private windStrength(speedKph: number | null): [string, string, string] {
