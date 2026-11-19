@@ -20,6 +20,9 @@ export class RegistrationRequests {
         let busy = false;
 
         const updateControls = (): void => {
+            const hasRequests = selected.length > 0;
+            options.classList.toggle("d-none", !hasRequests);
+            actions.classList.toggle("d-none", !hasRequests);
             const hasSelection = selected.some(item => item.checkbox.checked);
             approve.disabled = busy || !hasSelection;
             reject.disabled = busy || !hasSelection;

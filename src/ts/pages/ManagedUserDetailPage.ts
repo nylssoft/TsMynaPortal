@@ -67,7 +67,6 @@ export class ManagedUserDetailPage implements Page {
         const quota = Controls.createInput(quotaDiv, "number", "admin-quota-id", "form-control");
         quota.min = "2"; quota.max = "1000"; quota.step = "1";
         quota.value = String(user.storageQuota / MB);
-        const quotaButton = Controls.createButton(quotaDiv, "button", locale.translate("ADMIN_USER_SAVE_QUOTA"), "btn btn-outline-primary mt-2");
         const update = async (operation: () => Promise<boolean>, onSuccess: () => void, onFailure: () => void): Promise<void> => {
             if (fieldset.disabled) return;
             fieldset.disabled = true;
@@ -77,7 +76,6 @@ export class ManagedUserDetailPage implements Page {
                 if (!await operation()) throw new Error("ERROR_ADMIN_USER_UNCHANGED");
                 onSuccess();
                 context.authenticationClient.resetUserInfo();
-                Controls.createAlert(alerts, locale.translate("ADMIN_USER_UPDATED"), "alert-success");
             } catch (error: unknown) {
                 onFailure();
                 Controls.createAlert(alerts, locale.translateWithArgs("ADMIN_USER_UPDATE_FAILED_1", [locale.translateError(error)]));
@@ -86,13 +84,14 @@ export class ManagedUserDetailPage implements Page {
                 back.disabled = false;
             }
         };
-        quotaButton.addEventListener("click", () => {
+        quota.addEventListener("change", () => {
+            if (fieldset.disabled) return;
             const amount = Number(quota.value);
+            if (amount * MB === user.storageQuota && quota.value.trim() !== "") return;
             if (quota.value.trim() === "" || !Number.isInteger(amount) || amount < 2 || amount > 1000 || amount * MB <= used) {
                 Controls.createAlert(alerts, locale.translate("ERROR_ADMIN_USER_QUOTA"));
                 return;
             }
-            if (amount * MB === user.storageQuota) return;
             void update(() => UserAdministrationService.updateQuotaAsync(token, user.id, amount * MB), () => { user.storageQuota = amount * MB; }, () => { quota.value = String(user.storageQuota / MB); });
         });
         const loginDiv = Controls.createDiv(fieldset, "form-check mb-3");

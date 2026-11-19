@@ -1,6 +1,6 @@
 {
   "name": "tsmynaportal",
-  "version": "1.6.22",
+  "version": "1.6.23",
   "description": "Web client for stockfleth.eu",
   "main": "index.js",
   "scripts": {
@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
-    "bootstrap": "^5.3.7"
+    "bootstrap": "^5.3.7",
+    "fflate": "^0.8.2"
   }
 }
