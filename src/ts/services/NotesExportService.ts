@@ -1,4 +1,5 @@
-import { strToU8, zip } from "fflate";
+import { strToU8 } from "fflate";
+import { ExportArchive } from "./ExportArchive";
 import { UserInfoResult } from "../TypeDefinitions";
 import { NoteService } from "./NoteService";
 
@@ -20,13 +21,10 @@ export class NotesExportService {
             if (note.id !== ids[index] || typeof note.title !== "string" || typeof note.content !== "string") {
                 throw new Error("ERROR_NOTES_EXPORT_RESPONSE");
             }
-            const title = Array.from(note.title.replace(/[<>:"/\\|?*\u0000-\u001f\u007f]/g, "_").trim()).slice(0, 40).join("").replace(/[. ]+$/, "") || "note";
+            const title = ExportArchive.sanitizeName(note.title);
             files[`notes/${note.id}-${title}.txt`] = strToU8(note.content);
             progress(index + 1, notes.length);
         }
-        const archive = await new Promise<Uint8Array>((resolve, reject) => {
-            zip(files, (error, data) => error ? reject(error) : resolve(data));
-        });
-        return new Blob([new Uint8Array(archive).buffer], { type: "application/zip" });
+        return await ExportArchive.createAsync(files);
     }
 }
