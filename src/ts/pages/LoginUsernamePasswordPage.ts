@@ -46,6 +46,7 @@ export class LoginUsernamePasswordPage implements Page {
             pageContext.dataEmail = "";
             await pageContext.renderAsync();
         });
+        Controls.createAnchor(parent, "password-backup.html", pageContext.locale.translate("PASSWORD_BACKUP_OPEN"), "mt-2 d-block");
     }
 
     private async onClickLoginWithUsernameAndPasswordAsync(e: MouseEvent, pageContext: PageContext, inputUsername: HTMLInputElement, inputPassword: HTMLInputElement, staySignedIn: HTMLInputElement, alertDiv: HTMLDivElement) {

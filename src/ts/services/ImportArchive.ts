@@ -1,8 +1,7 @@
 import { Unzip, UnzipInflate } from "fflate";
 
 export class ImportArchive {
-    static async readAsync(file: File): Promise<Map<string, Uint8Array>> {
-        const limit = 512 * 1024 * 1024;
+    static async readAsync(file: File, limit = 512 * 1024 * 1024): Promise<Map<string, Uint8Array>> {
         if (file.size === 0 || file.size > limit) throw new Error("ERROR_IMPORT_ARCHIVE");
         const entries = new Map<string, Uint8Array>();
         let count = 0;
@@ -35,7 +34,11 @@ export class ImportArchive {
         try {
             const bytes = new Uint8Array(await file.arrayBuffer());
             const central = this.directory(bytes, limit);
-            unzip.push(bytes, true);
+            const chunkSize = 32 * 1024;
+            for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+                const end = Math.min(offset + chunkSize, bytes.length);
+                unzip.push(bytes.subarray(offset, end), end === bytes.length);
+            }
             if (count !== completed || count !== central.size) throw new Error("ERROR_IMPORT_ARCHIVE");
             for (const [name, data] of entries) {
                 const expected = central.get(name);

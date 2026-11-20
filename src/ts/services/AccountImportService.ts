@@ -1,4 +1,5 @@
-import { ContactsResult, DocumentItemResult, PasswordItemResult, UserInfoResult } from "../TypeDefinitions";
+import { ContactsResult, DocumentItemResult, UserInfoResult } from "../TypeDefinitions";
+import { PasswordBackupReader, passwordBackupFields } from "./PasswordBackupReader";
 import { ContactService } from "./ContactService";
 import { DiaryService } from "./DiaryService";
 import { DocumentService } from "./DocumentService";
@@ -12,6 +13,18 @@ type Action = (token: string, user: UserInfoResult) => Promise<void>;
 
 export class AccountImportService {
     static async prepareAsync(kind: ImportKind, file: File, passphrase: string, volumeName: string): Promise<Action[]> {
+        if (kind === "passwords") {
+            const items = await PasswordBackupReader.readAsync(file, passphrase);
+            return [async (token, user) => {
+                if (typeof user.hasPasswordManagerFile !== "boolean") throw new Error("ERROR_IMPORT_EXISTING");
+                const current = await PasswordManagerService.getPasswordFileAsync(token, user);
+                if (!current || !Array.isArray(current.items) || !current.items.every(item => item && passwordBackupFields.every(field => typeof item[field] === "string"))) throw new Error("ERROR_IMPORT_EXISTING");
+                for (const item of items) await PasswordManagerService.encodePasswordAsync(user, item);
+                const merged = [...current.items, ...items];
+                if (new TextEncoder().encode(JSON.stringify(merged)).length > 5242852) throw new Error("ERROR_IMPORT_TOO_LARGE");
+                await PasswordManagerService.savePasswordFileAsync(token, user, merged);
+            }];
+        }
         const entries = await ImportArchive.readAsync(file);
         const paths = [...entries.keys()].filter(path => !path.endsWith("/"));
         const read = (path: string): Uint8Array => {
@@ -75,38 +88,6 @@ export class AccountImportService {
                 }
                 if (new TextEncoder().encode(JSON.stringify(merged)).length > 5242852) throw new Error("ERROR_IMPORT_TOO_LARGE");
                 await ContactService.saveContactsAsync(token, user, merged);
-            }];
-        }
-        if (kind === "passwords") {
-            if (paths.length !== 1 || paths[0] !== "passwords/passwords.encrypted.json" || [...entries.keys()].some(path => path !== paths[0] && path !== "passwords/")) throw new Error("ERROR_IMPORT_ARCHIVE");
-            const raw = ImportArchive.json(read(paths[0]));
-            if (typeof raw !== "object" || raw === null) throw new Error("ERROR_IMPORT_ARCHIVE");
-            const envelope = raw as Record<string, unknown>;
-            if (envelope.format !== "myna-passwords" || envelope.version !== 1 || envelope.cipher !== "AES-256-GCM" || envelope.kdf !== "PBKDF2-SHA256" || envelope.iterations !== 600000 || typeof envelope.salt !== "string" || !/^[0-9a-f]{32}$/i.test(envelope.salt) || typeof envelope.iv !== "string" || !/^[0-9a-f]{24}$/i.test(envelope.iv) || typeof envelope.ciphertext !== "string" || envelope.ciphertext.length < 32 || envelope.ciphertext.length % 2 !== 0 || !/^[0-9a-f]+$/i.test(envelope.ciphertext)) throw new Error("ERROR_IMPORT_ARCHIVE");
-            const decode = (hex: string): Uint8Array<ArrayBuffer> => {
-                const bytes = new Uint8Array(hex.length / 2);
-                for (let i = 0; i < bytes.length; i++) bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
-                return bytes;
-            };
-            const material = await crypto.subtle.importKey("raw", new TextEncoder().encode(passphrase), "PBKDF2", false, ["deriveKey"]);
-            const key = await crypto.subtle.deriveKey({ name: "PBKDF2", hash: "SHA-256", salt: decode(envelope.salt), iterations: 600000 }, material, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
-            let plaintext: ArrayBuffer;
-            try { plaintext = await crypto.subtle.decrypt({ name: "AES-GCM", iv: decode(envelope.iv) }, key, decode(envelope.ciphertext)); }
-            catch { throw new Error("ERROR_IMPORT_PASSPHRASE"); }
-            const parsed = ImportArchive.json(new Uint8Array(plaintext));
-            if (typeof parsed !== "object" || parsed === null) throw new Error("ERROR_IMPORT_ARCHIVE");
-            const data = parsed as { version?: unknown; items?: unknown };
-            const fields = ["Name", "Login", "Password", "Description", "Url"] as const;
-            if (data.version !== 1 || !Array.isArray(data.items) || data.items.length === 0 || !data.items.every(item => item && fields.every(field => typeof item[field] === "string"))) throw new Error("ERROR_IMPORT_ARCHIVE");
-            const items: PasswordItemResult[] = data.items.map(item => ({ Name: item.Name, Login: item.Login, Password: item.Password, Description: item.Description, Url: item.Url }));
-            return [async (token, user) => {
-                if (typeof user.hasPasswordManagerFile !== "boolean") throw new Error("ERROR_IMPORT_EXISTING");
-                const current = await PasswordManagerService.getPasswordFileAsync(token, user);
-                if (!current || !Array.isArray(current.items) || !current.items.every(item => item && fields.every(field => typeof item[field] === "string"))) throw new Error("ERROR_IMPORT_EXISTING");
-                for (const item of items) await PasswordManagerService.encodePasswordAsync(user, item);
-                const merged = [...current.items, ...items];
-                if (new TextEncoder().encode(JSON.stringify(merged)).length > 5242852) throw new Error("ERROR_IMPORT_TOO_LARGE");
-                await PasswordManagerService.savePasswordFileAsync(token, user, merged);
             }];
         }
         const all = [...entries.keys()];

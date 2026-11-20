@@ -41,6 +41,7 @@ export class AccountExport {
         select.value = this.kind;
         const secrets = Controls.createDiv(card, `mb-3${this.kind === "passwords" ? "" : " d-none"}`);
         Controls.createParagraph(secrets, "small", locale.translate("ACCOUNT_EXPORT_PASSWORD_WARNING"));
+        Controls.createAnchor(secrets, "password-backup.html", locale.translate("PASSWORD_BACKUP_OPEN"), "d-block mb-3");
         Controls.createLabel(secrets, "export-passphrase-id", "form-label", locale.translate("ACCOUNT_EXPORT_PASSPHRASE"));
         const password = Controls.createInput(secrets, "password", "export-passphrase-id", "form-control mb-2");
         password.autocomplete = "new-password";

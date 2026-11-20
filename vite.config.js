@@ -7,6 +7,12 @@ export default {
   build: {
     outDir: '../dist',
     emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        portal: resolve(__dirname, 'src', 'index.html'),
+        passwordBackup: resolve(__dirname, 'src', 'password-backup.html'),
+      },
+    },
   },
   server: {
     port: 8080,
