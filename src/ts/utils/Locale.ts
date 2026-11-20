@@ -9,6 +9,17 @@ export class Locale {
 
     private german = {
         "APP_NAME": "stockfleth.eu",
+        "WELCOME_TITLE": "Dein persönliches Portal",
+        "WELCOME_INTRO": "stockfleth.eu ist ein privates Portal für Familie und Freunde. Hier kannst du deinen Alltag organisieren und wichtige Informationen an einem Ort im Blick behalten.",
+        "WELCOME_SIGN_IN": "Anmelden",
+        "WELCOME_REQUEST_ACCOUNT": "Konto beantragen",
+        "WELCOME_APPROVAL": "Kontoanträge müssen genehmigt werden.",
+        "WELCOME_ORGANIZE_TITLE": "Informationen organisieren",
+        "WELCOME_ORGANIZE_TEXT": "Halte Ideen in Notizen fest, führe ein Tagebuch und verwalte Kontakte, Dokumente und Passwörter.",
+        "WELCOME_PLAN_TITLE": "Deinen Tag planen",
+        "WELCOME_PLAN_TEXT": "Organisiere deine Termine und sieh dir die stündliche Wettervorhersage oder die Vorschau für sieben Tage an.",
+        "WELCOME_BACKUP_TITLE": "Daten sichern und wiederherstellen",
+        "WELCOME_BACKUP_TEXT": "Exportiere und importiere deine Daten als ZIP-Dateien. Passwortsicherungen kannst du ohne Anmeldung direkt im Browser lesen.",
         "MESSAGE_WELCOME_1_2_3": "Hallo {0}! Heute ist der {1}. Es ist {2}.",
         "MESSAGE_LAST_LOGIN_1": "Deine letzte Anmeldung war am {0}.",
         "LANGUAGE": "Sprache",
@@ -239,6 +250,17 @@ export class Locale {
 
     private englisch = {
         "APP_NAME": "stockfleth.eu",
+        "WELCOME_TITLE": "Your personal portal",
+        "WELCOME_INTRO": "stockfleth.eu is a private portal for family and friends. Here you can organize your day and keep important information in one place.",
+        "WELCOME_SIGN_IN": "Sign in",
+        "WELCOME_REQUEST_ACCOUNT": "Request an account",
+        "WELCOME_APPROVAL": "Account requests require approval.",
+        "WELCOME_ORGANIZE_TITLE": "Organize your information",
+        "WELCOME_ORGANIZE_TEXT": "Capture ideas in notes, keep a diary, and manage your contacts, documents, and passwords.",
+        "WELCOME_PLAN_TITLE": "Plan your day",
+        "WELCOME_PLAN_TEXT": "Manage appointments and check the hourly or seven-day weather forecast.",
+        "WELCOME_BACKUP_TITLE": "Back up and restore your data",
+        "WELCOME_BACKUP_TEXT": "Export and import your data as ZIP files. Read password backups directly in your browser without signing in.",
         "MESSAGE_WELCOME_1_2_3": "Hello {0}! Today is {1}. It is {2}.",
         "MESSAGE_LAST_LOGIN_1": "Your last login was on {0}.",
         "LANGUAGE": "Language",
@@ -492,8 +514,10 @@ export class Locale {
         const json: any = await resp2.json();
         this.translationMap.clear();
         Object.entries(json).forEach(([key, value]) => this.translationMap.set(key, value as string));
-        const texts = this.language === "de" ? this.german : this.englisch;
+        const contentLanguage = this.language === "de" ? "de" : "en";
+        const texts = contentLanguage === "de" ? this.german : this.englisch;
         Object.entries(texts).forEach(([key, value]) => this.translationMap.set(key, value as string));
+        document.documentElement.lang = contentLanguage;
     }
 
     /**

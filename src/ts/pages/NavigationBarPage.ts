@@ -82,15 +82,18 @@ export class NavigationBarPage implements Page {
                 img.alt = user.name;
             }
         }
-        aBrand.setAttribute("role", "button");
+        aBrand.href = window.location.pathname + window.location.search;
         aBrand.addEventListener("click", async (e: MouseEvent) => {
             e.preventDefault();
             if (pageContext.vote.vid != null) {
                 await new ShowVotePageAction().runAsync(e, pageContext);
             } else if (pageContext.authenticationClient.isLoggedIn()) {
                 await new ShowDesktopPageAction().runAsync(e, pageContext);
-            } else {
+            } else if (pageContext.authenticationClient.isRequiresPin() || pageContext.authenticationClient.isRequiresPass2()) {
                 await new ShowLoginPageAction().runAsync(e, pageContext);
+            } else {
+                pageContext.pageType = "WELCOME";
+                await pageContext.renderAsync();
             }
         });
         const button: HTMLButtonElement = Controls.createElement(container, "button", "navbar-toggler") as HTMLButtonElement;

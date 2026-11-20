@@ -1,8 +1,10 @@
 # Web client for stockfleth.eu
 
 Provides a web client for the website provided by [API Server](https://github.com/nylssoft/MynaAPIServer).
-The portal provides applications to securly manage notes, contacts, passwords, diary entries, documents and appointments.
+The portal provides applications to securely manage notes, contacts, passwords, diary entries, documents and appointments.
 The About page shows the client version and the running API server version retrieved from `GET /api/version`.
+
+Signed-out visitors start on a welcome page in English or German that introduces the private portal for family and friends. It includes a feature overview, **Sign in**, **Request an account**, and a link to the standalone password backup reader. Account requests require approval. Already signed-in users go straight to the desktop, and pending authentication steps resume as before.
 
 ## Build
 

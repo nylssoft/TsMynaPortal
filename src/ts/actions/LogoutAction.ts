@@ -9,7 +9,7 @@ import { SwitchPageClickAction } from "./SwitchPageAction";
 export class LogoutAction extends SwitchPageClickAction {
 
     constructor() {
-        super("LOGIN_USERNAME_PASSWORD");
+        super("WELCOME");
     }
 
     override async beforeRunAsync(e: MouseEvent, pageContext: PageContext): Promise<PageType> {

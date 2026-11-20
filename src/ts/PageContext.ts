@@ -60,7 +60,7 @@ export class PageContext {
     // markdown page
     markdownPages: string[] = [];
     // current page
-    pageType: PageType = "LOGIN_USERNAME_PASSWORD";
+    pageType: PageType = "WELCOME";
     // all page registrations
     private readonly pageRegistrations = new Map<PageType, Page>();
     // auto logout settings

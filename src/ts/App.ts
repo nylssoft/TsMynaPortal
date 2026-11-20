@@ -28,6 +28,7 @@ import { AdministrationPage } from "./pages/AdministrationPage";
 import { FolderAccessPage } from "./pages/FolderAccessPage";
 import { MarkdownEditPage } from "./pages/MarkdownEditPage";
 import { ManagedUserDetailPage } from "./pages/ManagedUserDetailPage";
+import { WelcomePage } from "./pages/WelcomePage";
 
 /**
  * Main application class that initializes the application, handles authentication, and renders the UI.
@@ -58,6 +59,7 @@ export class App {
         pageContext.registerPage(new NavigationBarPage());
         pageContext.registerPage(new AboutPage());
         pageContext.registerPage(new DesktopPage());
+        pageContext.registerPage(new WelcomePage());
         pageContext.registerPage(new LoginUsernamePasswordPage());
         pageContext.registerPage(new LoginPinPage());
         pageContext.registerPage(new LoginPass2Page());
@@ -110,7 +112,7 @@ export class App {
             } else if (pageContext.authenticationClient.isRequiresPass2()) {
                 pageContext.pageType = "LOGIN_PASS2";
             } else {
-                pageContext.pageType = "LOGIN_USERNAME_PASSWORD";
+                pageContext.pageType = "WELCOME";
             }
         }
         await pageContext.renderAsync();
