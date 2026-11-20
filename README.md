@@ -1,50 +1,82 @@
-# Web client for stockfleth.eu
+# TsMynaPortal
 
-Provides a web client for the website provided by [API Server](https://github.com/nylssoft/MynaAPIServer).
-The portal provides applications to securely manage notes, contacts, passwords, diary entries, documents and appointments.
-The About page shows the client version and the running API server version retrieved from `GET /api/version`.
+TsMynaPortal is the web client for [stockfleth.eu](https://stockfleth.eu/), a private portal for family and friends. It brings everyday tools together: keep personal records, find a date that works for a group, check the weather, and back up your data.
 
-Signed-out visitors start on a welcome page in English or German that introduces the private portal for family and friends. It includes a feature overview, **Sign in**, **Request an account**, and a link to the standalone password backup reader. Account requests require approval. Already signed-in users go straight to the desktop, and pending authentication steps resume as before.
+This repository contains the browser application, built with TypeScript, Bootstrap, and Vite. The companion [MynaAPIServer](https://github.com/nylssoft/MynaAPIServer) handles sign-in, storage, and server-side permissions. The standalone password-backup reader can open an exported backup without connecting to that API.
 
-## Build
+## Getting started
 
-Use Node.js 24 and run `npm ci` followed by `npm run build`. The production client is generated in `dist`.
+The welcome page is available in English and German. Returning users can **Sign in**; family and friends who do not yet have access can choose **Request an account**. Requests require approval before registration. Most tools are on the signed-in desktop. An existing session opens the desktop directly, and a pending PIN or two-factor prompt resumes instead of returning to the welcome page.
 
-On GitHub, select **Actions > Build TsMynaPortal > Run workflow** to build the client. The workflow runs on Ubuntu and uploads the contents of `dist` as the downloadable `tsmynaportal-<run number>` artifact.
+## What you can do
 
-## Settings
+| Tool | What it is for |
+| --- | --- |
+| **Notes and diary** | Keep notes for things you want to remember and write dated diary entries. |
+| **Contacts and birthdays** | Keep contact details together and see upcoming birthdays recorded in your contacts. |
+| **Passwords** | Store website logins and make a separately encrypted backup that you can read without signing in. |
+| **Documents** | Organize files in folders, download them, and rename, move, or delete selected items. |
+| **Appointments** | Propose dates and share a voting link so participants can indicate when they are available. |
+| **Weather** | Search for a city to see current conditions, an hourly forecast for the next 24 hours, or a seven-day forecast. |
 
-Signed-in users can open the Account information tab (info icon) in Settings to view their previous login date and time and storage usage versus quota, including zero usage. The desktop no longer displays the welcome information panel.
+Use **Settings > View settings** to choose a language, a light or dark theme, and which desktop apps are visible. **Account information** shows the previous sign-in and storage usage against the account quota. **Account settings** includes profile and sign-in options such as staying signed in, PIN, and two-factor authentication.
 
-Use the **Export data** tab in Settings, choose Notes, Diary, Contacts, Passwords or Documents, then select Export to download a ZIP for that data type. Notes are fetched and decrypted in the browser using the existing data-protection key; progress shows completed notes, followed by archive creation. The browser controls the download destination (normally Downloads, or its configured Save dialog); a download link remains available if automatic downloading is blocked. Completion means the archive is ready, not that the browser has confirmed writing it to disk. Notes exports are unencrypted and contain one UTF-8 `.txt` file per note under `notes/`, with the note ID and a sanitized, shortened title as its filename to avoid collisions. This follows MynaCloudExport's per-note text export, but uses UTF-8 rather than UTF-16. Empty accounts show a message without downloading a file; any read/decryption error aborts the export rather than downloading a partial archive. No server changes are required. Store exports securely.
+### Document sharing
 
-Each exporter has its own TypeScript service; archive creation and filename sanitization are shared. Only one export runs at a time, and progress continues when reopening the Export data tab. Data is assembled in browser memory, so very large document trees may exceed device memory. Downloads use sanitized ID-prefixed paths to prevent traversal and collisions; original document extensions are retained.
+The Documents tab opens in browsing mode. Turn on selection mode to rename, move, or delete items. The mode lasts until you turn it off or reload the page; the selected items are cleared when the list reloads.
 
-- **Diary:** UTF-8 `diary/yyyy-MM-dd.txt` files for all recorded dates, without local-time conversion.
-- **Contacts:** `contacts/contacts.json` preserves the full contact data; `contacts/contacts.csv` uses UTF-8 with BOM, quoted fields and CRLF rows. Spreadsheet formula-like values are prefixed with an apostrophe in CSV only; JSON retains exact values.
-- **Documents:** recursively exports the owned folder tree under `documents/`, including empty folders. Private files are decrypted with the existing data-protection key; shared files retain their original bytes. No folders are created or changed on the server.
-- **Passwords:** requires a new passphrase of at least 12 characters, entered twice. The ZIP contains only `passwords/passwords.encrypted.json`, never plaintext passwords. The version-1 JSON envelope identifies `format: myna-passwords`, `cipher: AES-256-GCM`, `kdf: PBKDF2-SHA256`, and `iterations: 600000`. Decode hex `salt` (16 bytes), `iv` (12 bytes), and `ciphertext`; derive a 256-bit key from the UTF-8 passphrase with those PBKDF2 parameters, then AES-GCM decrypt using the IV and the final 16 ciphertext bytes as the authentication tag (no additional authenticated data). The decrypted UTF-8 JSON is `{ version: 1, items: [...] }`, with `Name`, `Login`, `Password`, `Description`, and `Url` fields. Fresh random salt/IV values are generated for every export. Keep the passphrase separately; it is not saved and cannot be recovered.
+Users with the `usermanager` role can set an owned folder to **Private**, **Family**, or **Public**. Family files are available to signed-in users with the `family` role; public files can be downloaded without signing in. Private uploads are encrypted, while new files uploaded directly into shared folders are unencrypted and inherit the folder's visibility. Changing folder visibility does not update existing files or subfolders. Moving items does not change their visibility or encryption, and new subfolders start private. Shared Markdown files can be edited in the browser; private encrypted Markdown files cannot be edited with that editor.
 
-Use the **Import data** tab in Settings to select a data type and its exported ZIP. Password imports also require the export passphrase. If the selected type already contains data, confirm before importing. Existing data is preserved: notes, contacts and passwords are added, so repeated imports can create duplicates; existing diary dates are skipped. Notes and document names use sanitized, shortened archive names; colliding document names receive an ID prefix. Documents and folders are imported privately, regardless of their original sharing settings. Contacts are restored from JSON, not CSV, and receive new IDs when added to an existing contacts file. A data-protection key is required. Import is not transactional or protected against concurrent sessions: if it fails, inspect any partially imported data before retrying. ZIPs and their extracted contents are each limited to 512 MiB and 10,000 entries; substantial additional browser memory may be required.
+### Weather forecasts
+
+Search by city name and select a location if several match. Forecast cards scroll horizontally, and you can switch between hourly and daily views without another request. Times use the city's time zone. Hourly cards show wind speed when available; the daily view covers today and the next six days and includes temperature ranges, maximum precipitation probability, and maximum wind speed. The browser remembers the last successfully selected location and fetches a fresh forecast when you reopen Weather.
+
+Weather requires the authenticated `GET /api/weather` endpoint. Use a compatible API version that supplies the `daily` and hourly `windSpeedKph` fields for those views. The API sends city searches to [Open-Meteo](https://open-meteo.com/), which provides weather data under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+
+## Back up and restore your data
+
+**Settings > Export data** creates a ZIP for one data type at a time. The browser assembles the archive and handles the download; a download link remains available if automatic downloading is blocked. The archive is ready when the export completes, but the browser does not confirm that the file has been saved. Store ZIP files securely: **only the password export is encrypted**. Notes and other account data that are decrypted for export are readable in the resulting archive.
+
+| Data type | What's in the ZIP | What happens when you import |
+| --- | --- | --- |
+| **Notes** | One UTF-8 text file per note under `notes/`. | Adds notes; repeated imports can create duplicates. |
+| **Diary** | One UTF-8 `diary/yyyy-MM-dd.txt` file per recorded date. | Skips dates that already have an entry. |
+| **Contacts** | Full data in `contacts/contacts.json` plus a spreadsheet-friendly `contacts/contacts.csv`. | Restores from JSON, not CSV; repeated imports can create duplicates. |
+| **Passwords** | `passwords/passwords.encrypted.json`, protected by an export passphrase of at least 12 characters. | Adds password items after you enter the export passphrase; repeated imports can create duplicates. |
+| **Documents** | The owned folder tree under `documents/`, including empty folders. | Restores files and folders as private, renaming conflicting files instead of overwriting them. |
+
+To restore data, open **Settings > Import data**, select the type, and choose its ZIP. A data-protection key is required. If the selected type already contains data, the portal asks for confirmation before proceeding. Imports are not transactional: if one fails, check what was imported before retrying. Avoid running imports concurrently from multiple sessions. The importer accepts at most 10,000 entries and limits both the ZIP size and total extracted size to 512 MiB (16 MiB for password backups). Large archives may require substantially more browser memory than their ZIP size.
 
 ### Read a password backup without importing
 
-Open **Open password backup** from the sign-in page or Settings → Export data → Passwords, or go directly to `password-backup.html` over HTTPS. Choose your exported password ZIP and enter its export passphrase. Search by name, username or website, and reveal or copy one password at a time. The read-only page requires no account and does not upload or save your data. Use **Lock backup** to clear the view; it also locks after two minutes of inactivity. A copied password may remain in your clipboard. The password ZIP and its extracted contents are each limited to 16 MiB, for both reading and importing.
+Choose **Open password backup** on the welcome page, the sign-in page, or **Settings > Export data > Passwords**. You can also open [`password-backup.html`](https://stockfleth.eu/password-backup.html) directly over HTTPS. Select the ZIP and enter the passphrase you set when exporting; it is not stored and cannot be recovered.
 
-## Documents
+The reader needs no account. It decrypts the archive locally and keeps unlocked data in memory without uploading or saving it. Search by name, username, or website and reveal or copy individual passwords. **Lock backup** clears the unlocked view; it also locks after two minutes of inactivity or when you leave the page. A copied password can remain in your clipboard. The same 16 MiB password-backup limit applies to the reader.
 
-The Documents tab opens in browsing mode without selection checkboxes. Use the selection icon beside the heading to show item checkboxes and select-all. Selected items enable rename, move and delete actions. Selection mode remains enabled when navigating folders or reopening the tab during the current session, but selected items are cleared when the list reloads. Turning selection mode off clears the selection. The mode is kept only in memory and resets when the page is reloaded. Names still open documents and folders while selection mode is enabled.
+<details>
+<summary>Password backup format</summary>
 
-Administrators (`usermanager`) can select one owned folder and use the sharing icon to choose Private, Family or Public, then Save. People/globe icons identify shared items. Public files require no login to download; family files require the `family` role. New uploads directly into shared folders are unencrypted and inherit the folder's visibility; private uploads remain encrypted. Changing folder visibility does not change existing files or subfolders, and moving items does not change their visibility or encryption. New subfolders are private.
+The version-1 JSON envelope uses `format: myna-passwords`, `cipher: AES-256-GCM`, `kdf: PBKDF2-SHA256`, and `iterations: 600000`. The `salt` (16 bytes), `iv` (12 bytes), and `ciphertext` fields are hex-encoded. The UTF-8 passphrase is used to derive a 256-bit key. The final 16 bytes of `ciphertext` are the GCM authentication tag; no additional authenticated data is used. Each export generates a fresh salt and IV. The decrypted UTF-8 JSON has the shape `{ version: 1, items: [...] }`, with `Name`, `Login`, `Password`, `Description`, and `Url` fields on each item.
 
-Select one shared `.md` file and use Edit Markdown content to open the full-width editor. Save updates the existing document; leaving with unsaved edits requires confirmation. Private encrypted Markdown files cannot be edited this way. These features use the existing document download, folder access-role and Markdown update endpoints (the API's public access-role value is spelled `everbody`).
+</details>
 
 ## Administration
 
-Signed-in users with the `usermanager` role can open Administration from the navigation menu. Registration requests and Registered users have separate tabs; selecting either tab reloads its data, including selecting the active tab. Under Registration requests, select one or more requests to approve or reject them, optionally sending email notifications. Approval displays the registration code. Approved requests remain listed until the applicant registers and can be approved again to retrieve the existing code. Results are shown per request; if an operation fails, check its state before retrying because the server may have saved the change before a notification failed.
+The **Administration** menu is available to signed-in users with the `usermanager` role. **Registration requests** lets administrators approve or reject requests and optionally send email notifications. Approval displays the registration code, which remains available until the applicant registers. If a notification fails, check the request status before retrying; the decision may already have been saved.
 
-Under Registered users, open an account in its own details page to see its profile image and storage usage, change its quota, login permission or roles, or unlock it. Storage quota changes save automatically when the edited field is committed (for example, when leaving the field), without a separate Save button. Only whole-number limits of 2–1000 MB above current usage are accepted; failed saves restore the previous limit and show an error. The back arrow returns to the refreshed Registered users tab. Select accounts to delete them after confirmation; the result is reported for each account. To delete your own account, use Account Settings instead. The server enforces administrator permissions and its account-protection rules.
+**Registered users** lets administrators view account and storage details, adjust quotas and roles, allow or block sign-in, unlock accounts, and delete accounts after confirmation. Quota changes save when the edited field is committed. The API enforces administrative permissions and account-protection rules.
 
-## Weather
+## Development and builds
 
-The Weather desktop tab lets signed-in users search for a city and view current conditions. Switch between **24 hours** and **7 days** above the scrollable forecast without another API request. The daily view covers today and the following six days in the city's time zone and shows conditions, minimum/maximum temperatures, maximum precipitation probability and maximum wind speed. The selected forecast period is remembered in memory while the application is open. Both the client and API server must be updated for the seven-day forecast (`daily` response field). Click the search icon beside the heading and press Enter to search. Select a location if several match; scroll the forecast horizontally or use the arrow buttons. Each hourly card includes wind speed in km/h and the same color-coded wind-strength indicator as the current conditions. Hourly wind requires the API's hourly `windSpeedKph` field; missing wind values are shown as unavailable. The last successfully resolved location ID is stored in this browser's local storage; opening the weather tab on a later visit automatically retrieves a fresh forecast for that location. Location names use the selected language when translations are available; times are shown in the location's time zone. If the tab is hidden by a customized application list, enable it in View Settings. This feature requires an API Server version with `GET /api/weather`; city searches are sent to Open-Meteo. Weather data is provided by [Open-Meteo](https://open-meteo.com/) under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+Use Node.js 24. For local development, start [MynaAPIServer](https://github.com/nylssoft/MynaAPIServer) with its HTTP endpoint on `localhost:5000`, then run these commands from this repository:
+
+```shell
+npm ci
+npm start
+```
+
+Open [http://localhost:8080](http://localhost:8080). Vite proxies API, translation, and profile-image requests to the local backend; adjust `vite.config.js` if your backend uses a different address.
+
+Run `npm run build` to type-check the client and generate static files in `dist`. The build includes both `index.html` and `password-backup.html`. When deploying, serve the contents over HTTPS and configure the site to route the portal's API and related backend requests to MynaAPIServer. The **About** page shows the client version and the running API version from `GET /api/version`.
+
+To build on GitHub, open **Actions > Build TsMynaPortal > Run workflow**. The workflow builds on Ubuntu with Node.js 24 and publishes `dist` as the `tsmynaportal-<run number>` artifact.
