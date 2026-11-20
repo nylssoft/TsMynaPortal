@@ -78,9 +78,10 @@ export class PasswordManagerService {
         }
     }
 
-    private static async savePasswordFileAsync(token: string, user: UserInfoResult, passwordItems: PasswordItemResult[]): Promise<void> {
+    static async savePasswordFileAsync(token: string, user: UserInfoResult, passwordItems: PasswordItemResult[]): Promise<void> {
         const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
-        const cryptoKey: CryptoKey = await Security.createCryptoKeyAsync(encryptionKey!, user.passwordManagerSalt)
+        if (!encryptionKey) throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
+        const cryptoKey: CryptoKey = await Security.createCryptoKeyAsync(encryptionKey, user.passwordManagerSalt)
         const encodedJson: string = await Security.encodeMessageAsync(cryptoKey, JSON.stringify(passwordItems));
         await FetchHelper.fetchAsync("/api/pwdman/file", {
             method: "POST",

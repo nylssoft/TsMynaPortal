@@ -28,8 +28,7 @@ export class AccountExport {
             URL.revokeObjectURL(this.url);
             this.url = null;
         }
-        const card = Controls.createDiv(parent, "card p-4 shadow-sm mt-3");
-        Controls.createHeading(card, 5, "mb-3", locale.translate("ACCOUNT_EXPORT"));
+        const card = Controls.createDiv(parent, "card p-4 shadow-sm");
         Controls.createParagraph(card, "small text-body-secondary", locale.translate("ACCOUNT_EXPORT_WARNING"));
         const alerts = Controls.createDiv(card);
         Controls.createLabel(card, "export-kind-id", "form-label", locale.translate("ACCOUNT_EXPORT_TYPE"));

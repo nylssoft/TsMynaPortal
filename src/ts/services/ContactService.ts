@@ -54,7 +54,7 @@ export class ContactService {
      * @param user current user information
      * @returns contacts for the user
      */
-    static async getContactsAsync(token: string, user: UserInfoResult): Promise<ContactsResult> {
+    static async getContactsAsync(token: string, user: UserInfoResult, requireExisting: boolean = false): Promise<ContactsResult> {
         const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
         if (encryptionKey == null || encryptionKey.length === 0) {
             throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
@@ -62,6 +62,7 @@ export class ContactService {
         const resp: Response = await FetchHelper.fetchAsync("/api/contacts", { headers: { "token": token } });
         const json: string | null = await resp.json() as string | null;
         if (json == null) {
+            if (requireExisting) throw new Error("ERROR_IMPORT_EXISTING");
             return { nextId: 1, version: 1, items: [] };
         }
         try {
@@ -122,9 +123,10 @@ export class ContactService {
         return { day: parseInt(match[2]), month: parseInt(match[1]) };
     }
 
-    private static async saveContactsAsync(token: string, user: UserInfoResult, contacts: ContactsResult): Promise<void> {
+    static async saveContactsAsync(token: string, user: UserInfoResult, contacts: ContactsResult): Promise<void> {
         const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
-        const cryptoKey: CryptoKey = await Security.createCryptoKeyAsync(encryptionKey!, user.passwordManagerSalt)
+        if (!encryptionKey) throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
+        const cryptoKey: CryptoKey = await Security.createCryptoKeyAsync(encryptionKey, user.passwordManagerSalt)
         const encodedJson: string = await Security.encodeMessageAsync(cryptoKey, JSON.stringify(contacts));
         await FetchHelper.fetchAsync("/api/contacts", {
             method: "PUT",

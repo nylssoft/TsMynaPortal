@@ -104,7 +104,9 @@ export class DocumentService {
             const formData = new FormData();
             formData.append("document-file", new File([fileData], filename, { type: "application/octet-stream" }));
             formData.append("overwrite", "false");
-            await FetchHelper.fetchAsync(`/api/document/upload/${parent.id}`, { method: "POST", headers: { token }, body: formData });
+            const response = await FetchHelper.fetchAsync(`/api/document/upload/${parent.id}`, { method: "POST", headers: { token }, body: formData });
+            const item: DocumentItemResult | null = await response.json();
+            if (!item || item.type !== "Document" || !Number.isSafeInteger(item.id) || item.id <= 0 || item.parentId !== parent.id) throw new Error("ERROR_DOCUMENT_UPDATE");
             return;
         }
         const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
@@ -121,7 +123,9 @@ export class DocumentService {
             console.error("Error encoding file data:", e);
             throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
         }
-        await FetchHelper.fetchAsync(`/api/document/upload/${parent.id}`, { method: "POST", headers: { "token": token }, body: formData });
+        const response = await FetchHelper.fetchAsync(`/api/document/upload/${parent.id}`, { method: "POST", headers: { "token": token }, body: formData });
+        const item: DocumentItemResult | null = await response.json();
+        if (!item || item.type !== "Document" || !Number.isSafeInteger(item.id) || item.id <= 0 || item.parentId !== parent.id || item.accessRole) throw new Error("ERROR_DOCUMENT_UPDATE");
     }
 
     static getChildren(parentId: number, docItems: DocumentItemResult[]): DocumentItemResult[] {

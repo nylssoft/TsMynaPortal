@@ -5,6 +5,7 @@ import { SettingsTabRenderer } from "../tabs/SettingsTabRenderer";
 import { ViewSettingsTab } from "../tabs/ViewSettingsTab";
 import { AccountSettingsTab } from "../tabs/AccountSettingsTab";
 import { AccountInformationTab } from "../tabs/AccountInformationTab";
+import { AccountDataTab } from "../tabs/AccountDataTab";
 
 export class SettingsPage implements Page {
 
@@ -16,6 +17,8 @@ export class SettingsPage implements Page {
         this.tabRenderer.registerTab(new ViewSettingsTab());
         this.tabRenderer.registerTab(new AccountSettingsTab());
         this.tabRenderer.registerTab(new AccountInformationTab());
+        this.tabRenderer.registerTab(new AccountDataTab("ACCOUNT_EXPORT"));
+        this.tabRenderer.registerTab(new AccountDataTab("ACCOUNT_IMPORT"));
     }
 
     async renderAsync(parent: HTMLElement, pageContext: PageContext): Promise<void> {

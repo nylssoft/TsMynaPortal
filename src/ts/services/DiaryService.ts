@@ -28,14 +28,14 @@ export class DiaryService {
         }
     }
 
-    static async saveEntryAsync(token: string, user: UserInfoResult, text: string, date: Date): Promise<void> {
+    static async saveEntryAsync(token: string, user: UserInfoResult, text: string, date: Date, preserveEmpty: boolean = false): Promise<void> {
         const encryptionKey: string | null = await Security.getEncryptionKeyAsync(user);
         if (encryptionKey == null || encryptionKey.length === 0) {
             throw new Error("ERROR_WRONG_DATA_PROTECTION_KEY");
         }
         const datestr: string = date.toISOString();
         let encodedText: string = "";
-        if (text.length > 0) {
+        if (text.length > 0 || preserveEmpty) {
             try {
                 const cryptoKey: CryptoKey = await Security.createCryptoKeyAsync(encryptionKey!, user.passwordManagerSalt)
                 encodedText = await Security.encodeMessageAsync(cryptoKey, text);
