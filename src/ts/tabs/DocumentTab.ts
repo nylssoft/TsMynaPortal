@@ -1,5 +1,6 @@
 import { PageContext } from "../PageContext";
 import { DocumentService } from "../services/DocumentService";
+import { DocumentsExportService } from "../services/DocumentsExportService";
 import { DesktopTabType, DocumentItemResult, UserInfoResult } from "../TypeDefinitions";
 import { Controls } from "../utils/Controls";
 import { DesktopTab } from "./DesktopTab";
@@ -8,6 +9,9 @@ export class DocumentTab implements DesktopTab {
     tabType: DesktopTabType = "DOCUMENTS";
     bootstrapIcon: string = "bi-files";
     titleKey: string = "HEADER_DOCUMENTS";
+    private readonly maxPreviewSize = 20 * 1024 * 1024;
+    private downloadBusy = false;
+    private downloadMessage = "";
 
     async renderAsync(pageContext: PageContext, parent: HTMLElement, alertDiv: HTMLDivElement): Promise<void> {
         try {
@@ -67,6 +71,13 @@ export class DocumentTab implements DesktopTab {
             const iMove: HTMLElement = Controls.createElement(heading, "i", "ms-4 bi bi-arrows-move d-none", undefined, "action-move-id");
             iMove.setAttribute("role", "button");
             iMove.addEventListener("click", async (e: Event) => await this.onMoveAsync(e, pageContext));
+            const download = Controls.createButton(heading, "button", "", "btn btn-link text-body fs-4 p-0 ms-4 align-baseline d-none", "action-download-id");
+            download.title = pageContext.locale.translate("DOCUMENTS_DOWNLOAD_SELECTED");
+            download.setAttribute("aria-label", download.title);
+            Controls.createSpan(download, "bi bi-download").setAttribute("aria-hidden", "true");
+            download.addEventListener("click", async () => await this.downloadSelectedAsync(pageContext));
+            const downloadStatus = Controls.createDiv(parent, "small text-body-secondary", this.downloadMessage, "document-download-status-id");
+            downloadStatus.setAttribute("role", "status");
             if (user.roles.includes("usermanager")) {
                 const createAction = (icon: string, key: string, id: string, page: "FOLDER_ACCESS" | "MARKDOWN_EDIT"): void => {
                     const button = Controls.createButton(heading, "button", "", "btn btn-link text-body fs-4 p-0 ms-4 align-baseline d-none", id);
@@ -177,9 +188,10 @@ export class DocumentTab implements DesktopTab {
                 }
                 const iconType: string = type == "Document" ? DocumentService.getFileIcon(item.name) : "bi-folder";
                 const iconElem: HTMLElement = Controls.createSpan(li, `bi ${iconType} flex-shrink-0`);
-                const nameElem: HTMLElement = Controls.createSpan(li, "ms-2 me-auto text-truncate", item.name);
+                const nameElem = Controls.createButton(li, "button", item.name, "btn btn-link text-body text-decoration-none text-start text-truncate flex-grow-1 p-0 ms-2");
                 nameElem.style.minWidth = "0";
                 nameElem.title = item.name;
+                nameElem.setAttribute("aria-label", pageContext.locale.translateWithArgs("DOCUMENTS_OPEN_1", [item.name]));
                 if (DocumentService.isShared(item)) {
                     const isPublic = item.accessRole === "everbody";
                     const sharing = Controls.createSpan(li, `bi ${isPublic ? "bi-globe" : "bi-people"} flex-shrink-0 mx-2`);
@@ -216,6 +228,9 @@ export class DocumentTab implements DesktopTab {
         Controls.showElemById("action-delete-id", selected.length > 0);
         Controls.showElemById("action-edit-id", selected.length == 1);
         Controls.showElemById("action-move-id", selected.length > 0);
+        Controls.showElemById("action-download-id", selected.length > 0);
+        const download = document.getElementById("action-download-id") as HTMLButtonElement | null;
+        if (download) download.disabled = this.downloadBusy;
         Controls.showElemById("action-sharing-id", selected.length === 1 && selected[0].type === "Folder");
         Controls.showElemById("action-markdown-id", selected.length === 1 && selected[0].type === "Document" &&
             selected[0].name.endsWith(".md") && DocumentService.isShared(selected[0]));
@@ -245,28 +260,171 @@ export class DocumentTab implements DesktopTab {
             });
     }
 
+    private async downloadSelectedAsync(pageContext: PageContext): Promise<void> {
+        if (this.downloadBusy) return;
+        const selected = this.getSelected(pageContext);
+        if (selected.length === 0) return;
+        this.downloadBusy = true;
+        this.updateActions(pageContext);
+        const setStatus = (message: string): void => {
+            this.downloadMessage = message;
+            const status = document.getElementById("document-download-status-id");
+            if (status) status.textContent = message;
+        };
+        try {
+            const token = pageContext.authenticationClient.getToken();
+            if (!token || !pageContext.authenticationClient.isLoggedIn()) throw new Error("ERROR_INVALID_TOKEN");
+            const checkSession = (): void => {
+                if (!pageContext.authenticationClient.isLoggedIn() || pageContext.authenticationClient.getToken() !== token) throw new Error("ERROR_INVALID_TOKEN");
+            };
+            const user = await pageContext.authenticationClient.getUserInfoAsync();
+            checkSession();
+            setStatus(pageContext.locale.translate("DOCUMENTS_DOWNLOAD_PREPARING"));
+            let blob: Blob;
+            let filename: string;
+            if (selected.length === 1 && selected[0].type === "Document") {
+                blob = await DocumentService.downloadBlobAsync(token, user, selected[0]);
+                filename = selected[0].name;
+            } else {
+                blob = await DocumentsExportService.exportSelectionAsync(token, user, selected, (completed, total) => {
+                    checkSession();
+                    setStatus(total > 0 && completed < total ? pageContext.locale.translateWithArgs("ACCOUNT_EXPORT_PROGRESS_1_2", [String(completed), String(total)]) :
+                        pageContext.locale.translate("DOCUMENTS_DOWNLOAD_PREPARING"));
+                });
+                filename = `myna-documents-${new Date().toISOString().slice(0, 10)}.zip`;
+            }
+            checkSession();
+            this.saveBlob(blob, filename, pageContext);
+        } catch (error: unknown) {
+            this.handleError(error, pageContext);
+        } finally {
+            this.downloadBusy = false;
+            setStatus("");
+            this.updateActions(pageContext);
+        }
+    }
+
     private async downloadFileAsync(id: number, pageContext: PageContext): Promise<void> {
-        const item: DocumentItemResult | null = DocumentService.getItem(id, pageContext.documentItem.filtered);
-        if (item != null && item.id != null && item.name != null) {
-            const token: string = pageContext.authenticationClient.getToken()!;
-            const user: UserInfoResult = await pageContext.authenticationClient.getUserInfoAsync();
-            const blob: Blob = await DocumentService.downloadBlobAsync(token, user, item);
-            const objUrl: string = URL.createObjectURL(blob);
-            const a: HTMLAnchorElement = document.createElement("a");
-            a.href = objUrl;
-            a.download = item.name;
-            a.style.display = "none";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(objUrl);
-            // fade in download success
-            const downloadText: HTMLElement = document.getElementById("download-alert-text-id") as HTMLElement;
-            downloadText.textContent = pageContext.locale.translateWithArgs("FILE_DOWNLOADED_1", [item.name]);
-            const downloadAlert: HTMLElement = document.getElementById("download-alert-id") as HTMLElement;
+        const item = DocumentService.getItem(id, pageContext.documentItem.filtered);
+        if (!item || item.type !== "Document") throw new Error("ERROR_INVALID_PARAMETERS");
+        const token = pageContext.authenticationClient.getToken();
+        if (!token) throw new Error("ERROR_INVALID_TOKEN");
+        const user = await pageContext.authenticationClient.getUserInfoAsync();
+        const blob = await DocumentService.downloadBlobAsync(token, user, item);
+        this.saveBlob(blob, item.name, pageContext);
+    }
+
+    private saveBlob(blob: Blob, filename: string, pageContext: PageContext): void {
+        const objUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = objUrl;
+        link.download = filename;
+        link.style.display = "none";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.setTimeout(() => URL.revokeObjectURL(objUrl), 1000);
+        const downloadText = document.getElementById("download-alert-text-id");
+        const downloadAlert = document.getElementById("download-alert-id");
+        if (downloadText && downloadAlert) {
+            downloadText.textContent = pageContext.locale.translateWithArgs("FILE_DOWNLOADED_1", [filename]);
             downloadAlert.classList.add("show");
-            // hide after 1 second
             window.setTimeout(() => downloadAlert.classList.remove("show"), 1000);
+        }
+    }
+
+    private async previewFileAsync(id: number, pageContext: PageContext): Promise<void> {
+        const item = DocumentService.getItem(id, pageContext.documentItem.filtered);
+        if (!item || item.type !== "Document") throw new Error("ERROR_INVALID_PARAMETERS");
+        const previewKind = DocumentService.getPreviewKind(item.name);
+        const mimeType = DocumentService.getPreviewMimeType(item.name);
+        if (!previewKind || !mimeType || item.size > this.maxPreviewSize) throw new Error("ERROR_DOCUMENT_PREVIEW_TOO_LARGE");
+        const token = pageContext.authenticationClient.getToken();
+        if (!token) throw new Error("ERROR_INVALID_TOKEN");
+        const user = await pageContext.authenticationClient.getUserInfoAsync();
+        const blob = await DocumentService.downloadBlobAsync(token, user, item);
+        if (blob.size > this.maxPreviewSize) throw new Error("ERROR_DOCUMENT_PREVIEW_TOO_LARGE");
+        const previewBlob = new Blob([blob], { type: mimeType });
+        const textContent = previewKind === "text" ? await previewBlob.text() : null;
+        let renderedMarkdown: DocumentFragment | null = null;
+        if (textContent !== null && DocumentService.getExtension(item.name) === "md") {
+            const { MarkdownPreview } = await import("../services/MarkdownPreview");
+            renderedMarkdown = MarkdownPreview.render(textContent, pageContext.locale.translate("DOCUMENTS_MARKDOWN_IMAGE"));
+        }
+        const objectUrl = URL.createObjectURL(previewBlob);
+        const dialog = Controls.createElement(document.body, "dialog", "modal d-block mw-100 mh-100 m-0 p-0 border-0 bg-transparent") as HTMLDialogElement;
+        dialog.setAttribute("aria-labelledby", "document-preview-title");
+        const modalDialog = Controls.createDiv(dialog, "modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable");
+        const content = Controls.createDiv(modalDialog, "modal-content");
+        const header = Controls.createDiv(content, "modal-header");
+        Controls.createHeading(header, 2, "modal-title fs-5 text-break", item.name).id = "document-preview-title";
+        const close = Controls.createButton(header, "button", "", "btn-close");
+        close.setAttribute("aria-label", pageContext.locale.translate("DOCUMENTS_CLOSE_PREVIEW"));
+        close.setAttribute("autofocus", "");
+        close.addEventListener("click", () => dialog.close());
+        const body = Controls.createDiv(content, "modal-body");
+        if (previewKind === "image") {
+            const image = Controls.createElement(body, "img", "img-fluid rounded mx-auto d-block") as HTMLImageElement;
+            image.src = objectUrl;
+            image.alt = item.name;
+        } else if (previewKind === "pdf") {
+            const frame = Controls.createElement(body, "div", "ratio ratio-4x3");
+            const pdf = Controls.createElement(frame, "iframe", "border-0") as HTMLIFrameElement;
+            pdf.src = objectUrl;
+            pdf.title = pageContext.locale.translateWithArgs("DOCUMENTS_PREVIEW_1", [item.name]);
+        } else if (renderedMarkdown) {
+            const modes = Controls.createDiv(body, "btn-group btn-group-sm mb-3");
+            modes.setAttribute("role", "group");
+            modes.setAttribute("aria-label", pageContext.locale.translate("DOCUMENTS_MARKDOWN_VIEW"));
+            const renderedButton = Controls.createButton(modes, "button", pageContext.locale.translate("DOCUMENTS_MARKDOWN_RENDERED"), "btn btn-outline-primary");
+            const sourceButton = Controls.createButton(modes, "button", pageContext.locale.translate("DOCUMENTS_MARKDOWN_SOURCE"), "btn btn-outline-primary");
+            const rendered = Controls.createDiv(body, "text-break");
+            rendered.appendChild(renderedMarkdown);
+            const source = Controls.createElement(body, "pre", "mb-0 font-monospace text-break");
+            source.textContent = textContent;
+            const selectMode = (showRendered: boolean): void => {
+                rendered.hidden = !showRendered;
+                source.hidden = showRendered;
+                renderedButton.classList.toggle("active", showRendered);
+                sourceButton.classList.toggle("active", !showRendered);
+                renderedButton.setAttribute("aria-pressed", String(showRendered));
+                sourceButton.setAttribute("aria-pressed", String(!showRendered));
+            };
+            renderedButton.addEventListener("click", () => selectMode(true));
+            sourceButton.addEventListener("click", () => selectMode(false));
+            selectMode(true);
+        } else {
+            const text = Controls.createElement(body, "pre", "mb-0 font-monospace text-break");
+            text.textContent = textContent ?? "";
+        }
+        const footer = Controls.createDiv(content, "modal-footer");
+        const download = Controls.createButton(footer, "button", "", "btn btn-primary");
+        Controls.createSpan(download, "bi bi-download me-2").setAttribute("aria-hidden", "true");
+        Controls.createSpan(download, "", pageContext.locale.translate("DOCUMENTS_DOWNLOAD"));
+        download.addEventListener("click", () => this.saveBlob(blob, item.name, pageContext));
+        const closePreview = Controls.createButton(footer, "button", pageContext.locale.translate("DOCUMENTS_CLOSE_PREVIEW"), "btn btn-secondary");
+        closePreview.addEventListener("click", () => dialog.close());
+        const cleanup = (): void => {
+            URL.revokeObjectURL(objectUrl);
+            dialog.remove();
+        };
+        dialog.addEventListener("close", cleanup, { once: true });
+        try {
+            dialog.showModal();
+        } catch (error: unknown) {
+            cleanup();
+            throw error;
+        }
+    }
+
+    private async runFileActionAsync(action: () => Promise<void>, pageContext: PageContext): Promise<void> {
+        Controls.showElemById("loading-progress-id", true);
+        try {
+            await action();
+        } catch (error: Error | unknown) {
+            this.handleError(error, pageContext);
+        } finally {
+            Controls.showElemById("loading-progress-id", false);
         }
     }
 
@@ -372,19 +530,17 @@ export class DocumentTab implements DesktopTab {
 
     private async onClickItemAsync(e: Event, pageContext: PageContext, type: string, id: number): Promise<void> {
         e.preventDefault();
-        if (type == "Folder") {
+        if (type === "Folder") {
             pageContext.documentItem.containerId = id;
             await pageContext.renderAsync();
             return;
         }
-        Controls.showElemById("loading-progress-id", true);
-        try {
-            await this.downloadFileAsync(id, pageContext);
+        const item = DocumentService.getItem(id, pageContext.documentItem.filtered);
+        if (item && DocumentService.getPreviewKind(item.name) && item.size <= this.maxPreviewSize) {
+            await this.runFileActionAsync(() => this.previewFileAsync(id, pageContext), pageContext);
+        } else {
+            await this.runFileActionAsync(() => this.downloadFileAsync(id, pageContext), pageContext);
         }
-        catch (error: Error | unknown) {
-            this.handleError(error, pageContext);
-        }
-        Controls.showElemById("loading-progress-id", false);
     }
 
     private onSelectAll(e: Event, pageContext: PageContext) {

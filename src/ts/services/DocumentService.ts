@@ -171,8 +171,29 @@ export class DocumentService {
     }
 
     static getExtension(str: string): string {
-        const idx: number | undefined = str.lastIndexOf(".");
-        return idx ? str.substring(idx + 1) : "";
+        const idx: number = str.lastIndexOf(".");
+        return idx > 0 ? str.substring(idx + 1).toLowerCase() : "";
+    }
+
+    static getPreviewKind(filename: string): "image" | "pdf" | "text" | null {
+        const ext = this.getExtension(filename);
+        if (["bmp", "gif", "jpeg", "jpg", "png", "webp"].includes(ext)) return "image";
+        if (ext === "pdf") return "pdf";
+        if (["csv", "json", "log", "md", "txt", "xml", "yaml", "yml"].includes(ext)) return "text";
+        return null;
+    }
+
+    static getPreviewMimeType(filename: string): string | null {
+        const ext = this.getExtension(filename);
+        if (this.getPreviewKind(filename) === "image") {
+            const mimeTypes: Record<string, string> = {
+                "bmp": "image/bmp", "gif": "image/gif", "jpeg": "image/jpeg", "jpg": "image/jpeg",
+                "png": "image/png", "webp": "image/webp"
+            };
+            return mimeTypes[ext] ?? null;
+        }
+        if (ext === "pdf") return "application/pdf";
+        return this.getPreviewKind(filename) === "text" ? "text/plain;charset=utf-8" : null;
     }
 
     static formatSize(cnt: number) {

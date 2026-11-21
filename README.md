@@ -15,17 +15,19 @@ The welcome page is available in English and German. Returning users can **Sign 
 | **Notes and diary** | Keep notes for things you want to remember and write dated diary entries. |
 | **Contacts and birthdays** | Keep contact details together and see upcoming birthdays recorded in your contacts. |
 | **Passwords** | Store website logins and make a separately encrypted backup that you can read without signing in. |
-| **Documents** | Organize files in folders, download them, and rename, move, or delete selected items. |
+| **Documents** | Organize files in folders, preview supported images, PDFs, and text files in the browser, or download them. Rename, move, and delete selected items. |
 | **Appointments** | Propose dates and share a voting link so participants can indicate when they are available. |
 | **Weather** | Search for a city to see current conditions, an hourly forecast for the next 24 hours, or a seven-day forecast. |
 
 Use **Settings > View settings** to choose a language, a light or dark theme, and which desktop apps are visible. **Account information** shows the previous sign-in and storage usage against the account quota. **Account settings** includes profile and sign-in options such as staying signed in, PIN, and two-factor authentication.
 
-### Document sharing
+### Documents and sharing
 
-The Documents tab opens in browsing mode. Turn on selection mode to rename, move, or delete items. The mode lasts until you turn it off or reload the page; the selected items are cleared when the list reloads.
+The Documents tab opens in browsing mode. Turn on selection mode to rename, move, delete, or download items. Downloading one file preserves its name; selecting multiple items or a folder creates a ZIP of the selection, including nested and empty folders. ZIP paths use sanitized, ID-prefixed names, as in document exports. Private files are decrypted in the browser, so the ZIP is unencrypted; store it securely. Large selections are assembled in browser memory. The mode lasts until you turn it off or reload the page; the selected items are cleared when the list reloads.
 
-Users with the `usermanager` role can set an owned folder to **Private**, **Family**, or **Public**. Family files are available to signed-in users with the `family` role; public files can be downloaded without signing in. Private uploads are encrypted, while new files uploaded directly into shared folders are unencrypted and inherit the folder's visibility. Changing folder visibility does not update existing files or subfolders. Moving items does not change their visibility or encryption, and new subfolders start private. Shared Markdown files can be edited in the browser; private encrypted Markdown files cannot be edited with that editor.
+Markdown files are rendered locally in the preview. Switch between **Rendered** and **Source**, or download the original file. For privacy, images in Markdown are not loaded, including relative images; only their alternative text is shown. Absolute HTTP(S) and email links can be opened explicitly; relative links are not followed. Raw HTML is displayed as text, not executed.
+
+Users with the `usermanager` role can set an owned folder to **Private**, **Family**, or **Public**. Family files are available to signed-in users with the `family` role; public files can be downloaded without signing in. Private uploads are encrypted, while new files uploaded directly into shared folders are unencrypted and inherit the folder's visibility. Changing folder visibility does not update existing files or subfolders. Moving items does not change their visibility or encryption, and new subfolders start private. Administrators can edit shared Markdown files in the browser and switch between editing and a rendered preview of unsaved changes. The preview uses the same privacy restrictions described above. Private encrypted Markdown files cannot be edited with that editor.
 
 ### Weather forecasts
 

@@ -39,13 +39,49 @@ export class MarkdownEditPage implements Page {
             Controls.createHeading(parent, 4, "mb-3", item.name);
             const save = Controls.createButton(actions, "button", locale.translate("BUTTON_SAVE"), "btn btn-primary");
             save.disabled = true;
-            Controls.createLabel(parent, "markdown-content-id", "form-label", locale.translate("DOCUMENTS_EDIT_CONTENT"));
-            const editor = Controls.createElement(parent, "textarea", "form-control font-monospace", undefined, "markdown-content-id") as HTMLTextAreaElement;
+            const modes = Controls.createDiv(parent, "btn-group btn-group-sm mb-3");
+            modes.setAttribute("role", "group");
+            modes.setAttribute("aria-label", locale.translate("DOCUMENTS_MARKDOWN_VIEW"));
+            const editButton = Controls.createButton(modes, "button", locale.translate("DOCUMENTS_MARKDOWN_EDIT"), "btn btn-outline-primary");
+            const previewButton = Controls.createButton(modes, "button", locale.translate("DOCUMENTS_MARKDOWN_RENDERED"), "btn btn-outline-primary");
+            const editView = Controls.createDiv(parent);
+            Controls.createLabel(editView, "markdown-content-id", "form-label", locale.translate("DOCUMENTS_EDIT_CONTENT"));
+            const editor = Controls.createElement(editView, "textarea", "form-control font-monospace", undefined, "markdown-content-id") as HTMLTextAreaElement;
             editor.rows = 22;
             editor.maxLength = 1024 * 1024;
             editor.spellcheck = false;
             editor.value = original;
             original = editor.value;
+            const preview = Controls.createDiv(parent, "border rounded p-3 text-break");
+            const selectMode = (editing: boolean): void => {
+                editView.hidden = !editing;
+                preview.hidden = editing;
+                editButton.classList.toggle("active", editing);
+                previewButton.classList.toggle("active", !editing);
+                editButton.setAttribute("aria-pressed", String(editing));
+                previewButton.setAttribute("aria-pressed", String(!editing));
+            };
+            let previewRequest = 0;
+            editButton.addEventListener("click", () => {
+                previewRequest++;
+                selectMode(true);
+            });
+            previewButton.addEventListener("click", async () => {
+                const request = ++previewRequest;
+                previewButton.disabled = true;
+                try {
+                    const { MarkdownPreview } = await import("../services/MarkdownPreview");
+                    if (request !== previewRequest || !parent.isConnected) return;
+                    const rendered = MarkdownPreview.render(editor.value, locale.translate("DOCUMENTS_MARKDOWN_IMAGE"));
+                    preview.replaceChildren(rendered);
+                    selectMode(false);
+                } catch (error: unknown) {
+                    if (request === previewRequest && parent.isConnected) Controls.createAlert(alerts, locale.translateError(error));
+                } finally {
+                    previewButton.disabled = false;
+                }
+            });
+            selectMode(true);
             const dialog = Controls.createConfirmationDialog(parent, item.name, locale.translate("CONFIRMATION_SAVE"),
                 locale.translate("BUTTON_YES"), locale.translate("BUTTON_NO"), "_markdown");
             dialog.querySelector<HTMLButtonElement>("#confirmationyesbutton-id_markdown")!.addEventListener("click", () => { void leave(); });
