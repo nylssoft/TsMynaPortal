@@ -14,9 +14,8 @@ export class NoteService {
     /**
      * Retrieves notes for the current user.
      * This method fetches notes from the API, decrypts the title using the user's data protection key,
-     * and returns the notes in a structured format.
-     * The last modified date and content is not set in the NoteResult, so it is not included in the returned notes.
-     * Use the getNoteAsync method to retrieve a specific note with its content and last modified date.
+     * and returns the notes in a structured format. The list includes last-modified timestamps but not note content.
+     * Use getNoteAsync to retrieve a note with its content.
      * 
      * @param token authentication token
      * @param user current user information

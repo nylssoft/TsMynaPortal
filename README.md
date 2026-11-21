@@ -27,6 +27,8 @@ When an app update is ready, save your work before choosing **Reload**. You can 
 
 Use **Settings > View settings** to choose a language, a light or dark theme, and which desktop apps are visible. **Account information** shows the previous sign-in and storage usage against the account quota. **Account settings** includes profile and sign-in options such as staying signed in, PIN, and two-factor authentication.
 
+In **Notes**, use the two header icons to toggle sorting by name or last modified and ascending or descending order. Tooltips describe the current settings and the next action; the browser remembers your choice.
+
 ### Documents and sharing
 
 The Documents tab opens in browsing mode. Turn on selection mode to rename, move, delete, or download items. Downloading one file preserves its name; selecting multiple items or a folder creates a ZIP of the selection, including nested and empty folders. ZIP paths use sanitized, ID-prefixed names, as in document exports. Private files are decrypted in the browser, so the ZIP is unencrypted; store it securely. Large selections are assembled in browser memory. The mode lasts until you turn it off or reload the page; the selected items are cleared when the list reloads.
