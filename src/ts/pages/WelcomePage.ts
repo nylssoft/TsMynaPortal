@@ -34,5 +34,9 @@ export class WelcomePage implements Page {
                 Controls.createAnchor(body, "password-backup.html", locale.translate("PASSWORD_BACKUP_OPEN"), "card-link");
             }
         }
+        const install = Controls.createElement(main, "details", "mt-4");
+        Controls.createElement(install, "summary", "h5", locale.translate("WELCOME_INSTALL_TITLE"));
+        Controls.createParagraph(install, "mb-2", locale.translate("WELCOME_INSTALL_ANDROID"));
+        Controls.createParagraph(install, "mb-0", locale.translate("WELCOME_INSTALL_IOS"));
     }
 }
