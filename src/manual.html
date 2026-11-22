@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Portal user manual / Portal-Handbuch</title>
+  <link rel="stylesheet" href="./css/styles.scss">
+  <script type="module" src="./js/manual.js"></script>
+</head>
+<body>
+  <main class="container py-4" style="max-width: 900px">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+      <a href="./index.html">Portal</a>
+      <div id="manual-language-control" hidden>
+        <label for="manual-language" class="form-label me-2">Language / Sprache</label>
+        <select id="manual-language" class="form-select d-inline-block w-auto">
+          <option value="en">English</option>
+          <option value="de">Deutsch</option>
+        </select>
+      </div>
+    </div>
+    <article lang="en" data-manual-language="en">
+      <h1>User manual</h1>
+      <p class="lead">Learn how to use the portal, protect your data, and keep backups.</p>
+      <nav aria-label="Manual contents" class="card card-body mb-4">
+        <h2 class="h5">Contents</h2>
+        <ul class="mb-0">
+          <li><a href="#en-start">Getting started and sign-in</a></li>
+          <li><a href="#en-install">Install the portal</a></li>
+          <li><a href="#en-security">Data protection and account settings</a></li>
+          <li><a href="#en-tools">Desktop tools</a></li>
+          <li><a href="#en-documents">Documents and sharing</a></li>
+          <li><a href="#en-appointments">Appointments, weather and games</a></li>
+          <li><a href="#en-backup">Back up and restore</a></li>
+          <li><a href="#en-admin">Administration</a></li>
+          <li><a href="#en-help">Troubleshooting and privacy</a></li>
+        </ul>
+      </nav>
+      <section id="en-start" class="mb-4">
+        <h2>Getting started and sign-in</h2>
+        <p>The portal is intended for family and friends. On the welcome page, choose <strong>Request an account</strong>, enter your email address and complete the verification. An administrator must approve your request before you can register. Use the registration code to complete registration.</p>
+        <p>Choose <strong>Sign in</strong> and enter your username or email address and password. If prompted, complete the PIN or two-factor authentication step. An existing session may open the desktop directly. Sign out from the navigation menu when finished, especially on shared devices.</p>
+      </section>
+      <section id="en-install" class="mb-4">
+        <h2>Install the portal</h2>
+        <p>You can add the portal to your device for an app-like experience:</p>
+        <ul>
+          <li><strong>Android:</strong> open the portal in a supported browser. In Firefox, open the three-dot menu and choose <strong>Install</strong> or <strong>Add to Home screen</strong>.</li>
+          <li><strong>iPhone or iPad:</strong> open the portal in Safari, tap <strong>Share</strong>, then <strong>Add to Home Screen</strong>.</li>
+          <li><strong>Desktop:</strong> in a supported browser, use its install or add-to-home-screen command if available.</li>
+        </ul>
+        <p>Menus vary by browser and version. The installed portal needs an internet connection to sign in and access account data. Its offline page does not contain your data. Browser and installed-app sessions may be separate. When an update is ready, save your work before choosing <strong>Reload</strong>; you can postpone the update.</p>
+      </section>
+      <section id="en-security" class="mb-4">
+        <h2>Data protection and account settings</h2>
+        <p>Use <strong>Data Protection</strong> to view or enter the key used to encrypt and decrypt protected data. Keep a secure copy separate from the portal: if you lose the key, encrypted data cannot be recovered. The data-protection key is separate from your sign-in password and password-backup export passphrase.</p>
+        <p>In <strong>Settings &gt; View settings</strong>, select a language and theme and choose which apps appear on your desktop. <strong>Account information</strong> shows the previous sign-in and storage usage. Under <strong>Account settings</strong>, manage your profile, email, password, stay-signed-in setting, PIN, two-factor authentication and password-reset option. Review the confirmation carefully before deleting an account and its data.</p>
+      </section>
+      <section id="en-tools" class="mb-4">
+        <h2>Desktop tools</h2>
+        <p>Open the desktop after signing in and select a tool. Use the plus icon to add an item, select an item to view or edit it, and save changes. Use search where available.</p>
+        <ul>
+          <li><strong>Notes:</strong> create and edit notes. The header icons switch between sorting by name or last modified and ascending or descending order; the browser remembers the choice.</li>
+          <li><strong>Diary:</strong> use the arrows to change month, then select a day to view or edit its entry.</li>
+          <li><strong>Contacts and birthdays:</strong> add and edit contacts and their details; the birthdays view shows upcoming birthdays from your contacts.</li>
+          <li><strong>Passwords:</strong> add and edit website login entries. Use the separate encrypted backup described below to keep a copy outside the portal.</li>
+        </ul>
+      </section>
+      <section id="en-documents" class="mb-4">
+        <h2>Documents and sharing</h2>
+        <p>Use the file and folder icons to upload files or create folders; open folders to browse. Select a file to preview supported images, PDFs, text or Markdown. Markdown can be viewed as rendered text or source; images are not loaded in Markdown previews.</p>
+        <p>Turn on selection mode to select items for renaming, moving, deleting or downloading. One file keeps its name; multiple items or a folder download as a ZIP including nested and empty folders. Downloaded private files are decrypted, so protect the resulting ZIP. Large downloads are assembled in browser memory.</p>
+        <p>Users with the administrator role can set an owned folder to private, family or public, and edit shared Markdown files. Family access requires the family role; public files are accessible without signing in. New files uploaded directly into shared folders are unencrypted. Changing visibility does not change existing files or subfolders; new subfolders are private. Moving items does not change their visibility or encryption. Private encrypted Markdown cannot be edited with the shared-file editor.</p>
+      </section>
+      <section id="en-appointments" class="mb-4">
+        <h2>Appointments, weather and games</h2>
+        <p><strong>Appointments:</strong> add a description, participants and possible days, then save. Open the appointment and share its voting link. Participants choose their name and indicate availability; the calendar shows the votes. A participant cannot be removed once voting has started.</p>
+        <p><strong>Weather:</strong> search for a city and choose a location if needed. Scroll horizontally through hourly cards or switch to the seven-day view. Times use the city's time zone. The last selected location is remembered and a fresh forecast is requested when you reopen Weather. Weather data is provided by <a href="https://open-meteo.com/">Open-Meteo</a>.</p>
+        <p><strong>Games:</strong> select a game from the navigation menu to open it. Available games depend on the portal deployment.</p>
+      </section>
+      <section id="en-backup" class="mb-4">
+        <h2>Back up and restore</h2>
+        <p>In <strong>Settings &gt; Export data</strong>, select notes, diary, contacts, passwords or documents and start the export. Each ZIP contains one type. Use the download link if the automatic download is blocked, and verify that the browser saved the file. Only password exports are encrypted; all other exports can contain readable personal data. Store every backup securely.</p>
+        <p>For passwords, choose and confirm an export passphrase of at least 12 characters. Keep it safe: it cannot be recovered. It is separate from your data-protection key and sign-in password.</p>
+        <p>To restore, select <strong>Settings &gt; Import data</strong>, choose the data type and its ZIP, and start the import. A data-protection key is required; password imports also require the export passphrase. Confirm if the destination already contains data. Notes, contacts and passwords are added and repeated imports can create duplicates. Existing diary dates are skipped. Documents are restored as private; conflicting files are renamed. Imports can partially complete if an error occurs: check the results before retrying and do not import concurrently from multiple sessions.</p>
+        <p>Imports allow up to 10,000 entries and 512 MiB for the ZIP and extracted data; password backups are limited to 16 MiB. Large archives can use substantially more browser memory.</p>
+        <h3 class="h5">Open a password backup separately</h3>
+        <p>Choose <strong>Open password backup</strong> on the welcome page or in the password export view, or open the <a href="./password-backup.html">password-backup reader</a> over HTTPS. Select the ZIP and enter its export passphrase. The reader needs no account and decrypts locally without uploading or saving the unlocked data. Lock the view when finished; it also locks after two minutes of inactivity. Copied passwords may remain on the clipboard.</p>
+        <p>Alternatively, on Windows use <a href="https://github.com/nylssoft/MynaPasswordManager">Myna Password Manager</a> to import the ZIP into an open local repository. Save the repository after import; repeated imports create duplicates.</p>
+      </section>
+      <section id="en-admin" class="mb-4">
+        <h2>Administration</h2>
+        <p>The <strong>Administration</strong> menu is available to users with the <code>usermanager</code> role. In <strong>Registration requests</strong>, approve or reject requests and optionally send an email; approval shows the registration code. In <strong>Registered users</strong>, review accounts and usage, change quotas and roles, allow or block sign-in, unlock accounts, or delete selected accounts after confirmation. If a request or notification fails, refresh and check the current status before retrying.</p>
+      </section>
+      <section id="en-help" class="mb-4">
+        <h2>Troubleshooting and privacy</h2>
+        <ul>
+          <li>If sign-in fails, check your credentials and any PIN or two-factor prompt. The login page offers a password-reset request when enabled for your account.</li>
+          <li>If protected data cannot be decrypted, check the key under <strong>Data Protection</strong>. A lost key cannot be recovered by the portal.</li>
+          <li>If a backup cannot be opened, select the original ZIP and check the export passphrase. Check partial imports before trying again.</li>
+          <li>Weather searches are sent to Open-Meteo. Account operations use the configured server; public and shared documents have the visibility described above.</li>
+        </ul>
+      </section>
+    </article>
+    <article lang="de" data-manual-language="de">
+      <h1>Benutzerhandbuch</h1>
+      <p class="lead">Erfahre, wie du das Portal nutzt, deine Daten schützt und Sicherungen erstellst.</p>
+      <nav aria-label="Handbuchinhalt" class="card card-body mb-4">
+        <h2 class="h5">Inhalt</h2>
+        <ul class="mb-0">
+          <li><a href="#de-start">Erste Schritte und Anmeldung</a></li>
+          <li><a href="#de-install">Portal installieren</a></li>
+          <li><a href="#de-security">Datenschutz und Kontoeinstellungen</a></li>
+          <li><a href="#de-tools">Desktop-Werkzeuge</a></li>
+          <li><a href="#de-documents">Dokumente und Freigaben</a></li>
+          <li><a href="#de-appointments">Termine, Wetter und Spiele</a></li>
+          <li><a href="#de-backup">Sichern und Wiederherstellen</a></li>
+          <li><a href="#de-admin">Verwaltung</a></li>
+          <li><a href="#de-help">Probleme und Datenschutz</a></li>
+        </ul>
+      </nav>
+      <section id="de-start" class="mb-4">
+        <h2>Erste Schritte und Anmeldung</h2>
+        <p>Das Portal ist für Familie und Freunde gedacht. Wähle auf der Startseite <strong>Konto beantragen</strong>, gib deine E-Mail-Adresse ein und schließe die Überprüfung ab. Ein Administrator muss den Antrag genehmigen, bevor du dich registrieren kannst. Schließe die Registrierung mit dem Registrierungscode ab.</p>
+        <p>Wähle <strong>Anmelden</strong> und gib deinen Benutzernamen oder deine E-Mail-Adresse und dein Passwort ein. Gib bei Aufforderung die PIN oder den Zwei-Faktor-Code ein. Eine bestehende Sitzung kann den Desktop direkt öffnen. Melde dich auf gemeinsam genutzten Geräten nach der Nutzung über das Navigationsmenü ab.</p>
+      </section>
+      <section id="de-install" class="mb-4">
+        <h2>Portal installieren</h2>
+        <p>Du kannst das Portal für eine App-ähnliche Nutzung zu deinem Gerät hinzufügen:</p>
+        <ul>
+          <li><strong>Android:</strong> Öffne das Portal in einem unterstützten Browser. Öffne in Firefox das Drei-Punkte-Menü und wähle <strong>Installieren</strong> oder <strong>Zum Startbildschirm hinzufügen</strong>.</li>
+          <li><strong>iPhone oder iPad:</strong> Öffne das Portal in Safari, tippe auf <strong>Teilen</strong> und anschließend auf <strong>Zum Home-Bildschirm</strong>.</li>
+          <li><strong>Desktop:</strong> Nutze in einem unterstützten Browser den Befehl zum Installieren oder Hinzufügen, falls verfügbar.</li>
+        </ul>
+        <p>Die Menüs hängen von Browser und Version ab. Das installierte Portal benötigt eine Internetverbindung für Anmeldung und Kontodaten. Die Offline-Seite enthält keine Daten. Browser und installierte App können getrennte Sitzungen verwenden. Speichere deine Arbeit vor <strong>Neu laden</strong>, wenn ein Update bereitsteht; du kannst das Update verschieben.</p>
+      </section>
+      <section id="de-security" class="mb-4">
+        <h2>Datenschutz und Kontoeinstellungen</h2>
+        <p>Unter <strong>Datenschutz</strong> kannst du den Schlüssel zum Ver- und Entschlüsseln geschützter Daten anzeigen oder eingeben. Bewahre eine sichere Kopie außerhalb des Portals auf: Bei Verlust lassen sich verschlüsselte Daten nicht wiederherstellen. Der Datenschutzschlüssel ist vom Anmeldepasswort und der Export-Passphrase für Passwortsicherungen getrennt.</p>
+        <p>Unter <strong>Einstellungen &gt; Ansichtseinstellungen</strong> wählst du Sprache und Design sowie die Apps für den Desktop. <strong>Kontoinformationen</strong> zeigen die vorherige Anmeldung und Speichernutzung. In den <strong>Kontoeinstellungen</strong> verwaltest du Profil, E-Mail, Passwort, angemeldet bleiben, PIN, Zwei-Faktor-Authentifizierung und die Option zum Zurücksetzen des Passworts. Prüfe die Bestätigung sorgfältig, bevor du ein Konto und dessen Daten löschst.</p>
+      </section>
+      <section id="de-tools" class="mb-4">
+        <h2>Desktop-Werkzeuge</h2>
+        <p>Öffne nach der Anmeldung den Desktop und wähle ein Werkzeug. Mit dem Plus-Symbol fügst du Einträge hinzu; wähle einen Eintrag zum Anzeigen oder Bearbeiten und speichere Änderungen. Wo vorhanden, kannst du die Suche verwenden.</p>
+        <ul>
+          <li><strong>Notizen:</strong> Erstelle und bearbeite Notizen. Die Symbole im Kopf schalten zwischen Sortierung nach Name oder Änderungsdatum sowie auf- oder absteigender Reihenfolge um. Der Browser merkt sich die Auswahl.</li>
+          <li><strong>Tagebuch:</strong> Wechsle mit den Pfeilen den Monat und wähle einen Tag, um seinen Eintrag anzuzeigen oder zu bearbeiten.</li>
+          <li><strong>Kontakte und Geburtstage:</strong> Erstelle und bearbeite Kontakte und ihre Angaben. Die Geburtstagsansicht zeigt kommende Geburtstage aus deinen Kontakten.</li>
+          <li><strong>Passwörter:</strong> Erstelle und bearbeite Website-Anmeldedaten. Mit der unten beschriebenen verschlüsselten Sicherung kannst du eine Kopie außerhalb des Portals aufbewahren.</li>
+        </ul>
+      </section>
+      <section id="de-documents" class="mb-4">
+        <h2>Dokumente und Freigaben</h2>
+        <p>Mit den Datei- und Ordnersymbolen lädst du Dateien hoch oder erstellst Ordner; öffne Ordner zum Durchsuchen. Wähle eine Datei für die Vorschau unterstützter Bilder, PDFs, Text- oder Markdown-Dateien. Markdown kann gerendert oder als Quelltext angezeigt werden; Bilder werden in der Vorschau nicht geladen.</p>
+        <p>Aktiviere den Auswahlmodus, um Elemente umzubenennen, zu verschieben, zu löschen oder herunterzuladen. Eine einzelne Datei behält ihren Namen; mehrere Elemente oder ein Ordner werden als ZIP mit verschachtelten und leeren Ordnern heruntergeladen. Private Dateien werden für den Download entschlüsselt; schütze die ZIP-Datei. Große Downloads werden im Browserspeicher zusammengestellt.</p>
+        <p>Benutzer mit Administratorrolle können eigene Ordner auf privat, Familie oder öffentlich setzen und geteilte Markdown-Dateien bearbeiten. Familienzugriff erfordert die Familienrolle; öffentliche Dateien sind ohne Anmeldung zugänglich. Neue Dateien, die direkt in freigegebene Ordner hochgeladen werden, sind unverschlüsselt. Eine Sichtbarkeitsänderung ändert bestehende Dateien und Unterordner nicht; neue Unterordner sind privat. Verschieben ändert weder Sichtbarkeit noch Verschlüsselung. Private verschlüsselte Markdown-Dateien können nicht mit dem Editor für geteilte Dateien bearbeitet werden.</p>
+      </section>
+      <section id="de-appointments" class="mb-4">
+        <h2>Termine, Wetter und Spiele</h2>
+        <p><strong>Termine:</strong> Gib eine Beschreibung, Teilnehmer und mögliche Tage ein und speichere. Öffne den Termin und teile den Abstimmungslink. Teilnehmer wählen ihren Namen und geben ihre Verfügbarkeit an; der Kalender zeigt die Stimmen. Nach Beginn der Abstimmung können Teilnehmer nicht mehr entfernt werden.</p>
+        <p><strong>Wetter:</strong> Suche eine Stadt und wähle bei Bedarf einen Ort aus. Scrolle horizontal durch die Stundenkarten oder wechsle zur Sieben-Tage-Ansicht. Die Zeiten verwenden die Zeitzone des Ortes. Der letzte Ort wird gespeichert und beim erneuten Öffnen eine aktuelle Vorhersage geladen. Die Wetterdaten stammen von <a href="https://open-meteo.com/">Open-Meteo</a>.</p>
+        <p><strong>Spiele:</strong> Wähle im Navigationsmenü ein Spiel aus, um es zu öffnen. Die verfügbaren Spiele hängen von der Portalinstallation ab.</p>
+      </section>
+      <section id="de-backup" class="mb-4">
+        <h2>Sichern und Wiederherstellen</h2>
+        <p>Wähle unter <strong>Einstellungen &gt; Daten exportieren</strong> Notizen, Tagebuch, Kontakte, Passwörter oder Dokumente und starte den Export. Jede ZIP enthält einen Datentyp. Nutze den Download-Link, falls der automatische Download blockiert wird, und prüfe, ob der Browser die Datei gespeichert hat. Nur Passwortexporte sind verschlüsselt; alle anderen Exporte können lesbare persönliche Daten enthalten. Bewahre alle Sicherungen sicher auf.</p>
+        <p>Für Passwörter wähle und bestätige eine Export-Passphrase mit mindestens 12 Zeichen. Bewahre sie sicher auf; sie kann nicht wiederhergestellt werden. Sie ist vom Datenschutzschlüssel und Anmeldepasswort getrennt.</p>
+        <p>Zum Wiederherstellen wähle <strong>Einstellungen &gt; Daten importieren</strong>, den Datentyp und seine ZIP und starte den Import. Ein Datenschutzschlüssel ist erforderlich; für Passwörter zusätzlich die Export-Passphrase. Bestätige, falls bereits Daten vorhanden sind. Notizen, Kontakte und Passwörter werden hinzugefügt; wiederholte Importe können Duplikate erzeugen. Vorhandene Tagebuchdaten werden übersprungen. Dokumente werden privat wiederhergestellt; bei Namenskonflikten werden Dateien umbenannt. Bei Fehlern kann ein Import teilweise abgeschlossen sein: Prüfe das Ergebnis vor einem erneuten Versuch und importiere nicht gleichzeitig aus mehreren Sitzungen.</p>
+        <p>Importe erlauben bis zu 10.000 Einträge und 512 MiB für ZIP und entpackte Daten; Passwortsicherungen sind auf 16 MiB begrenzt. Große Archive können deutlich mehr Browserspeicher benötigen.</p>
+        <h3 class="h5">Passwortsicherung separat öffnen</h3>
+        <p>Wähle <strong>Passwortsicherung öffnen</strong> auf der Startseite oder beim Passwortexport, oder öffne den <a href="./password-backup.html">Passwortsicherungsleser</a> über HTTPS. Wähle die ZIP und gib ihre Export-Passphrase ein. Der Leser benötigt kein Konto und entschlüsselt lokal, ohne die geöffneten Daten hochzuladen oder zu speichern. Sperre die Ansicht nach der Nutzung; nach zwei Minuten Inaktivität wird sie automatisch gesperrt. Kopierte Passwörter können in der Zwischenablage bleiben.</p>
+        <p>Alternativ kannst du unter Windows mit dem <a href="https://github.com/nylssoft/MynaPasswordManager">Myna Password Manager</a> die ZIP in ein geöffnetes lokales Repository importieren. Speichere das Repository nach dem Import; wiederholte Importe erzeugen Duplikate.</p>
+      </section>
+      <section id="de-admin" class="mb-4">
+        <h2>Verwaltung</h2>
+        <p>Das Menü <strong>Verwaltung</strong> steht Benutzern mit der Rolle <code>usermanager</code> zur Verfügung. Unter <strong>Registrierungsanfragen</strong> kannst du Anträge genehmigen oder ablehnen und optional eine E-Mail senden; bei Genehmigung wird der Registrierungscode angezeigt. Unter <strong>Registrierte Benutzer</strong> kannst du Konten und Speichernutzung prüfen, Limits und Rollen ändern, Anmeldungen erlauben oder sperren, Konten entsperren oder ausgewählte Konten nach Bestätigung löschen. Falls eine Aktion oder Benachrichtigung fehlschlägt, aktualisiere und prüfe den Status vor einem erneuten Versuch.</p>
+      </section>
+      <section id="de-help" class="mb-4">
+        <h2>Probleme und Datenschutz</h2>
+        <ul>
+          <li>Prüfe bei Anmeldeproblemen deine Zugangsdaten und eine mögliche PIN- oder Zwei-Faktor-Abfrage. Die Anmeldeseite bietet eine Passwort-Zurücksetzung an, sofern sie für dein Konto aktiviert ist.</li>
+          <li>Falls geschützte Daten nicht entschlüsselt werden können, prüfe den Schlüssel unter <strong>Datenschutz</strong>. Ein verlorener Schlüssel kann vom Portal nicht wiederhergestellt werden.</li>
+          <li>Falls eine Sicherung nicht geöffnet werden kann, wähle die ursprüngliche ZIP und prüfe die Export-Passphrase. Prüfe teilweise Importe vor einem erneuten Versuch.</li>
+          <li>Wettersuchen werden an Open-Meteo gesendet. Kontoaktionen verwenden den konfigurierten Server; für öffentliche und geteilte Dokumente gilt die oben beschriebene Sichtbarkeit.</li>
+        </ul>
+      </section>
+    </article>
+  </main>
+</body>
+</html>

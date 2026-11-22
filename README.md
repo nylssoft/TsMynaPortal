@@ -8,7 +8,9 @@ This repository contains the browser application, built with TypeScript, Bootstr
 
 The welcome page is available in English and German. Returning users can **Sign in**; family and friends who do not yet have access can choose **Request an account**. Requests require approval before registration. Most tools are on the signed-in desktop. An existing session opens the desktop directly, and a pending PIN or two-factor prompt resumes instead of returning to the welcome page.
 
-### Install the portal
+### User manual and installation
+
+The [online user manual](https://www.stockfleth.eu/desktop/manual.html) provides English and German instructions for installing and using the portal; its source is in [`src/manual.html`](src/manual.html). In the deployed application, open **User manual** from the welcome page or navigation menu. The manual is publicly accessible and does not require the API, but it is not cached for offline use.
 
 On supported browsers, use the browser's install or add-to-home-screen command. On iOS, use Safari's Share menu and **Add to Home Screen**. The installed portal requires an internet connection to sign in and access account data. After an initial online visit, an offline page is shown if the portal cannot be reached. The service worker caches only that offline page, not account data, API responses, passwords, or documents. The standalone password-backup reader can read a backup without the API once its page and assets have loaded, but is not guaranteed to start offline.
 
@@ -91,7 +93,7 @@ npm start
 
 Open [http://localhost:8080](http://localhost:8080). Vite proxies API, translation, and profile-image requests to the local backend; adjust `vite.config.js` if your backend uses a different address.
 
-Run `npm run build` to type-check the client and generate static files in `dist`. The build includes both `index.html` and `password-backup.html`, the manifest, icons, offline page, and a generated service worker. Service-worker registration is disabled in the Vite development server; test the production build on HTTPS or localhost. When deploying, serve the contents over HTTPS and configure the site to route the portal's API and related backend requests to MynaAPIServer. Serve `service-worker.js` without a long-lived cache (for example `Cache-Control: no-cache`) and deploy the complete build together. The portal CSP must permit the same-origin manifest and worker (`manifest-src 'self'; worker-src 'self'`, or appropriate fallbacks). Do not apply a blanket offline fallback or caching rule to API responses or the password-backup reader. The **About** page shows the client version and the running API version from `GET /api/version`.
+Run `npm run build` to type-check the client and generate static files in `dist`. The build includes `index.html`, `password-backup.html` and `manual.html`, the manifest, icons, offline page, and a generated service worker. Service-worker registration is disabled in the Vite development server; test the production build on HTTPS or localhost. When deploying, serve the contents over HTTPS and configure the site to route the portal's API and related backend requests to MynaAPIServer. Serve `service-worker.js` without a long-lived cache (for example `Cache-Control: no-cache`) and deploy the complete build together. The portal CSP must permit the same-origin manifest and worker (`manifest-src 'self'; worker-src 'self'`, or appropriate fallbacks). Do not apply a blanket offline fallback or caching rule to API responses, the password-backup reader, or the manual. The **About** page shows the client version and the running API version from `GET /api/version`.
 
 To build on GitHub, open **Actions > Build TsMynaPortal > Run workflow**. The workflow builds on Ubuntu with Node.js 24 and publishes `dist` as the `tsmynaportal-<run number>` artifact.
 

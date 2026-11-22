@@ -12,7 +12,7 @@ export default {
     apply: 'build',
     generateBundle(_options, bundle) {
       const hash = createHash('sha256').update(workerSource).update(offlinePage)
-      for (const name of ['index.html', 'password-backup.html', 'public/manifest.webmanifest', 'public/icons/icon-192.png', 'public/icons/icon-512.png', 'public/icons/icon-maskable-512.png']) {
+      for (const name of ['index.html', 'password-backup.html', 'manual.html', 'public/manifest.webmanifest', 'public/icons/icon-192.png', 'public/icons/icon-512.png', 'public/icons/icon-maskable-512.png']) {
         hash.update(readFileSync(resolve(__dirname, 'src', name)))
       }
       Object.keys(bundle).sort().forEach(name => {
@@ -31,6 +31,7 @@ export default {
       input: {
         portal: resolve(__dirname, 'src', 'index.html'),
         passwordBackup: resolve(__dirname, 'src', 'password-backup.html'),
+        manual: resolve(__dirname, 'src', 'manual.html'),
       },
     },
   },
