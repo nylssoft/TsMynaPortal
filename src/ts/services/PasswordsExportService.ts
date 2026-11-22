@@ -2,10 +2,12 @@ import { strToU8 } from "fflate";
 import { PasswordItemResult, UserInfoResult } from "../TypeDefinitions";
 import { ExportArchive, ExportProgress } from "./ExportArchive";
 import { PasswordManagerService } from "./PasswordManagerService";
+import { waitForExportRequestAsync } from "./ExportRequestDelay";
 
 export class PasswordsExportService {
     static async exportAsync(token: string, user: UserInfoResult, progress: ExportProgress, passphrase: string): Promise<Blob | null> {
         if (passphrase.length < 12) throw new Error("ERROR_EXPORT_PASSPHRASE");
+        await waitForExportRequestAsync();
         const source = await PasswordManagerService.getPasswordFileAsync(token, user);
         const fields = ["Name", "Login", "Password", "Description", "Url"] as const;
         if (!source || !Array.isArray(source.items) || !source.items.every(item => item && fields.every(key => typeof item[key] === "string"))) {

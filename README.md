@@ -49,6 +49,8 @@ Weather requires the authenticated `GET /api/weather` endpoint. Use a compatible
 
 **Settings > Export data** creates a ZIP for one data type at a time. The browser assembles the archive and handles the download; a download link remains available if automatic downloading is blocked. The archive is ready when the export completes, but the browser does not confirm that the file has been saved. Store ZIP files securely: **only the password export is encrypted**. Notes and other account data that are decrypted for export are readable in the resulting archive.
 
+Export and document selection ZIP requests wait 100 ms before each data request to reduce proxy rate-limit errors. Large exports can therefore take longer. Other tabs, users, or requests sharing the same proxy limit can still trigger rate limiting.
+
 | Data type | What's in the ZIP | What happens when you import |
 | --- | --- | --- |
 | **Notes** | One UTF-8 text file per note under `notes/`. | Adds notes; repeated imports can create duplicates. |

@@ -2,9 +2,11 @@ import { strToU8 } from "fflate";
 import { UserInfoResult } from "../TypeDefinitions";
 import { ContactService } from "./ContactService";
 import { ExportArchive, ExportProgress } from "./ExportArchive";
+import { waitForExportRequestAsync } from "./ExportRequestDelay";
 
 export class ContactsExportService {
     static async exportAsync(token: string, user: UserInfoResult, progress: ExportProgress): Promise<Blob | null> {
+        await waitForExportRequestAsync();
         const contacts = await ContactService.getContactsAsync(token, user);
         const columns = ["name", "address", "phone", "birthday", "email", "note"] as const;
         if (!contacts || !Array.isArray(contacts.items) || !contacts.items.every(contact => contact && columns.every(key => typeof contact[key] === "string"))) {

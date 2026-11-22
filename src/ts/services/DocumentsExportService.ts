@@ -1,10 +1,12 @@
 import { DocumentItemResult, UserInfoResult } from "../TypeDefinitions";
 import { DocumentService } from "./DocumentService";
 import { ExportArchive, ExportProgress } from "./ExportArchive";
+import { waitForExportRequestAsync } from "./ExportRequestDelay";
 
 export class DocumentsExportService {
     static async exportAsync(token: string, user: UserInfoResult, progress: ExportProgress): Promise<Blob | null> {
         progress(0, 0);
+        await waitForExportRequestAsync();
         const root = await DocumentService.getDocumentItemsAsync(token, user, null);
         if (!Array.isArray(root)) throw new Error("ERROR_EXPORT_RESPONSE");
         const volume = DocumentService.getVolume(root);
@@ -47,6 +49,7 @@ export class DocumentsExportService {
         for (let index = 0; index < queue.length; index++) {
             progress(0, 0);
             const folder = queue[index];
+            await waitForExportRequestAsync();
             const items = await DocumentService.getDocumentItemsAsync(token, user, folder.id);
             if (!Array.isArray(items) || !items.some(item => item.id === folder.id && item.type === "Folder")) throw new Error("ERROR_EXPORT_RESPONSE");
             items.filter(child => child.parentId === folder.id).forEach(item => addItem(item, folder.path));
@@ -55,6 +58,7 @@ export class DocumentsExportService {
         if (documents.length === 0 && Object.keys(files).length === 0) return null;
         for (let i = 0; i < documents.length; i++) {
             const { item, path } = documents[i];
+            await waitForExportRequestAsync();
             const blob = await DocumentService.downloadBlobAsync(token, user, item);
             files[path] = new Uint8Array(await blob.arrayBuffer());
             progress(i + 1, documents.length);
