@@ -34,9 +34,6 @@ export class WelcomePage implements Page {
                 Controls.createAnchor(body, "password-backup.html", locale.translate("PASSWORD_BACKUP_OPEN"), "card-link");
             }
         }
-        const manual = Controls.createAnchor(main, "manual.html", locale.translate("USER_MANUAL"), "btn btn-outline-secondary mt-4");
-        manual.target = "_blank";
-        manual.rel = "noopener";
-        manual.setAttribute("aria-label", locale.translate("USER_MANUAL_NEW_TAB"));
+        Controls.createAnchor(main, "manual.html", locale.translate("USER_MANUAL"), "btn btn-outline-secondary mt-4");
     }
 }

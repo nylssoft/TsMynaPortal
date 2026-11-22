@@ -1,3 +1,5 @@
+import { getContentLanguage, getPortalLanguage } from "./LanguagePreference";
+
 /**
  * Provides methods for managing locale and translations.
  */
@@ -5,7 +7,7 @@ export class Locale {
 
     private translationMap: Map<string, string> = new Map<string, string>();
 
-    private language: string = window.localStorage.getItem("locale") || window.navigator.language.split("-")[0];
+    private language: string = getPortalLanguage();
 
     private german = {
         "APP_NAME": "stockfleth.eu",
@@ -21,7 +23,6 @@ export class Locale {
         "WELCOME_BACKUP_TITLE": "Daten sichern und wiederherstellen",
         "WELCOME_BACKUP_TEXT": "Exportiere und importiere deine Daten als ZIP-Dateien. Passwortsicherungen kannst du ohne Anmeldung direkt im Browser lesen.",
         "USER_MANUAL": "Benutzerhandbuch",
-        "USER_MANUAL_NEW_TAB": "Benutzerhandbuch (öffnet sich in einem neuen Tab)",
         "MESSAGE_WELCOME_1_2_3": "Hallo {0}! Heute ist der {1}. Es ist {2}.",
         "MESSAGE_LAST_LOGIN_1": "Deine letzte Anmeldung war am {0}.",
         "LANGUAGE": "Sprache",
@@ -284,7 +285,6 @@ export class Locale {
         "WELCOME_BACKUP_TITLE": "Back up and restore your data",
         "WELCOME_BACKUP_TEXT": "Export and import your data as ZIP files. Read password backups directly in your browser without signing in.",
         "USER_MANUAL": "User manual",
-        "USER_MANUAL_NEW_TAB": "User manual (opens in a new tab)",
         "MESSAGE_WELCOME_1_2_3": "Hello {0}! Today is {1}. It is {2}.",
         "MESSAGE_LAST_LOGIN_1": "Your last login was on {0}.",
         "LANGUAGE": "Language",
@@ -558,7 +558,7 @@ export class Locale {
         const json: any = await resp2.json();
         this.translationMap.clear();
         Object.entries(json).forEach(([key, value]) => this.translationMap.set(key, value as string));
-        const contentLanguage = this.language === "de" ? "de" : "en";
+        const contentLanguage = getContentLanguage(this.language);
         const texts = contentLanguage === "de" ? this.german : this.englisch;
         Object.entries(texts).forEach(([key, value]) => this.translationMap.set(key, value as string));
         document.documentElement.lang = contentLanguage;

@@ -1,0 +1,16 @@
+.manual-content > section {
+    background: var(--bs-body-bg);
+    border: var(--bs-border-width) solid var(--bs-border-color-translucent);
+    border-radius: var(--bs-border-radius);
+    padding: 1.5rem;
+}
+
+.manual-content > section > :last-child {
+    margin-bottom: 0;
+}
+
+.manual-toc ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    gap: 0.5rem 1.5rem;
+}

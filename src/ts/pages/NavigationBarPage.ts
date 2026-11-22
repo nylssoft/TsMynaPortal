@@ -47,10 +47,7 @@ export class NavigationBarPage implements Page {
         this.createNavItem(ul, pageContext, "SETTINGS", new ShowSettingsPageAction());
         this.createNavItem(ul, pageContext, "ABOUT", new ShowAboutPageAction());
         const manualItem = Controls.createElement(ul, "li", "nav-item");
-        const manual = Controls.createAnchor(manualItem, "manual.html", pageContext.locale.translate("USER_MANUAL"), "nav-link");
-        manual.target = "_blank";
-        manual.rel = "noopener";
-        manual.setAttribute("aria-label", pageContext.locale.translate("USER_MANUAL_NEW_TAB"));
+        Controls.createAnchor(manualItem, "manual.html", pageContext.locale.translate("USER_MANUAL"), "nav-link");
         if (pageContext.authenticationClient.isLoggedIn() || pageContext.authenticationClient.isRequiresPin() || pageContext.authenticationClient.isRequiresPass2()) {
             const logoutAction: LogoutAction = new LogoutAction();
             const li: HTMLLIElement = Controls.createElement(ul, "li", "nav-item") as HTMLLIElement;

@@ -10,7 +10,7 @@ The welcome page is available in English and German. Returning users can **Sign 
 
 ### User manual and installation
 
-The [online user manual](https://www.stockfleth.eu/desktop/manual.html) provides English and German instructions for installing and using the portal; its source is in [`src/manual.html`](src/manual.html). In the deployed application, open **User manual** from the welcome page or navigation menu. The manual is publicly accessible and does not require the API, but it is not cached for offline use.
+The [online user manual](https://www.stockfleth.eu/desktop/manual.html) provides English and German instructions for installing and using the portal; its source is in [`src/manual.html`](src/manual.html). In the deployed application, open **User manual** from the welcome page or navigation menu. The manual uses the portal's saved language and theme. It is publicly accessible and does not require the API, but it is not cached for offline use.
 
 On supported browsers, use the browser's install or add-to-home-screen command. On iOS, use Safari's Share menu and **Add to Home Screen**. The installed portal requires an internet connection to sign in and access account data. After an initial online visit, an offline page is shown if the portal cannot be reached. The service worker caches only that offline page, not account data, API responses, passwords, or documents. The standalone password-backup reader can read a backup without the API once its page and assets have loaded, but is not guaranteed to start offline.
 
