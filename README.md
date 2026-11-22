@@ -63,6 +63,10 @@ Choose **Open password backup** on the welcome page or under **Settings > Export
 
 The reader needs no account. It decrypts the archive locally and keeps unlocked data in memory without uploading or saving it. Search by name, username, or website and reveal or copy individual passwords. **Lock backup** clears the unlocked view; it also locks after two minutes of inactivity or when you leave the page. A copied password can remain in your clipboard. The same 16 MiB password-backup limit applies to the reader.
 
+### Use the backup in Myna Password Manager
+
+On Windows, [Myna Password Manager](https://github.com/nylssoft/MynaPasswordManager) can import the encrypted password backup ZIP into an open local repository. Select **File > Import web password backup...**, choose the ZIP without extracting it, and enter the export passphrase. Imported items are added to the repository; save it to keep them. Importing the same backup again creates duplicates. See the password manager's README for installation and repository setup.
+
 <details>
 <summary>Password backup format</summary>
 
