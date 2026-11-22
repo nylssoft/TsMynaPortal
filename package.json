@@ -10,7 +10,7 @@
   },
   "keywords": [],
   "author": "Niels Stockfleth",
-  "license": "ISC",
+  "license": "GPL-3.0-only",
   "devDependencies": {
     "@types/markdown-it": "^14.2.0",
     "@types/node": "^24.1.0",

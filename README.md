@@ -90,3 +90,7 @@ Open [http://localhost:8080](http://localhost:8080). Vite proxies API, translati
 Run `npm run build` to type-check the client and generate static files in `dist`. The build includes both `index.html` and `password-backup.html`, the manifest, icons, offline page, and a generated service worker. Service-worker registration is disabled in the Vite development server; test the production build on HTTPS or localhost. When deploying, serve the contents over HTTPS and configure the site to route the portal's API and related backend requests to MynaAPIServer. Serve `service-worker.js` without a long-lived cache (for example `Cache-Control: no-cache`) and deploy the complete build together. The portal CSP must permit the same-origin manifest and worker (`manifest-src 'self'; worker-src 'self'`, or appropriate fallbacks). Do not apply a blanket offline fallback or caching rule to API responses or the password-backup reader. The **About** page shows the client version and the running API version from `GET /api/version`.
 
 To build on GitHub, open **Actions > Build TsMynaPortal > Run workflow**. The workflow builds on Ubuntu with Node.js 24 and publishes `dist` as the `tsmynaportal-<run number>` artifact.
+
+## License and third-party notices
+
+See [`LICENSE`](LICENSE) for TsMynaPortal's license and [third-party notices](docs/third-party-notices.md) for the principal software libraries, external assets, and data services used by the client.
