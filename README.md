@@ -65,7 +65,7 @@ To restore data, open **Settings > Import data**, select the type, and choose it
 
 Choose **Open password backup** on the welcome page or under **Settings > Export data > Passwords**. You can also open [`password-backup.html`](https://www.stockfleth.eu/desktop/password-backup.html) directly over HTTPS. Select the ZIP and enter the passphrase you set when exporting; it is not stored and cannot be recovered.
 
-The reader needs no account. It decrypts the archive locally and keeps unlocked data in memory without uploading or saving it. Search by name, username, or website and reveal or copy individual passwords. **Lock backup** clears the unlocked view; it also locks after two minutes of inactivity or when you leave the page. A copied password can remain in your clipboard. The same 16 MiB password-backup limit applies to the reader.
+The reader needs no account. It decrypts the archive locally and keeps unlocked data in memory without uploading or saving it. Search by name, username, or website; passwords and notes are hidden by default and can be revealed or copied individually. **Lock backup** clears the unlocked view; it also locks after two minutes of inactivity or when you leave the page. Copied passwords and notes can remain in your clipboard. The same 16 MiB password-backup limit applies to the reader.
 
 ### Use the backup in Myna Password Manager
 

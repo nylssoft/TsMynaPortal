@@ -1,2 +1,7 @@
 // Import all of Bootstrap’s CSS
 @import "bootstrap/scss/bootstrap";
+
+.backup-secret {
+  min-width: 0;
+  white-space: pre-wrap;
+}
