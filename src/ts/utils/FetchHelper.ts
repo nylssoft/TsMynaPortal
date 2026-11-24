@@ -1,4 +1,4 @@
-import { ErrorResult } from "../TypeDefinitions";
+import { HttpResponseError } from "./HttpResponseError";
 
 /**
  * FetchHelper provides methods to fetch data from the API.
@@ -24,9 +24,19 @@ export class FetchHelper {
         this.lastActivityDateTime = Date.now();
         const resp: Response = await window.fetch(url, options);
         if (!resp.ok && !acceptedStatuses.includes(resp.status)) {
-            const errorResult: ErrorResult | null = await resp.json() as ErrorResult;
-            const errorMessage: string | null = errorResult?.title;
-            throw new Error(errorMessage || "ERROR_UNEXPECTED");
+            const contentType = resp.headers.get("content-type")?.split(";", 1)[0].trim().toLowerCase();
+            if (contentType === "application/json" || contentType?.endsWith("+json")) {
+                try {
+                    const errorResult: unknown = await resp.json();
+                    if (typeof errorResult === "object" && errorResult !== null && "title" in errorResult &&
+                        typeof errorResult.title === "string" && errorResult.title.length > 0) {
+                        throw new Error(errorResult.title);
+                    }
+                } catch (error: unknown) {
+                    if (error instanceof Error && error.name !== "SyntaxError") throw error;
+                }
+            }
+            throw new HttpResponseError(resp.status);
         }
         return resp;
     }

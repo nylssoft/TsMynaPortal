@@ -1,4 +1,5 @@
 import { getContentLanguage, getPortalLanguage } from "./LanguagePreference";
+import { HttpResponseError } from "./HttpResponseError";
 
 /**
  * Provides methods for managing locale and translations.
@@ -164,6 +165,8 @@ export class Locale {
         "ERROR_WEATHER_RATE_LIMIT": "Zu viele Wetteranfragen. Bitte versuche es später erneut.",
         "ERROR_WEATHER_RESPONSE": "Die Antwort des Wetterdienstes ist ungültig.",
         "ERROR_WEATHER_STORAGE": "Der gespeicherte Wetterort konnte nicht gelesen oder gespeichert werden. Bitte suche den Ort erneut; prüfe bei Bedarf die Browsereinstellungen.",
+        "ERROR_RATE_LIMITED": "Zu viele Anfragen (HTTP 429). Bitte warte und versuche es erneut.",
+        "ERROR_HTTP_STATUS_1": "Der Server hat den HTTP-Status {0} zurückgegeben.",
         "COPIED_TO_CLIPBOARD": "In die Zwischenablage kopiert",
         "WEBSITE_INFO": "Dies ist eine private Website. Sie wird ausschließlich für persönliche oder familiäre Zwecke verwendet.",
         "CONFIRMATION_SAVE": "Die Änderungen wurden nicht gespeichert. Willst du die Seite wirklich verlassen?",
@@ -426,6 +429,8 @@ export class Locale {
         "ERROR_WEATHER_RATE_LIMIT": "Too many weather requests. Please try again later.",
         "ERROR_WEATHER_RESPONSE": "The weather service returned an invalid response.",
         "ERROR_WEATHER_STORAGE": "The saved weather location could not be read or stored. Please search again; check your browser settings if needed.",
+        "ERROR_RATE_LIMITED": "Too many requests (HTTP 429). Please wait and try again.",
+        "ERROR_HTTP_STATUS_1": "The server returned HTTP status {0}.",
         "COPIED_TO_CLIPBOARD": "Copied to the clipboard",
         "WEBSITE_INFO": "This is a private website. It is intended for personal or family use only.",
         "CONFIRMATION_SAVE": "The changes were not saved. Are you sure you want to leave the page?",
@@ -617,6 +622,10 @@ export class Locale {
      * @returns the translated error message
      */
     translateError(error: Error | unknown): string {
+        if (error instanceof HttpResponseError) {
+            return error.status === 429 ? this.translate("ERROR_RATE_LIMITED") :
+                this.translateWithArgs("ERROR_HTTP_STATUS_1", [String(error.status)]);
+        }
         if (error instanceof Error) {
             return this.translate(error.message);
         }
