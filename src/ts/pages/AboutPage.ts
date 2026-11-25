@@ -48,7 +48,7 @@ export class AboutPage implements Page {
             "/images/markdown/welcome/bilderrahmen-carousel.png",
             "CAROUSEL_TITLE_PICTURE_FRAMES",
             "CAROUSEL_TEXT_PICTURE_FRAMES");
-        item4.addEventListener("click", () => window.location.href = "/webpack/tsphotoframe");
+        item4.addEventListener("click", () => window.location.href = "/photoframe/");
         const item5: HTMLDivElement = this.createCarouselItem(pageContext, carouselInner,
             "/images/markdown/welcome/baerbel-carousel.png",
             "CAROUSEL_TITLE_PAINTER",
