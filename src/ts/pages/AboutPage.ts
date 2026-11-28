@@ -38,7 +38,7 @@ export class AboutPage implements Page {
             "/images/markdown/welcome/bildergalerie-carousel.png",
             "CAROUSEL_TITLE_IMAGE_GALLERY",
             "CAROUSEL_TEXT_IMAGE_GALLERY");
-        item2.addEventListener("click", () => window.location.href = "/slideshow/?shuffle=false");
+        item2.addEventListener("click", () => window.location.href = "/slideshow/");
         const item3: HTMLDivElement = this.createCarouselItem(pageContext, carouselInner,
             "/images/markdown/welcome/concerts-carousel.png",
             "CAROUSEL_TITLE_CONCERTS",

@@ -23,15 +23,19 @@ export class WelcomePage implements Page {
         requestAccount.addEventListener("click", async event => registerAction.runAsync(event, context));
         Controls.createParagraph(intro, "small text-body-secondary mt-3 mb-0", locale.translate("WELCOME_APPROVAL"));
 
-        const features = Controls.createDiv(main, "row row-cols-1 row-cols-md-3 g-3");
-        for (const feature of ["ORGANIZE", "PLAN", "BACKUP"]) {
+        const features = Controls.createDiv(main, "row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3");
+        for (const feature of ["ORGANIZE", "PLAN", "BACKUP", "PHOTOS"]) {
             const column = Controls.createDiv(features, "col");
             const card = Controls.createElement(column, "section", "card h-100");
             const body = Controls.createDiv(card, "card-body");
             Controls.createHeading(body, 2, "h5", locale.translate(`WELCOME_${feature}_TITLE`));
-            Controls.createParagraph(body, feature === "BACKUP" ? "" : "mb-0", locale.translate(`WELCOME_${feature}_TEXT`));
+            Controls.createParagraph(body, feature === "BACKUP" || feature === "PHOTOS" ? "" : "mb-0", locale.translate(`WELCOME_${feature}_TEXT`));
             if (feature === "BACKUP") {
                 Controls.createAnchor(body, "password-backup.html", locale.translate("PASSWORD_BACKUP_OPEN"), "card-link");
+            } else if (feature === "PHOTOS") {
+                const links = Controls.createDiv(body, "d-flex flex-wrap column-gap-3 row-gap-2");
+                Controls.createAnchor(links, "/slideshow/", locale.translate("WELCOME_PHOTOS_SLIDESHOW"));
+                Controls.createAnchor(links, "/photoframe/", locale.translate("WELCOME_PHOTOS_PHOTOFRAME"));
             }
         }
         Controls.createAnchor(main, "manual.html", locale.translate("USER_MANUAL"), "btn btn-outline-secondary mt-4");
